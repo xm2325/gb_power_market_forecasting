@@ -1,0 +1,150 @@
+{
+  "claim_boundary": "Public Elexon/NESO forecasting evidence only; not realised trading P&L, execution performance, or Volcore desk returns.",
+  "frozen_final_window": {
+    "coverage_each_horizon": 1.0,
+    "expected_rows": 1623,
+    "future_neso_publications_each_horizon": 0,
+    "observed_rows_each_horizon": 1623,
+    "target_start_end_exclusive_utc": "2026-08-15T07:30:00+00:00",
+    "target_start_utc": "2026-07-12T12:00:00+00:00"
+  },
+  "interpretation": {
+    "12h": "NESO levels passed pre-final selection/tail gates but failed strongly on the independent final window; preserve as a negative result.",
+    "2h": "NESO forecast levels improved selection MAE and the independent final window; revision features did not beat the simpler levels family.",
+    "30m": "Price-history-only was strongest; adding NESO levels or revisions did not improve selection MAE.",
+    "6h": "NESO levels passed pre-final selection/tail gates but failed on the independent final window; preserve as a negative result.",
+    "revisions": "Forecast revision features were not selected at any horizon."
+  },
+  "locked_on": "2026-08-21",
+  "neso_physical_forecast_final": {
+    "12h": {
+      "coverage": 1.0,
+      "solar_mae_mw": 466.845348120764,
+      "wind_mae_mw": 104.62538508934072
+    },
+    "2h": {
+      "coverage": 1.0,
+      "solar_mae_mw": 445.97227356746765,
+      "wind_mae_mw": 58.72520024645718
+    },
+    "30m": {
+      "coverage": 1.0,
+      "solar_mae_mw": 445.0486752926679,
+      "wind_mae_mw": 42.82747997535428
+    },
+    "6h": {
+      "coverage": 1.0,
+      "solar_mae_mw": 465.16882316697473,
+      "wind_mae_mw": 78.67097966728281
+    }
+  },
+  "price_benchmark_final": {
+    "12h": {
+      "action_rate": 0.3376463339494763,
+      "claim_class": "REAL_NEGATIVE_RESULT",
+      "deployed_mae_gbp_mwh": 50.97385567361787,
+      "improvement_pct": -111.96400289794491,
+      "interval_coverage": 0.8311768330252619,
+      "p95_abs_error_gbp_mwh": 80.78124492234552,
+      "reference_mae_gbp_mwh": 24.048354898336413,
+      "selected_family": "PRICE_PLUS_NESO_LEVELS"
+    },
+    "2h": {
+      "action_rate": 0.061614294516327786,
+      "claim_class": "REAL_CLAIMABLE_POSITIVE",
+      "deployed_mae_gbp_mwh": 17.087308359192516,
+      "improvement_pct": 28.94604046127679,
+      "interval_coverage": 0.8946395563770795,
+      "p95_abs_error_gbp_mwh": 48.52315962968049,
+      "reference_mae_gbp_mwh": 24.048354898336413,
+      "selected_family": "PRICE_PLUS_NESO_LEVELS"
+    },
+    "30m": {
+      "action_rate": 0.036968576709796676,
+      "claim_class": "REAL_CLAIMABLE_POSITIVE",
+      "deployed_mae_gbp_mwh": 8.93898884724872,
+      "improvement_pct": 62.82910458932436,
+      "interval_coverage": 0.8946395563770795,
+      "p95_abs_error_gbp_mwh": 25.198791987398984,
+      "reference_mae_gbp_mwh": 24.048354898336413,
+      "selected_family": "PRICE_HISTORY_ONLY"
+    },
+    "6h": {
+      "action_rate": 0.2754158964879852,
+      "claim_class": "REAL_NEGATIVE_RESULT",
+      "deployed_mae_gbp_mwh": 34.43694819393296,
+      "improvement_pct": -43.198769061393044,
+      "interval_coverage": 0.8589032655576093,
+      "p95_abs_error_gbp_mwh": 67.85945731486214,
+      "reference_mae_gbp_mwh": 24.048354898336413,
+      "selected_family": "PRICE_PLUS_NESO_LEVELS"
+    }
+  },
+  "prospective_policy": {
+    "condition_for_folding_into_training": "Any model trained or selected using locked-window labels requires a new later prospective holdout for numerical claims.",
+    "locked_window_may_be_reused_for_diagnostics": true,
+    "locked_window_may_be_used_to_select_or_tune_a_model_and_then_reclaim_independent_performance_on_same_window": false,
+    "locked_window_may_later_be_folded_into_training": true,
+    "next_prospective_target_start_not_before_utc": "2026-08-15T07:30:00+00:00",
+    "rule": "Preserve v0.20 as the immutable benchmark. Do not tune against its 1,623 final labels and then report the same final window as independent evidence."
+  },
+  "selection_evidence": {
+    "12h": {
+      "PRICE_HISTORY_ONLY_selection_mae": 20.15593781551832,
+      "PRICE_PLUS_NESO_LEVELS_AND_REVISIONS_selection_mae": 17.378538869436433,
+      "PRICE_PLUS_NESO_LEVELS_selection_mae": 17.192408423036607
+    },
+    "2h": {
+      "PRICE_HISTORY_ONLY_selection_mae": 13.828210526308299,
+      "PRICE_PLUS_NESO_LEVELS_AND_REVISIONS_selection_mae": 13.119124691156015,
+      "PRICE_PLUS_NESO_LEVELS_selection_mae": 13.044765755415598
+    },
+    "30m": {
+      "PRICE_HISTORY_ONLY_selection_mae": 7.086637480830468,
+      "PRICE_PLUS_NESO_LEVELS_AND_REVISIONS_selection_mae": 8.519535911276664,
+      "PRICE_PLUS_NESO_LEVELS_selection_mae": 9.226986294885801
+    },
+    "6h": {
+      "PRICE_HISTORY_ONLY_selection_mae": 19.274908114827298,
+      "PRICE_PLUS_NESO_LEVELS_AND_REVISIONS_selection_mae": 18.11860720425258,
+      "PRICE_PLUS_NESO_LEVELS_selection_mae": 17.965136031871946
+    }
+  },
+  "source_snapshot": {
+    "elexon": {
+      "duplicate_reference_rows": 0,
+      "duplicate_system_price_rows": 0,
+      "expected_settlement_periods": 10894,
+      "joint_coverage": 1.0,
+      "market_reference_coverage": 1.0,
+      "system_price_coverage": 1.0
+    },
+    "neso_current_forecast": {
+      "rows": 1040322,
+      "sha256": "86ac731211ffe59a7130ebfda1340ec8d44c94dc1ca8dbd8edf87760acbf500b"
+    },
+    "neso_demand_data_update": {
+      "actual_rows_materialised": 2465,
+      "rows_downloaded": 2832,
+      "sha256": "67521b4381ecdffbdb90a3c47a4ee3cfa0da4e74b034ab4f8372de7d25b9b16f"
+    },
+    "neso_historic_demand_2026": {
+      "rows": 10174,
+      "sha256": "77199d5e085959be69f73094a06f1619e622ab3181071f6cce94f2a7b129704c"
+    },
+    "neso_legacy_forecast": {
+      "rows": 2427930,
+      "sha256": "bcb35ee177e8614d39a3a6667cf907044e11f129457f58d7401d12c4143f79a7"
+    }
+  },
+  "status": "LOCKED_REAL_BENCHMARK",
+  "version": "0.20.0",
+  "workflow_run": {
+    "artifact_id": 9442153815,
+    "artifact_name": "gb-power-market-real-evidence-32469293682",
+    "artifact_sha256": "152434ff0ff2198991eaf5a2c2c49b66a3a7da73f78e4d04ac39be7e6916c0b3",
+    "claim_integrity_gate": "PASS",
+    "evidence_id_sha256": "7c5f78b98c8ed877ab4c5cefa8a40b3068abb74cb2062ecf677f319d74a14661",
+    "run_id": 32469293682
+  }
+}
