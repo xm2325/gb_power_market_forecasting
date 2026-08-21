@@ -73,6 +73,8 @@ The monitoring view changes the interpretation materially:
 
 The monitor writes row-level prediction/error histories, UTC-day summaries, cumulative error advantage and rolling 24h/3d/7d MAE. Monitoring data are intentionally visible. If monitoring motivates a model change, the revised model receives a new versioned forward segment; previously observed rows are never relabelled as fresh prospective evidence.
 
+This table is a dated **21 August 2026 monitoring snapshot**, not a value that silently updates inside Git. Later runs create new versioned monitoring snapshots rather than rewriting this one.
+
 Evidence:
 
 - [`docs/V0_24_CONTINUOUS_FORWARD_VALIDATION.md`](docs/V0_24_CONTINUOUS_FORWARD_VALIDATION.md)
