@@ -86,6 +86,31 @@ def test_recursive_safety_rejects_nested_performance_key():
         })
 
 
+def test_recursive_safety_allows_protocol_resampling_when_nested_in_horizon():
+    assert_pre_reveal_payload_safe({
+        "status": "SEALED_CONFIRMATORY_CHECK_COMPLETE",
+        "horizons": {
+            "30m": {
+                "status": "SEALED_ACCUMULATION",
+                "protocol": {"bootstrap_replicates": 5000, "bootstrap_seed": 20260821},
+            }
+        },
+    })
+
+
+def test_recursive_safety_rejects_bootstrap_result_outside_protocol():
+    with pytest.raises(ValueError, match="forbidden performance keys"):
+        assert_pre_reveal_payload_safe({
+            "status": "SEALED_CONFIRMATORY_CHECK_COMPLETE",
+            "horizons": {
+                "30m": {
+                    "status": "SEALED_ACCUMULATION",
+                    "diagnostics": {"bootstrap_ci95_low_gbp_mwh": -1.0},
+                }
+            },
+        })
+
+
 def test_duplicate_target_blocks_and_cannot_inflate_coverage():
     frame = _frame(20)
     frame = pd.concat([frame, frame.iloc[[5]]], ignore_index=True)
