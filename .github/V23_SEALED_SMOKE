@@ -1,6 +1,6 @@
-2026-08-21 sealed v0.23 smoke check — retry 2
+2026-08-21 sealed v0.23 smoke check — retry 3
 
 Start: 2026-08-21T11:30:00Z
 Fixed reveal end: 2026-09-04T11:30:00Z
 Pre-reveal artifacts must contain reports/manifests only; no price-bearing Parquet or CSV is uploaded.
-Protocol bootstrap settings are metadata-only and explicitly whitelisted under the protocol object; performance outputs remain recursively forbidden.
+Nested protocol bootstrap configuration is allowed as predeclared metadata; bootstrap results remain recursively forbidden outside protocol objects.
