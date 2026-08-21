@@ -13,6 +13,10 @@ from gb_power_market.adaptive_bias_v25 import (
     candidate_spec,
     summarise_candidate,
 )
+from gb_power_market.adaptive_monitor_v25 import build_adaptive_monitor_state
+
+
+FIRST_V25_FORWARD_ARTIFACT_SHA256 = "64d30a6e18a2c3fa2243fa28ceb800afec1abc66f7dc0816515d96ff9faf885c"
 
 
 def _segment(rows: pd.DataFrame, start: str, end: str | None = None) -> dict:
@@ -47,6 +51,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--v24-rows", default="reports/v24_forward/forward_rows_2h.csv")
     ap.add_argument("--out-dir", default="reports/v25_2h")
+    ap.add_argument(
+        "--previous-snapshot-sha256",
+        default=FIRST_V25_FORWARD_ARTIFACT_SHA256,
+        help="SHA-256 lineage anchor for the preceding immutable v0.25 forward snapshot/artifact.",
+    )
     args = ap.parse_args()
 
     rows = pd.read_csv(args.v24_rows)
@@ -71,9 +80,18 @@ def main() -> None:
             "Only rows at or after 2026-08-21T11:30:00Z belong to the v0.25 versioned forward segment."
         ),
     }
+    monitor = build_adaptive_monitor_state(
+        corrected,
+        forward_start_utc=V25_FORWARD_START_UTC,
+        candidate_id=spec["candidate"],
+        model_version=spec["version"],
+        previous_snapshot_sha256=args.previous_snapshot_sha256 or None,
+    )
+
     (out / "v25_2h_summary.json").write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
-    Path(out / "v25_2h_candidate_spec.json").write_text(json.dumps(spec, indent=2, default=str), encoding="utf-8")
-    print(json.dumps(summary, indent=2, default=str))
+    (out / "v25_2h_candidate_spec.json").write_text(json.dumps(spec, indent=2, default=str), encoding="utf-8")
+    (out / "v25_monitor_state.json").write_text(json.dumps(monitor, indent=2, default=str), encoding="utf-8")
+    print(json.dumps({"summary": summary, "monitor": monitor}, indent=2, default=str))
 
 
 if __name__ == "__main__":
