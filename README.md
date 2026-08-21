@@ -1,63 +1,55 @@
 # GB Power Market Forecasting
 
-Leakage-safe forecasting of GB electricity market prices using **real Elexon market data** and **as-of NESO wind/solar forecast vintages**.
+Leakage-safe forecasting of GB electricity market prices using real Elexon market data and as-of NESO wind/solar forecast vintages.
 
-## What this repository does
+## What this repository contains
 
-The live pipeline downloads public GB electricity data, reconstructs what was knowable at each historical decision time, and compares four forecast horizons: **30 minutes, 2 hours, 6 hours, and 12 hours**. It keeps model selection, uncertainty calibration, and the final evaluation window separate.
+- real Elexon APX/N2EX Market Index Price ingestion and a volume-weighted market reference;
+- real Elexon settlement system prices for market-stress diagnostics;
+- real NESO 2026 embedded wind/solar forecast archives with publication-time-safe vintage selection;
+- real NESO outturn ingestion and physical-forecast benchmarking;
+- 30-minute, 2-hour, 6-hour and 12-hour market-price experiments;
+- GB settlement-clock handling, including 46/48/50-period DST days;
+- fixed chronological development windows and a frozen 1,623-period final window;
+- large-price-move guards, conformal uncertainty, abstention and evidence/claim controls;
+- CI on Python 3.11 and 3.12 plus a separate real-data evidence workflow.
 
-The price target is the volume-weighted Elexon Market Index Price across APX/N2EX providers. NESO embedded wind/solar forecasts are selected only when their publication timestamp is at or before the corresponding decision time. GB daylight-saving settlement days are handled with the real 46/48/50-period market clock rather than a fixed `shift(48)` assumption.
+## Real-data status
 
-## Evidence status
+A network-enabled GitHub Actions run on 21 August 2026 successfully downloaded the official source snapshots:
 
-The repository deliberately distinguishes three things:
+- NESO legacy 2026 forecast archive: 2,427,930 rows;
+- NESO current 2026 forecast archive: 1,039,670 rows;
+- NESO Historic Demand Data 2026: 10,174 rows;
+- NESO Demand Data Update: 2,832 rows;
+- Elexon market/system-price history: 10,894 expected settlement periods with 100% MID coverage, 100% system-price coverage and no duplicate settlement keys in the materialised audit.
 
-- **Real official samples and metadata committed here**: small NESO archive/outturn samples used to verify schema and settlement-time semantics.
-- **Full real data hydrated in GitHub Actions**: multi-million-row NESO forecast archives plus Elexon MID/system-price history are downloaded at run time and stored as workflow artifacts, not committed to Git history.
-- **Synthetic contract fixtures**: only for software tests; file names explicitly contain `SYNTHETIC` and their metrics are not treated as market results.
+The first full network run exposed a source-clock inconsistency in 1,268 legacy NESO forecast rows published on 20--21 April 2026. Those rows use a BST/local-clock interpretation in the raw `TIME_GMT` field. The repository now treats `SETTLEMENT_DATE + SETTLEMENT_PERIOD` as the canonical target key, records the raw-clock offset for audit, allows the identified one-hour GMT/BST label offset, and still fails closed for larger unexplained clock errors.
 
-Until the network-enabled workflow completes all provenance, coverage, timestamp and final-window gates, new real-price headline metrics remain blocked. The current evidence ledger is under `reports/v20_evidence/`.
+New real price-performance claims remain blocked until the corrected materialisation and fixed-window benchmark rerun completes successfully. The downloaded source snapshots are retained as workflow artifacts rather than committed as large Git blobs.
 
-## Live experiment
-
-Run **Actions → real-market-evidence → Run workflow**. The job:
-
-1. runs the full test suite;
-2. downloads real 2026 NESO forecast archives and actual outturn;
-3. downloads real Elexon APX/N2EX MID and settlement system prices;
-4. materialises timestamp-normalised Parquet;
-5. evaluates 30m / 2h / 6h / 12h physical and price forecasts on fixed calendar windows;
-6. builds a SHA-256-backed evidence ledger;
-7. uploads evidence even when the final integrity gate blocks a claim.
-
-The frozen final price window contains **1,623 half-hour targets** from 2026-07-12 12:00 UTC to 2026-08-15 07:30 UTC (end exclusive at 08:00).
-
-## Main paths
+## Repository layout
 
 ```text
-src/gb_power_market/                 forecasting + market-time logic
-scripts/                             real-data download/materialisation/evaluation
-tests/                               DST, leakage, provenance and model tests
-data/samples/                        small real NESO samples + metadata
-fixtures/                            explicitly synthetic contract fixtures
-.github/workflows/real-market-evidence.yml
-reports/v20_evidence/                current claim-safe evidence status
-docs/REAL_MARKET_PROTOCOL.md
-docs/EVIDENCE_PROTOCOL.md
+src/gb_power_market/          reusable forecasting, timing and evidence logic
+scripts/                      download, materialisation and benchmark entry points
+tests/                        unit/regression tests and timing-leakage checks
+fixtures/                     synthetic contract fixtures + small official samples
+data/samples/                 small committed source samples only
+docs/                         experiment and evidence protocols
+reports/                      small audit/status files
+.github/workflows/            normal CI + real-data evidence workflow
 ```
 
-## Reproduce locally
+## Run tests
 
 ```bash
-python -m pip install -e '.[dev,live]'
+python -m pip install -e '.[dev]'
 pytest -q
 ```
 
-The large official archives are intentionally not committed. Use the workflow or the scripts in `scripts/` to hydrate them.
+## Run the real-data pipeline
 
-## Data sources
+Use the **real-market-evidence** GitHub Actions workflow. It downloads official NESO/Elexon snapshots, materialises compact Parquet data, runs the physical and price benchmarks, uploads the full evidence artifact, and applies the final claim-integrity gate.
 
-- NESO Data Portal: embedded wind and solar forecasts, Historic Demand Data and Demand Data Update.
-- Elexon BMRS Insights API: Market Index Data and settlement system prices.
-
-Public-source data remain subject to the providers' terms and attribution requirements. No realised trading P&L is claimed: the repository does not contain private positions, nominations, fees, netting or execution constraints.
+Large network snapshots are intentionally excluded from Git history.
