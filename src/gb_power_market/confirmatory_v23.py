@@ -29,9 +29,9 @@ _FORBIDDEN_PRE_REVEAL_KEY_FRAGMENTS = (
     "reference_metric",
     "interval_coverage",
     "abstention",
-    "bootstrap",
     "classification",
 )
+_ALLOWED_PROTOCOL_RESAMPLING_KEYS = {"bootstrap_replicates", "bootstrap_seed"}
 
 
 @dataclass(frozen=True)
@@ -83,10 +83,15 @@ def _find_forbidden_keys(value: Any, path: tuple[str, ...] = ()) -> list[str]:
     found: list[str] = []
     if isinstance(value, dict):
         for key, child in value.items():
-            key_text = str(key).lower()
-            if any(fragment in key_text for fragment in _FORBIDDEN_PRE_REVEAL_KEY_FRAGMENTS):
-                found.append(".".join((*path, str(key))))
-            found.extend(_find_forbidden_keys(child, (*path, str(key))))
+            key_str = str(key)
+            key_text = key_str.lower()
+            is_allowed_protocol_resampling = path == ("protocol",) and key_text in _ALLOWED_PROTOCOL_RESAMPLING_KEYS
+            if not is_allowed_protocol_resampling:
+                if "bootstrap" in key_text or any(
+                    fragment in key_text for fragment in _FORBIDDEN_PRE_REVEAL_KEY_FRAGMENTS
+                ):
+                    found.append(".".join((*path, key_str)))
+            found.extend(_find_forbidden_keys(child, (*path, key_str)))
     elif isinstance(value, list):
         for i, child in enumerate(value):
             found.extend(_find_forbidden_keys(child, (*path, str(i))))
@@ -97,8 +102,8 @@ def assert_pre_reveal_payload_safe(payload: dict[str, Any]) -> None:
     """Fail if a blinded payload contains performance-bearing key names.
 
     The check is recursive so a metric cannot be hidden in a nested object.
-    It intentionally checks keys rather than prose values: explanatory strings
-    may say that MAE is forbidden without exposing an MAE value.
+    Predeclared resampling configuration is allowed only under ``protocol``;
+    a bootstrap result or similarly named field anywhere else remains forbidden.
     """
     if payload.get("status") == "SEALED_CONFIRMATORY_REVEALED":
         return
