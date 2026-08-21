@@ -29,6 +29,11 @@ def apply_causal_bias_correction(
     outcome is available by that decision time, conservatively taken as s+30m.
     Therefore the current target and the most recent 150 minutes of target labels
     can never enter its own correction.
+
+    If the frozen replay contains conformal interval endpoints, v0.25 translates
+    both endpoints by the same causal level correction. The conformal width and
+    calibration quantile are unchanged; no future label is used to recalculate
+    interval width.
     """
     required = {
         "target_start_utc",
@@ -40,6 +45,13 @@ def apply_causal_bias_correction(
     missing = sorted(required - set(rows.columns))
     if missing:
         raise ValueError(f"adaptive-bias input missing columns: {missing}")
+
+    interval_present = {
+        "interval_lower_gbp_mwh",
+        "interval_upper_gbp_mwh",
+    }.intersection(rows.columns)
+    if interval_present and len(interval_present) != 2:
+        raise ValueError("adaptive-bias input must contain both frozen interval endpoints or neither")
 
     x = rows.copy()
     x["target_start_utc"] = pd.to_datetime(x["target_start_utc"], utc=True, errors="raise")
@@ -65,7 +77,9 @@ def apply_causal_bias_correction(
     lookback = pd.Timedelta(hours=rule.lookback_hours)
 
     for i, decision in enumerate(x["decision_time_utc"]):
-        eligible = (availability <= decision) & (target > decision - lookback - pd.Timedelta(minutes=rule.outcome_delay_minutes))
+        eligible = (availability <= decision) & (
+            target > decision - lookback - pd.Timedelta(minutes=rule.outcome_delay_minutes)
+        )
         idx = np.flatnonzero(eligible.to_numpy())
         history_rows[i] = len(idx)
         if len(idx) >= rule.minimum_history_rows:
@@ -89,6 +103,21 @@ def apply_causal_bias_correction(
             - x["previous_settlement_day_reference_gbp_mwh"].astype(float)
         )
     )
+
+    if interval_present:
+        lower = x["interval_lower_gbp_mwh"].astype(float)
+        upper = x["interval_upper_gbp_mwh"].astype(float)
+        if (upper < lower).any():
+            raise ValueError("frozen conformal interval has upper < lower")
+        x["adaptive_interval_lower_gbp_mwh"] = lower + correction
+        x["adaptive_interval_upper_gbp_mwh"] = upper + correction
+        x["adaptive_interval_width_gbp_mwh"] = upper - lower
+        y = x["realised_price_gbp_mwh"].astype(float)
+        x["adaptive_interval_covered"] = (
+            (y >= x["adaptive_interval_lower_gbp_mwh"])
+            & (y <= x["adaptive_interval_upper_gbp_mwh"])
+        )
+
     return x
 
 
@@ -109,7 +138,7 @@ def summarise_candidate(rows: pd.DataFrame, *, start_utc: str | pd.Timestamp) ->
     mae_frozen = float(np.abs(y - frozen).mean())
     mae_adaptive = float(np.abs(y - adaptive).mean())
     mae_reference = float(np.abs(y - reference).mean())
-    return {
+    result = {
         "status": "FORWARD_MONITORING",
         "rows": int(len(x)),
         "start_utc": start.isoformat(),
@@ -126,6 +155,12 @@ def summarise_candidate(rows: pd.DataFrame, *, start_utc: str | pd.Timestamp) ->
         "adaptive_win_rate_vs_reference": float((np.abs(y - adaptive) < np.abs(y - reference)).mean()),
         "mean_bias_correction_gbp_mwh": float(x["bias_correction_gbp_mwh"].mean()),
     }
+    if "adaptive_interval_covered" in x.columns:
+        result["adaptive_interval_coverage"] = float(x["adaptive_interval_covered"].astype(float).mean())
+        result["adaptive_interval_mean_width_gbp_mwh"] = float(
+            x["adaptive_interval_width_gbp_mwh"].astype(float).mean()
+        )
+    return result
 
 
 def candidate_spec(rule: BiasCorrectionRule = BiasCorrectionRule()) -> dict:
@@ -137,6 +172,11 @@ def candidate_spec(rule: BiasCorrectionRule = BiasCorrectionRule()) -> dict:
         "information_contract": (
             "Each correction uses only residuals whose target outcome is available by the current decision time; "
             "the candidate does not refit the frozen v0.20 ridge coefficients or NESO feature family."
+        ),
+        "uncertainty_contract": (
+            "When frozen conformal bounds are present, both bounds are translated by the same causal bias "
+            "correction as the point forecast. Interval width and the frozen calibration quantile remain unchanged; "
+            "no v0.25 forward label is used to recalibrate uncertainty."
         ),
         "evidence_contract": (
             "Rows before the forward start are development diagnostics. Rows at or after the forward start form a "
