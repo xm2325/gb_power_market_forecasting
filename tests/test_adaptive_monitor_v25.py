@@ -90,6 +90,26 @@ def test_monitor_reports_tail_metrics_and_lineage():
     assert state["lineage"]["previous_snapshot_sha256"] == "abc123"
 
 
+def test_monitor_reports_translated_interval_coverage_without_changing_width():
+    x = _rows(48, adaptive_offset=1.0)
+    x["adaptive_interval_covered"] = True
+    x["adaptive_interval_width_gbp_mwh"] = 40.0
+    x["interval_covered"] = np.arange(48) % 2 == 0
+    x["interval_lower_gbp_mwh"] = x["frozen_prediction_gbp_mwh"] - 20.0
+    x["interval_upper_gbp_mwh"] = x["frozen_prediction_gbp_mwh"] + 20.0
+    state = build_adaptive_monitor_state(
+        x,
+        forward_start_utc="2026-08-21T11:30:00Z",
+        candidate_id="candidate",
+    )
+    m = state["cumulative"]
+    assert m["adaptive_interval_coverage"] == 1.0
+    assert m["frozen_interval_coverage"] == 0.5
+    assert m["adaptive_minus_frozen_interval_coverage"] == 0.5
+    assert m["adaptive_interval_mean_width_gbp_mwh"] == 40.0
+    assert m["frozen_interval_mean_width_gbp_mwh"] == 40.0
+
+
 def test_duplicate_targets_fail_closed():
     x = _rows(50)
     x.loc[1, "target_start_utc"] = x.loc[0, "target_start_utc"]
