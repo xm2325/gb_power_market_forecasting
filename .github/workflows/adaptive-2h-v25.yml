@@ -90,7 +90,7 @@ jobs:
             --locked-ledger reports/monitoring/V0_25_FORWARD_LEDGER_FIRST6.csv \
             --out-dir reports/v25_2h
 
-      - name: Enforce candidate, ledger and monitoring contracts
+      - name: Enforce candidate, ledger, monitoring and promotion contracts
         run: |
           python - <<'PY'
           import json
@@ -99,6 +99,7 @@ jobs:
           summary = json.loads(Path('reports/v25_2h/v25_2h_summary.json').read_text())
           monitor = json.loads(Path('reports/v25_2h/v25_monitor_state.json').read_text())
           ledger = json.loads(Path('reports/v25_2h/forward_ledger_check.json').read_text())
+          promotion = monitor['promotion_readiness']
           spec = summary['candidate_spec']
           if spec['forward_start_utc'] != '2026-08-21T11:30:00+00:00':
               raise SystemExit('v0.25 forward start changed')
@@ -106,6 +107,10 @@ jobs:
               raise SystemExit('v0.25 candidate identity changed')
           if monitor['policy']['alert_min_rows'] != 48:
               raise SystemExit('v0.25 alert sample gate changed')
+          if promotion['policy']['minimum_forward_rows'] != 336:
+              raise SystemExit('v0.25 promotion sample gate changed')
+          if promotion.get('automatic_promotion') is True:
+              raise SystemExit('v0.25 must never auto-promote')
           if ledger['status'] != 'LOCKED_PREFIX_REPRODUCED':
               raise SystemExit('v0.25 immutable forward prefix was not reproduced')
           if ledger['locked_rows'] != 6:
@@ -119,6 +124,7 @@ jobs:
               'maturity_stage': monitor['maturity_stage'],
               'alert_status': monitor['alert_status'],
               'alerts': monitor['alerts'],
+              'promotion_status': promotion['status'],
           })
           PY
 
