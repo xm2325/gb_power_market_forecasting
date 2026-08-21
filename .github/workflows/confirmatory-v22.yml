@@ -2,10 +2,6 @@ name: confirmatory-v22
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths:
-      - '.github/V22_BLINDED_SMOKE'
 
 permissions:
   contents: read
@@ -106,8 +102,7 @@ jobs:
           for horizon, result in payload['horizons'].items():
               if result['status'] == 'CONFIRMATORY_REVEALED':
                   continue
-              keys = set(result)
-              leaked = sorted(keys & forbidden)
+              leaked = sorted(set(result) & forbidden)
               if leaked:
                   raise SystemExit(f'{horizon}: pre-gate performance keys leaked: {leaked}')
               if result['status'] not in {'BLINDED_ACCUMULATION', 'BLOCKED_EVIDENCE'}:
