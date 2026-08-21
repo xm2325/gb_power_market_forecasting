@@ -1,16 +1,13 @@
 name: bootstrap-v020-real-data
 
 on:
-  push:
-    branches:
-      - feat/real-data-v0.20
-    paths:
-      - 'bootstrap/**'
-      - '.github/workflows/bootstrap-v020.yml'
   pull_request:
-    branches:
-      - main
+    branches: [main]
     types: [opened, synchronize, reopened]
+    paths:
+      - 'bootstrap_v3/**'
+      - '.github/workflows/bootstrap-v020.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,51 +15,117 @@ permissions:
 jobs:
   hydrate-publish-and-run-real-data:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 300
 
     steps:
-      - name: Checkout bootstrap branch
+      - name: Checkout feature branch
         uses: actions/checkout@v4
         with:
           ref: feat/real-data-v0.20
           fetch-depth: 0
 
+      - name: Detect already-published source
+        id: guard
+        shell: bash
+        run: |
+          if [[ -f VERSION && -f pyproject.toml && -d src/gb_power_market ]]; then
+            echo "bootstrap=false" >> "$GITHUB_OUTPUT"
+            echo "Normal source tree already exists; bootstrap work is skipped."
+          else
+            echo "bootstrap=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Python
+        if: steps.guard.outputs.bootstrap == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Hydrate audited v0.20 source snapshot
+      - name: Verify and hydrate audited v0.20 source snapshot
+        if: steps.guard.outputs.bootstrap == 'true'
+        shell: bash
         run: |
-          cat bootstrap/part-*.b64 | tr -d '\n' | base64 -d > /tmp/gbpm-v020.zip
-          unzip -oq /tmp/gbpm-v020.zip -d .
-          test -f pyproject.toml
-          test -f scripts/download_neso_v18_bundle.py
-          test -f scripts/download_elexon_v19_bundle.py
-          test -f .github/workflows/real-market-evidence.yml
+          python - <<'PY'
+          from __future__ import annotations
+          import base64, hashlib, json, tarfile
+          from pathlib import Path
+
+          root = Path('bootstrap_v3')
+          manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
+          pieces = []
+          for item in manifest['parts']:
+              path = root / item['part']
+              data = path.read_bytes()
+              if len(data) != int(item['chars']):
+                  raise SystemExit(f"length mismatch {item['part']}: {len(data)} != {item['chars']}")
+              got = hashlib.sha256(data).hexdigest()
+              if got != item['sha256']:
+                  raise SystemExit(f"sha256 mismatch {item['part']}: {got} != {item['sha256']}")
+              pieces.append(data)
+              print(f"verified {item['part']}: {len(data):,} chars {got}")
+
+          encoded = b''.join(pieces)
+          if len(encoded) != int(manifest['base64_chars']):
+              raise SystemExit(f"base64 length mismatch: {len(encoded)} != {manifest['base64_chars']}")
+          raw = base64.b64decode(encoded, validate=True)
+          if len(raw) != int(manifest['archive_bytes']):
+              raise SystemExit(f"archive byte mismatch: {len(raw)} != {manifest['archive_bytes']}")
+          digest = hashlib.sha256(raw).hexdigest()
+          if digest != manifest['archive_sha256']:
+              raise SystemExit(f"archive sha256 mismatch: {digest} != {manifest['archive_sha256']}")
+          archive = Path('/tmp/gbpm-v020.tar.xz')
+          archive.write_bytes(raw)
+          print(f"verified archive: {len(raw):,} bytes {digest}")
+
+          with tarfile.open(archive, mode='r:xz') as tf:
+              tf.extractall('.', filter='data')
+
+          required = [
+              Path('pyproject.toml'),
+              Path('scripts/download_neso_v18_bundle.py'),
+              Path('scripts/download_elexon_v19_bundle.py'),
+              Path('scripts/build_v20_evidence_bundle.py'),
+              Path('src/gb_power_market/evidence_v20.py'),
+          ]
+          missing = [str(p) for p in required if not p.exists()]
+          if missing:
+              raise SystemExit(f"hydrated archive missing required paths: {missing}")
+          PY
 
       - name: Install dependencies
+        if: steps.guard.outputs.bootstrap == 'true'
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e '.[dev,live]'
 
-      - name: Run full curated test suite
+      - name: Run curated test suite
+        if: steps.guard.outputs.bootstrap == 'true'
         run: pytest -q
 
       - name: Publish normal source tree before long network run
+        if: steps.guard.outputs.bootstrap == 'true'
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm -r bootstrap .github/workflows/bootstrap-v020.yml
           git add -- \
             README.md VERSION .gitignore pyproject.toml \
             src scripts tests fixtures docs data/samples \
-            .github/workflows/real-market-evidence.yml \
             reports/v20_evidence reports/TEST_STATUS.json
-          git commit -m "Publish v0.20 real-data forecasting pipeline"
-          git push origin HEAD:feat/real-data-v0.20
+          if git diff --cached --quiet; then
+            echo "No source changes to publish"
+          else
+            git commit -m "Publish v0.20 real-data forecasting pipeline"
+            git push origin HEAD:feat/real-data-v0.20
+          fi
+
+      - name: Mark source as ready for network run
+        if: steps.guard.outputs.bootstrap == 'true'
+        id: ready
+        run: echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Download real NESO forecast archive and outturn
+        if: steps.ready.outputs.ready == 'true'
         id: neso_download
         continue-on-error: true
         run: |
@@ -72,8 +135,8 @@ jobs:
             --manifest reports/v19_real_market/neso_download_manifest.json
 
       - name: Materialise real NESO Parquet
+        if: always() && steps.ready.outputs.ready == 'true'
         id: neso_materialise
-        if: always()
         continue-on-error: true
         run: |
           python scripts/materialise_v18_parquet.py \
@@ -82,8 +145,8 @@ jobs:
             --manifest reports/v19_real_market/neso_materialise_manifest.json
 
       - name: Evaluate real NESO physical forecasts
+        if: always() && steps.ready.outputs.ready == 'true'
         id: neso_benchmark
-        if: always()
         continue-on-error: true
         run: |
           python scripts/run_v18_real_neso_benchmark.py \
@@ -91,8 +154,8 @@ jobs:
             --out-dir reports/v19_real_market/neso_physical_benchmark
 
       - name: Download real Elexon MID and settlement system prices
+        if: always() && steps.ready.outputs.ready == 'true'
         id: elexon_download
-        if: always()
         continue-on-error: true
         run: |
           python scripts/download_elexon_v19_bundle.py \
@@ -102,8 +165,8 @@ jobs:
             --manifest reports/v19_real_market/elexon_download_manifest.json
 
       - name: Materialise and audit real Elexon market data
+        if: always() && steps.ready.outputs.ready == 'true'
         id: elexon_materialise
-        if: always()
         continue-on-error: true
         run: |
           python scripts/materialise_elexon_v19.py \
@@ -114,8 +177,8 @@ jobs:
             --end-date-exclusive 2026-08-16
 
       - name: Run fixed-window real price benchmark
+        if: always() && steps.ready.outputs.ready == 'true'
         id: price_benchmark
-        if: always()
         continue-on-error: true
         run: |
           python scripts/run_v19_real_price_benchmark.py \
@@ -124,21 +187,45 @@ jobs:
             --out-dir reports/v19_real_market
 
       - name: Build claim-safe evidence ledger
-        if: always()
+        if: always() && steps.ready.outputs.ready == 'true'
+        id: evidence
+        continue-on-error: true
         run: |
           PYTHONPATH=src python scripts/build_v20_evidence_bundle.py \
             --report-dir reports/v19_real_market \
             --out-dir reports/v20_evidence \
             --github-step-summary "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload real processed data and evidence
-        if: always()
+      - name: Record step outcomes
+        if: always() && steps.ready.outputs.ready == 'true'
+        shell: bash
+        run: |
+          mkdir -p reports/v20_evidence
+          cat > reports/v20_evidence/GITHUB_RUN_STATUS.json <<JSON
+          {
+            "run_id": "${GITHUB_RUN_ID}",
+            "run_attempt": "${GITHUB_RUN_ATTEMPT}",
+            "commit": "${GITHUB_SHA}",
+            "neso_download": "${{ steps.neso_download.outcome }}",
+            "neso_materialise": "${{ steps.neso_materialise.outcome }}",
+            "neso_benchmark": "${{ steps.neso_benchmark.outcome }}",
+            "elexon_download": "${{ steps.elexon_download.outcome }}",
+            "elexon_materialise": "${{ steps.elexon_materialise.outcome }}",
+            "price_benchmark": "${{ steps.price_benchmark.outcome }}",
+            "evidence": "${{ steps.evidence.outcome }}"
+          }
+          JSON
+
+      - name: Upload real raw data, processed data and evidence
+        if: always() && steps.ready.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: gb-power-market-v20-real-data-and-evidence
           path: |
             reports/v19_real_market/
             reports/v20_evidence/
+            data/external/neso_2026_bundle/
+            data/external/elexon_v19/
             data/processed/v18_neso/
             data/processed/v19_elexon/
           if-no-files-found: warn
@@ -146,7 +233,8 @@ jobs:
           compression-level: 6
 
       - name: Commit small real-run evidence to branch
-        if: always()
+        if: always() && steps.ready.outputs.ready == 'true'
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -162,5 +250,5 @@ jobs:
           fi
 
       - name: Final claim-integrity gate
-        if: always()
+        if: always() && steps.ready.outputs.ready == 'true'
         run: python scripts/check_v19_real_market_claim_gate.py
