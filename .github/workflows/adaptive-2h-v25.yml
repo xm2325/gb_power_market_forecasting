@@ -83,13 +83,14 @@ jobs:
             --end-exclusive-utc "$AVAILABLE_END_UTC" \
             --out-dir reports/v24_for_v25
 
-      - name: Run v0.25 causal 2h correction and monitor
+      - name: Run v0.25 causal 2h correction, ledger and monitor
         run: |
           python scripts/run_v25_2h_adaptive_candidate.py \
             --v24-rows reports/v24_for_v25/forward_rows_2h.csv \
+            --locked-ledger reports/monitoring/V0_25_FORWARD_LEDGER_FIRST6.csv \
             --out-dir reports/v25_2h
 
-      - name: Enforce candidate and monitoring contracts
+      - name: Enforce candidate, ledger and monitoring contracts
         run: |
           python - <<'PY'
           import json
@@ -97,6 +98,7 @@ jobs:
 
           summary = json.loads(Path('reports/v25_2h/v25_2h_summary.json').read_text())
           monitor = json.loads(Path('reports/v25_2h/v25_monitor_state.json').read_text())
+          ledger = json.loads(Path('reports/v25_2h/forward_ledger_check.json').read_text())
           spec = summary['candidate_spec']
           if spec['forward_start_utc'] != '2026-08-21T11:30:00+00:00':
               raise SystemExit('v0.25 forward start changed')
@@ -104,9 +106,16 @@ jobs:
               raise SystemExit('v0.25 candidate identity changed')
           if monitor['policy']['alert_min_rows'] != 48:
               raise SystemExit('v0.25 alert sample gate changed')
+          if ledger['status'] != 'LOCKED_PREFIX_REPRODUCED':
+              raise SystemExit('v0.25 immutable forward prefix was not reproduced')
+          if ledger['locked_rows'] != 6:
+              raise SystemExit('v0.25 immutable forward prefix row count changed')
+          if ledger['locked_chain_tip_sha256'] != 'b27a99b21466c8a4cbf58d29ad9c980a174b278cee1a741582a978af747789f2':
+              raise SystemExit('v0.25 immutable forward chain tip changed')
           print({
               'candidate': spec['candidate'],
               'forward': summary['new_forward_segment'],
+              'ledger': ledger,
               'maturity_stage': monitor['maturity_stage'],
               'alert_status': monitor['alert_status'],
               'alerts': monitor['alerts'],
