@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from .fixed_market_experiment import FixedMarketWindows
-from .price_feature_families import HISTORY_FEATURES, LEVEL_FEATURES
+from .price_feature_families import HISTORY_FEATURES, LEVEL_FEATURES, REVISION_FEATURES
 from .price_forecasting import NumpyRidge, price_metrics
 from .probabilistic_price import (
     abstention_metrics,
@@ -22,6 +22,7 @@ FAMILY_FEATURES = {
     "PRICE_HISTORY_ONLY": list(HISTORY_FEATURES),
     "PRICE_PLUS_NESO_LEVELS": list(HISTORY_FEATURES) + list(LEVEL_FEATURES),
 }
+ALL_V20_SELECTION_FEATURES = list(HISTORY_FEATURES) + list(LEVEL_FEATURES) + list(REVISION_FEATURES)
 
 
 @dataclass(frozen=True)
@@ -68,18 +69,21 @@ def fit_frozen_replay_state(
 ) -> dict[str, Any]:
     """Reconstruct the exact pre-final v0.20 ridge state.
 
-    Model coefficients are fitted only on the purged train + selection blocks.
-    Calibration is used only to reproduce the locked conformal residual quantile.
-    The locked final labels never enter the point fit or conformal fit.
+    v0.20 selected all feature families on one common complete-row intersection.
+    The replay export therefore preserves that same row population even when the
+    winning family is price-history-only. Point coefficients are fitted only on
+    the purged train + selection blocks. Calibration is used only to reproduce
+    the locked conformal residual quantile. Locked-final labels are never fitted.
     """
     features = _feature_columns(selected_family)
     required = [
         "target_start_utc",
         "decision_time_utc",
+        "neso_publish_time_utc",
         target_col,
         "price_lag_1d_same_target",
         "price_lag_last_completed",
-        *features,
+        *ALL_V20_SELECTION_FEATURES,
     ]
     df = frame.dropna(subset=list(dict.fromkeys(required))).copy()
     df["target_start_utc"] = pd.to_datetime(df["target_start_utc"], utc=True, errors="raise")
@@ -87,6 +91,7 @@ def fit_frozen_replay_state(
     df = df.sort_values("target_start_utc").reset_index(drop=True)
 
     w = windows.parsed()
+    df = df[(df["target_start_utc"] >= w["train_start_utc"]) & (df["target_start_utc"] < w["final_end_exclusive_utc"])].copy()
     raw_train = df[(df["target_start_utc"] >= w["train_start_utc"]) & (df["target_start_utc"] < w["selection_start_utc"])].copy()
     raw_selection = df[(df["target_start_utc"] >= w["selection_start_utc"]) & (df["target_start_utc"] < w["calibration_start_utc"])].copy()
     raw_calibration = df[(df["target_start_utc"] >= w["calibration_start_utc"]) & (df["target_start_utc"] < w["final_start_utc"])].copy()
@@ -119,6 +124,7 @@ def fit_frozen_replay_state(
         "horizon_minutes": int(horizon_minutes),
         "selected_family": selected_family,
         "features": features,
+        "training_row_contract": "same all-family complete-row intersection used by v0.20 selection",
         "alpha": float(alpha),
         "mean": model.mean_.astype(float).tolist(),
         "scale": model.scale_.astype(float).tolist(),
