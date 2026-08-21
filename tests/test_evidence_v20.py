@@ -86,3 +86,16 @@ def test_evidence_id_depends_on_sources_not_generation_time(tmp_path):
     _write(r / "elexon_download_manifest.json", {"status": "PASS", "snapshot": 2})
     c = build_evidence_bundle(tmp_path, r, tmp_path / "out3", generated_at_utc="2026-08-22T00:00:00+00:00")
     assert c["evidence_id_sha256"] != a["evidence_id_sha256"]
+
+
+def test_current_aliases_are_overwritten_from_same_run(tmp_path):
+    r = _base_tree(tmp_path)
+    _write(r / "real_price_benchmark_all.json", {"horizons": {h: _real_result() for h in ("30m","2h","6h","12h")}})
+    out = tmp_path / "out"
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "EVIDENCE_BUNDLE_CURRENT.json").write_text("stale", encoding="utf-8")
+    build_evidence_bundle(tmp_path, r, out, generated_at_utc="2026-08-21T00:00:00+00:00")
+    assert (out / "EVIDENCE_BUNDLE_CURRENT.json").read_bytes() == (out / "V0_20_EVIDENCE_BUNDLE.json").read_bytes()
+    assert (out / "CV_SAFE_SUMMARY_CURRENT.md").read_bytes() == (out / "V0_20_CV_SAFE_SUMMARY.md").read_bytes()
+    assert (out / "INTERVIEW_SAFE_SUMMARY_CURRENT.md").read_bytes() == (out / "V0_20_INTERVIEW_SAFE_SUMMARY.md").read_bytes()
+    assert (out / "FAILURE_DIAGNOSTIC_CURRENT.md").read_bytes() == (out / "V0_20_FAILURE_DIAGNOSTIC.md").read_bytes()
