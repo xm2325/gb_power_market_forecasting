@@ -32,29 +32,52 @@ def _clock_lookup(dates: pd.Series, sps: pd.Series) -> dict[tuple[str, int], pd.
     return {(d, int(sp)): canonical_period_end_utc(d, int(sp)) for d, sp in pairs.itertuples(index=False, name=None)}
 
 
+def _wrapped_clock_offset_seconds(raw_target: pd.DatetimeIndex, canonical: pd.DatetimeIndex) -> np.ndarray:
+    """Return the shortest signed clock offset on a 24-hour circle.
+
+    Some legacy NESO rows published on 20--21 April 2026 label ``TIME_GMT``
+    with the BST/local clock.  A midnight wrap therefore appears as 23 hours
+    if compared naively.  The settlement-date/period key remains internally
+    consistent, so we use it as the canonical target and retain this raw-clock
+    offset only as an audit field.
+    """
+    delta = (pd.DatetimeIndex(raw_target) - pd.DatetimeIndex(canonical)).total_seconds().to_numpy(float)
+    return ((delta + 43200.0) % 86400.0) - 43200.0
+
+
 def normalise_forecast_chunk(raw: pd.DataFrame, regime: str) -> tuple[pd.DataFrame, float]:
+    if regime not in {"legacy", "current"}:
+        raise ValueError(regime)
+
     sp = pd.to_numeric(raw["SETTLEMENT_PERIOD"], errors="raise").astype(int)
     pub = pd.to_datetime(raw["Forecast_Datetime"], utc=True, errors="raise")
-    if regime == "legacy":
-        local_date = pd.to_datetime(raw["SETTLEMENT_DATE"], errors="raise").dt.date.astype(str)
-        target_end = pd.to_datetime(raw["DATE_GMT"].astype(str).str.slice(0, 10) + " " + raw["TIME_GMT"].astype(str), utc=True, errors="raise")
-    elif regime == "current":
-        target_end = pd.to_datetime(raw["DATE_GMT"], utc=True, errors="raise")
-        local_date = (target_end - pd.Timedelta(minutes=30)).dt.tz_convert("Europe/London").dt.date.astype(str)
-    else:
-        raise ValueError(regime)
+    local_date = pd.to_datetime(raw["SETTLEMENT_DATE"], errors="raise").dt.date.astype(str)
+
+    # The GB settlement key is authoritative.  DATE_GMT/TIME_GMT is retained
+    # as an independent source-clock cross-check because the legacy archive
+    # contains a small, identifiable BST-labelled subset.
     lookup = _clock_lookup(pd.Series(local_date), sp)
     canonical = pd.DatetimeIndex([lookup[(d, int(p))] for d, p in zip(local_date, sp, strict=True)])
-    diff = np.abs((pd.DatetimeIndex(target_end) - canonical).total_seconds().to_numpy(float))
-    max_diff = float(np.nanmax(diff)) if len(diff) else 0.0
-    if max_diff > 1.0:
-        raise ValueError(f"{regime} settlement clock mismatch: {max_diff}s")
+    raw_target = pd.to_datetime(
+        raw["DATE_GMT"].astype(str).str.slice(0, 10) + " " + raw["TIME_GMT"].astype(str),
+        utc=True,
+        errors="raise",
+    )
+    offset = _wrapped_clock_offset_seconds(pd.DatetimeIndex(raw_target), canonical)
+    max_diff = float(np.nanmax(np.abs(offset))) if len(offset) else 0.0
+
+    # One hour is an explainable GMT/BST labelling offset. Anything larger is
+    # not silently repaired.
+    if max_diff > 3600.0 + 1.0:
+        raise ValueError(f"{regime} settlement clock mismatch exceeds one hour: {max_diff}s")
+
     out = pd.DataFrame({
-        "target_end_utc": pd.DatetimeIndex(target_end),
-        "target_start_utc": pd.DatetimeIndex(target_end) - pd.Timedelta(minutes=30),
+        "target_end_utc": canonical,
+        "target_start_utc": canonical - pd.Timedelta(minutes=30),
         "publish_time_utc": pub,
         "settlement_date_local": np.asarray(local_date, dtype=str),
         "settlement_period": sp.to_numpy(np.int16),
+        "raw_clock_offset_seconds": offset,
         "wind_mw": pd.to_numeric(raw["EMBEDDED_WIND_FORECAST"], errors="coerce").to_numpy(float),
         "wind_capacity_mw": pd.to_numeric(raw["EMBEDDED_WIND_CAPACITY"], errors="coerce").to_numpy(float),
         "solar_mw": pd.to_numeric(raw["EMBEDDED_SOLAR_FORECAST"], errors="coerce").to_numpy(float),
@@ -70,15 +93,25 @@ def materialise_forecast(src: Path, dst: Path, regime: str, chunksize: int) -> d
     writer = None
     rows = 0
     max_clock = 0.0
+    raw_clock_mismatch_rows = 0
     for chunk in pd.read_csv(src, chunksize=chunksize, low_memory=False):
         norm, clock = normalise_forecast_chunk(chunk, regime)
         writer = _writer(dst, norm, writer)
         rows += len(norm)
         max_clock = max(max_clock, clock)
+        raw_clock_mismatch_rows += int((norm["raw_clock_offset_seconds"].abs() > 1.0).sum())
         print(f"{regime}: materialised {rows:,} rows", flush=True)
     if writer is not None:
         writer.close()
-    return {"source": str(src), "parquet": str(dst), "rows": rows, "max_clock_error_seconds": max_clock}
+    return {
+        "source": str(src),
+        "parquet": str(dst),
+        "rows": rows,
+        "target_key": "GB settlement date + settlement period",
+        "max_raw_clock_offset_seconds": max_clock,
+        "raw_clock_mismatch_rows": raw_clock_mismatch_rows,
+        "raw_clock_mismatch_policy": "canonicalise by settlement key; allow <=1h GMT/BST label offset; fail above 1h",
+    }
 
 
 def materialise_outturn(src: Path, dst: Path, chunksize: int) -> dict:

@@ -57,3 +57,42 @@ def test_official_forecast_and_outturn_samples_join_with_asof_cutoff():
     # decision time 00:30), so exactly three rows are eligible.
     assert res["n_with_asof_forecast"] == 3
     assert res["future_publications"] == 0
+
+
+def test_materialiser_uses_settlement_key_when_legacy_time_is_bst_labelled():
+    from scripts.materialise_v18_parquet import normalise_forecast_chunk
+
+    raw = pd.DataFrame([{
+        "DATE_GMT": "2026-04-22T00:00:00",
+        "TIME_GMT": "00:30:00",  # one hour ahead of true UTC period end
+        "SETTLEMENT_DATE": "2026-04-22T00:00:00",
+        "SETTLEMENT_PERIOD": 1,
+        "EMBEDDED_WIND_FORECAST": 4000,
+        "EMBEDDED_WIND_CAPACITY": 6500,
+        "EMBEDDED_SOLAR_FORECAST": 0,
+        "EMBEDDED_SOLAR_CAPACITY": 22000,
+        "Forecast_Datetime": "2026-04-20T00:00:00",
+    }])
+    out, max_offset = normalise_forecast_chunk(raw, "legacy")
+    assert out.loc[0, "target_end_utc"] == pd.Timestamp("2026-04-21T23:30:00Z")
+    assert out.loc[0, "raw_clock_offset_seconds"] == 3600.0
+    assert max_offset == 3600.0
+
+
+def test_materialiser_rejects_unexplained_clock_offset_over_one_hour():
+    from scripts.materialise_v18_parquet import normalise_forecast_chunk
+    import pytest
+
+    raw = pd.DataFrame([{
+        "DATE_GMT": "2026-04-22T00:00:00",
+        "TIME_GMT": "02:30:00",
+        "SETTLEMENT_DATE": "2026-04-22T00:00:00",
+        "SETTLEMENT_PERIOD": 1,
+        "EMBEDDED_WIND_FORECAST": 4000,
+        "EMBEDDED_WIND_CAPACITY": 6500,
+        "EMBEDDED_SOLAR_FORECAST": 0,
+        "EMBEDDED_SOLAR_CAPACITY": 22000,
+        "Forecast_Datetime": "2026-04-20T00:00:00",
+    }])
+    with pytest.raises(ValueError, match="exceeds one hour"):
+        normalise_forecast_chunk(raw, "legacy")
