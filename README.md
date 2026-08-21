@@ -14,19 +14,59 @@ Leakage-safe forecasting of GB electricity market prices using real Elexon marke
 - large-price-move guards, conformal uncertainty, abstention and evidence/claim controls;
 - CI on Python 3.11 and 3.12 plus a separate real-data evidence workflow.
 
-## Real-data status
+## Locked real benchmark
 
-A network-enabled GitHub Actions run on 21 August 2026 successfully downloaded the official source snapshots:
+The first fully successful network-enabled benchmark ran on **21 August 2026** using real NESO forecast vintages/outturn and real Elexon Market Index and system prices.
 
-- NESO legacy 2026 forecast archive: 2,427,930 rows;
-- NESO current 2026 forecast archive: 1,039,670 rows;
-- NESO Historic Demand Data 2026: 10,174 rows;
-- NESO Demand Data Update: 2,832 rows;
-- Elexon market/system-price history: 10,894 expected settlement periods with 100% MID coverage, 100% system-price coverage and no duplicate settlement keys in the materialised audit.
+| Horizon | Selected family | Previous-settlement-day MAE | Deployed MAE | Final result |
+|---|---|---:|---:|---:|
+| 30m | Price history only | 24.048 £/MWh | **8.939 £/MWh** | **62.8% better** |
+| 2h | Price + NESO forecast levels | 24.048 £/MWh | **17.087 £/MWh** | **28.9% better** |
+| 6h | Price + NESO forecast levels | 24.048 £/MWh | 34.437 £/MWh | **43.2% worse** |
+| 12h | Price + NESO forecast levels | 24.048 £/MWh | 50.974 £/MWh | **112.0% worse** |
 
-The first full network run exposed a source-clock inconsistency in 1,268 legacy NESO forecast rows published on 20--21 April 2026. Those rows use a BST/local-clock interpretation in the raw `TIME_GMT` field. The repository now treats `SETTLEMENT_DATE + SETTLEMENT_PERIOD` as the canonical target key, records the raw-clock offset for audit, allows the identified one-hour GMT/BST label offset, and still fails closed for larger unexplained clock errors.
+All four horizons have:
 
-New real price-performance claims remain blocked until the corrected materialisation and fixed-window benchmark rerun completes successfully. The downloaded source snapshots are retained as workflow artifacts rather than committed as large Git blobs.
+- 1,623 / 1,623 frozen final targets;
+- 100% end-to-end target coverage;
+- zero NESO forecast publications after the decision-time cutoff;
+- a passing real-data information/coverage gate.
+
+The evidence policy classifies 30m and 2h as `REAL_CLAIMABLE_POSITIVE`. The 6h and 12h results are deliberately retained as `REAL_NEGATIVE_RESULT`; they passed pre-final selection but did not generalise to the independent final window.
+
+Forecast-revision features were **not selected at any horizon**. At 30m, price history alone was strongest. At 2h, as-of NESO forecast levels added useful information.
+
+Full result and provenance:
+
+- [`docs/REAL_RESULTS_2026-08-21.md`](docs/REAL_RESULTS_2026-08-21.md)
+- [`reports/locked/V0_20_REAL_BENCHMARK_LOCK.json`](reports/locked/V0_20_REAL_BENCHMARK_LOCK.json)
+- [`docs/PROSPECTIVE_HOLDOUT_POLICY.md`](docs/PROSPECTIVE_HOLDOUT_POLICY.md)
+
+These are public-data forecasting results, **not realised trading P&L**.
+
+## Real-data snapshot
+
+The successful benchmark downloaded and audited:
+
+- NESO legacy 2026 forecast archive: **2,427,930 rows**;
+- NESO current 2026 forecast archive: **1,040,322 rows**;
+- NESO Historic Demand Data 2026: **10,174 rows**;
+- NESO Demand Data Update: **2,832 downloaded rows**;
+- Elexon market/system-price history: **10,894 settlement periods**, with 100% market-reference coverage, 100% system-price coverage and zero duplicate settlement keys.
+
+The full network snapshots remain GitHub Actions artifacts rather than large Git blobs. The locked benchmark records the artifact digest and the SHA-256 identity of each NESO source snapshot.
+
+## Source-clock audit
+
+The full network run exposed a source-clock inconsistency in **1,268** legacy NESO forecast rows published on 20–21 April 2026. Those rows use a BST/local-clock interpretation in the raw `TIME_GMT` field.
+
+The repository therefore treats:
+
+```text
+SETTLEMENT_DATE + SETTLEMENT_PERIOD
+```
+
+as the canonical GB target key. Raw `DATE_GMT/TIME_GMT` is retained for audit; the identified one-hour GMT/BST label offset is recorded, while larger unexplained clock errors still fail closed.
 
 ## Repository layout
 
@@ -36,15 +76,15 @@ scripts/                      download, materialisation and benchmark entry poin
 tests/                        unit/regression tests and timing-leakage checks
 fixtures/                     synthetic contract fixtures + small official samples
 data/samples/                 small committed source samples only
-docs/                         experiment and evidence protocols
-reports/                      small audit/status files
+docs/                         experiment, results and evidence protocols
+reports/locked/               immutable small real-benchmark evidence records
 .github/workflows/            normal CI + real-data evidence workflow
 ```
 
 ## Run tests
 
 ```bash
-python -m pip install -e '.[dev]'
+python -m pip install -e '.[dev,live]'
 pytest -q
 ```
 
@@ -53,3 +93,9 @@ pytest -q
 Use the **real-market-evidence** GitHub Actions workflow. It downloads official NESO/Elexon snapshots, materialises compact Parquet data, runs the physical and price benchmarks, uploads the full evidence artifact, and applies the final claim-integrity gate.
 
 Large network snapshots are intentionally excluded from Git history.
+
+## Prospective development
+
+The v0.20 final window is locked. It may be used for diagnostics, but a model changed after inspecting these labels cannot claim the same 1,623 periods as independent evidence.
+
+Any new numerical post-v0.20 claim requires a later prospective holdout beginning no earlier than **2026-08-15 07:30 UTC**. See [`docs/PROSPECTIVE_HOLDOUT_POLICY.md`](docs/PROSPECTIVE_HOLDOUT_POLICY.md).
