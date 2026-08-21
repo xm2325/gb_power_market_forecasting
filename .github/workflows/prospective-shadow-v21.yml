@@ -1,0 +1,123 @@
+name: prospective-shadow-v21
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/V21_SHADOW_RUN'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prospective-shadow-v21-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Test frozen contracts
+        run: pytest -q
+
+      - name: Set prospective boundaries
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          from datetime import datetime, time, timezone
+          from zoneinfo import ZoneInfo
+          london = ZoneInfo('Europe/London')
+          today_local = datetime.now(timezone.utc).astimezone(london).date()
+          boundary_local = datetime.combine(today_local, time.min, tzinfo=london)
+          boundary_utc = boundary_local.astimezone(timezone.utc)
+          print(f"SCORE_END_UTC={boundary_utc.isoformat().replace('+00:00', 'Z')}")
+          print(f"SOURCE_END_DATE={today_local.isoformat()}")
+          print(f"PROSPECTIVE_START_UTC=2026-08-15T07:30:00Z")
+          print(f"ELEXON_START_DATE=2026-08-08")
+          print(f"NESO_START_DATE=2026-08-14")
+          PY
+
+      - name: Show frozen replay boundary
+        run: |
+          echo "prospective start: $PROSPECTIVE_START_UTC"
+          echo "score end:        $SCORE_END_UTC"
+          echo "source date end:  $SOURCE_END_DATE (exclusive)"
+
+      - name: Download bounded NESO current forecast window
+        run: |
+          python scripts/download_neso_v21_window.py \
+            --start-date "$NESO_START_DATE" \
+            --end-date-exclusive "$SOURCE_END_DATE" \
+            --out data/external/v21/neso_current_window.csv \
+            --manifest reports/v21_shadow/neso_window_manifest.json
+
+      - name: Materialise bounded NESO current window
+        run: |
+          python scripts/materialise_v21_current.py \
+            --input data/external/v21/neso_current_window.csv \
+            --out data/processed/v21/forecast_current.parquet \
+            --manifest reports/v21_shadow/neso_materialise_manifest.json
+
+      - name: Download Elexon history plus prospective window
+        run: |
+          python scripts/download_elexon_v19_bundle.py \
+            --start-date "$ELEXON_START_DATE" \
+            --end-date-exclusive "$SOURCE_END_DATE" \
+            --out-dir data/external/v21/elexon \
+            --manifest reports/v21_shadow/elexon_download_manifest.json \
+            --sleep-seconds 0.05
+
+      - name: Materialise Elexon prospective source
+        run: |
+          python scripts/materialise_elexon_v19.py \
+            --bundle-dir data/external/v21/elexon \
+            --out-dir data/processed/v21/elexon \
+            --report-dir reports/v21_shadow \
+            --start-date "$ELEXON_START_DATE" \
+            --end-date-exclusive "$SOURCE_END_DATE"
+
+      - name: Replay exact frozen models on prospective labels
+        run: |
+          python scripts/run_v21_prospective_shadow.py \
+            --elexon-dir data/processed/v21/elexon \
+            --neso-current data/processed/v21/forecast_current.parquet \
+            --model-state reports/locked/V0_21_FROZEN_MODEL_STATE.json \
+            --start-utc "$PROSPECTIVE_START_UTC" \
+            --end-exclusive-utc "$SCORE_END_UTC" \
+            --out-dir reports/v21_shadow
+
+      - name: Shadow integrity gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('reports/v21_shadow/prospective_shadow_all.json').read_text())
+          allowed = {'SHADOW_ONLY', 'PROSPECTIVE_EVIDENCE_READY'}
+          bad = {h: r['status'] for h, r in p['horizons'].items() if r['status'] not in allowed}
+          if bad:
+              raise SystemExit(f'prospective shadow blocked: {bad}')
+          print({h: r['status'] for h, r in p['horizons'].items()})
+          PY
+
+      - name: Upload prospective checkpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: v21-prospective-shadow-${{ github.run_id }}
+          path: |
+            reports/v21_shadow/
+            data/processed/v21/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
