@@ -85,9 +85,9 @@ def apply_adaptive_2h_gate(
     selected_source: list[str] = []
     selected_prediction: list[float] = []
 
-    for i, row in x.iterrows():
+    for _, row in x.iterrows():
         decision = row["decision_time_utc"]
-        eligible_idx = np.flatnonzero(outcome_available.to_numpy() <= decision.to_datetime64())
+        eligible_idx = np.flatnonzero((outcome_available <= decision).to_numpy())
         if len(eligible_idx) > config.lookback_completed_rows:
             eligible_idx = eligible_idx[-config.lookback_completed_rows :]
 
