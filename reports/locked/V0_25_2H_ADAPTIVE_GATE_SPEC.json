@@ -1,0 +1,25 @@
+{
+  "version": "0.25.0",
+  "status": "FROZEN_ADAPTIVE_2H_CANDIDATE_SPEC",
+  "candidate_forward_start_utc": "2026-08-21T11:30:00+00:00",
+  "development_data_last_target_start_utc": "2026-08-21T11:00:00+00:00",
+  "source_v24_run_id": 32485905691,
+  "source_v24_artifact_id": 9447877873,
+  "source_v24_artifact_sha256": "b79f86af22ea62a7c7e3fcccc3f0403353d0350f523ac432ed60d959e9abe6eb",
+  "frozen_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "horizon_minutes": 120,
+  "underlying_model_changed": false,
+  "gate": {
+    "lookback_completed_half_hours": 144,
+    "minimum_history_rows": 48,
+    "score": "mean(model_abs_error - previous_settlement_day_reference_abs_error) over latest completed outcomes available by decision time",
+    "switch_threshold_gbp_mwh": 0.0,
+    "if_score_below_threshold": "FROZEN_MODEL",
+    "otherwise": "REFERENCE",
+    "insufficient_history_source": "FROZEN_MODEL"
+  },
+  "information_rule": "For each target, an outcome may enter gate history only when target_start_utc + 30 minutes <= the current decision_time_utc. The current target and all future targets are excluded.",
+  "development_interpretation": "The rule was designed after inspecting v0.24 monitoring through 2026-08-21T11:00Z. Any replay on those rows is retrospective development evidence only.",
+  "forward_interpretation": "Only target starts at or after 2026-08-21T11:30Z that were not inspected before this specification was frozen may be labelled v0.25 forward evidence.",
+  "claim_boundary": "This candidate is an adaptive trust/fallback policy around the unchanged frozen 2h forecaster. It is not a new price model and historical development diagnostics are not fresh prospective evidence."
+}
