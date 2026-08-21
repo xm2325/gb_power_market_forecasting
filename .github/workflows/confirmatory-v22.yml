@@ -1,0 +1,127 @@
+name: confirmatory-v22
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/V22_BLINDED_SMOKE'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: confirmatory-v22-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  blinded-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Test blinded contracts
+        run: pytest -q
+
+      - name: Set safe availability boundary
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          from datetime import datetime, timedelta, timezone
+          now = datetime.now(timezone.utc)
+          safe = now - timedelta(minutes=90)
+          safe = safe.replace(minute=(safe.minute // 30) * 30, second=0, microsecond=0)
+          source_end = safe.date() + timedelta(days=1)
+          print(f"AVAILABLE_END_UTC={safe.isoformat().replace('+00:00', 'Z')}")
+          print(f"SOURCE_END_DATE={source_end.isoformat()}")
+          print("ELEXON_START_DATE=2026-08-13")
+          print("NESO_START_DATE=2026-08-20")
+          PY
+
+      - name: Show confirmatory boundary only
+        run: |
+          echo "confirmatory start: 2026-08-20T23:00:00Z"
+          echo "fixed reveal end:  2026-09-03T23:00:00Z"
+          echo "available through:  $AVAILABLE_END_UTC"
+          echo "Performance is blinded until the fixed 672-row window is complete."
+
+      - name: Download bounded NESO current window
+        run: |
+          python scripts/download_neso_v21_window.py \
+            --start-date "$NESO_START_DATE" \
+            --end-date-exclusive "$SOURCE_END_DATE" \
+            --out data/external/v22/neso_current_window.csv \
+            --manifest reports/v22_confirmatory/neso_window_manifest.json
+
+      - name: Materialise bounded NESO current window
+        run: |
+          python scripts/materialise_v21_current.py \
+            --input data/external/v22/neso_current_window.csv \
+            --out data/processed/v22/forecast_current.parquet \
+            --manifest reports/v22_confirmatory/neso_materialise_manifest.json
+
+      - name: Download bounded Elexon MID only
+        run: |
+          python scripts/download_elexon_v22_mid.py \
+            --start-date "$ELEXON_START_DATE" \
+            --end-date-exclusive "$SOURCE_END_DATE" \
+            --out-dir data/external/v22/elexon_mid \
+            --manifest reports/v22_confirmatory/elexon_mid_manifest.json
+
+      - name: Materialise Elexon market reference
+        run: |
+          python scripts/materialise_elexon_v22_mid.py \
+            --bundle-dir data/external/v22/elexon_mid \
+            --out data/processed/v22/reference_market.parquet \
+            --manifest reports/v22_confirmatory/elexon_mid_materialise_manifest.json
+
+      - name: Run blinded confirmatory availability check
+        run: |
+          python scripts/run_v22_blinded_confirmatory.py \
+            --elexon-reference data/processed/v22/reference_market.parquet \
+            --neso-current data/processed/v22/forecast_current.parquet \
+            --model-state reports/locked/V0_21_FROZEN_MODEL_STATE.json \
+            --available-end-exclusive-utc "$AVAILABLE_END_UTC" \
+            --out-dir reports/v22_confirmatory
+
+      - name: Enforce no pre-gate performance leakage
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path('reports/v22_confirmatory/confirmatory_all.json').read_text())
+          forbidden = {
+              'reference', 'frozen_model', 'improvement_vs_previous_settlement_day_pct',
+              'interval', 'abstention', 'daily_block_bootstrap', 'classification',
+          }
+          for horizon, result in payload['horizons'].items():
+              if result['status'] == 'CONFIRMATORY_REVEALED':
+                  continue
+              keys = set(result)
+              leaked = sorted(keys & forbidden)
+              if leaked:
+                  raise SystemExit(f'{horizon}: pre-gate performance keys leaked: {leaked}')
+              if result['status'] not in {'BLINDED_ACCUMULATION', 'BLOCKED_EVIDENCE'}:
+                  raise SystemExit(f'{horizon}: unexpected blinded status {result["status"]}')
+          print({h: r['status'] for h, r in payload['horizons'].items()})
+          PY
+
+      - name: Upload blinded checkpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: v22-blinded-confirmatory-${{ github.run_id }}
+          path: |
+            reports/v22_confirmatory/
+            data/processed/v22/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
