@@ -47,7 +47,7 @@ def session() -> requests.Session:
     adapter = HTTPAdapter(max_retries=retry, pool_connections=4, pool_maxsize=4)
     s = requests.Session()
     s.mount("https://", adapter)
-    s.headers.update({"User-Agent": "volcore-real-neso-archive/0.18"})
+    s.headers.update({"User-Agent": "gb-power-market-forecasting/0.20"})
     return s
 
 
@@ -118,98 +118,105 @@ def paged_resume(s: requests.Session, rsrc: Resource, out: Path, page_size: int,
         result = payload["result"]
         rows = result.get("records", [])
         if fields is None:
-            fields = [x["id"] for x in result.get("fields", [])]
-            if not fields and rows:
-                fields = list(rows[0])
+            fields = [f["id"] for f in result.get("fields", [])]
         if not rows:
-            raise RuntimeError(f"unexpected empty page at {offset} before total {total}")
-        with gzip.open(chunk, "wt", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
-            w.writeheader()
-            w.writerows(rows)
-        state["completed"][key] = {"rows": len(rows), "file": chunk.name}
-        meta_path.write_text(json.dumps(state, indent=2))
+            raise RuntimeError(f"empty CKAN page before total at offset {offset}/{total}")
+        with gzip.open(chunk, "wt", newline="", encoding="utf-8") as gz:
+            writer = csv.DictWriter(gz, fieldnames=fields, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(rows)
+        state["completed"][key] = {"rows": len(rows), "sha256": sha256(chunk)}
+        meta_path.write_text(json.dumps(state, indent=2), encoding="utf-8")
         offset += len(rows)
-        print(f"{rsrc.name}: checkpointed {offset:,}/{total:,}", flush=True)
-        if offset < total:
+        if sleep_s:
             time.sleep(sleep_s)
 
-    # Merge the compressed pages into one ordinary CSV for compatibility with
-    # the existing audit scripts. This is atomic and can resume page fetching.
-    part = out.with_suffix(out.suffix + ".part")
-    with part.open("w", newline="", encoding="utf-8") as dst:
-        first = True
-        for off in sorted(map(int, state["completed"])):
-            chunk = checkpoint / state["completed"][str(off)]["file"]
+    tmp = out.with_suffix(out.suffix + ".part")
+    tmp.unlink(missing_ok=True)
+    ordered = sorted(checkpoint.glob("part_*.csv.gz"))
+    if not ordered:
+        raise RuntimeError("no checkpoint chunks to assemble")
+    first = True
+    with tmp.open("wt", newline="", encoding="utf-8") as dst:
+        for chunk in ordered:
             with gzip.open(chunk, "rt", newline="", encoding="utf-8") as src:
-                header = src.readline()
-                if first:
-                    dst.write(header)
-                    first = False
-                shutil.copyfileobj(src, dst, length=4 * 1024 * 1024)
-    os.replace(part, out)
-    return {"method": "paged_checkpoint_resume", "url": url, "checkpoint_dir": str(checkpoint)}
+                for line_no, line in enumerate(src):
+                    if not first and line_no == 0:
+                        continue
+                    dst.write(line)
+            first = False
+    os.replace(tmp, out)
+    return {"method": "ckan_paged_resume", "url": url, "checkpoint": str(checkpoint), "page_size": page_size}
 
 
+def download_resource(s: requests.Session, rsrc: Resource, out: Path, *, mode: str, page_size: int, sleep_s: float, timeout: int) -> dict:
+    before = metadata_total(s, rsrc.resource_id, timeout)
+    method: dict
+    if mode in {"auto", "dump"}:
+        try:
+            method = download_dump(s, rsrc, out, timeout)
+        except Exception:
+            if mode == "dump":
+                raise
+            method = paged_resume(s, rsrc, out, page_size, sleep_s, timeout)
+    else:
+        method = paged_resume(s, rsrc, out, page_size, sleep_s, timeout)
+    rows = count_rows(out)
+    after = metadata_total(s, rsrc.resource_id, timeout)
+    if rsrc.live:
+        snapshot_ok = before <= rows <= after
+    else:
+        snapshot_ok = before == rows == after
+    if not snapshot_ok:
+        raise RuntimeError(f"row-count snapshot gate failed for {rsrc.name}: before={before}, rows={rows}, after={after}, live={rsrc.live}")
+    return {
+        "resource": rsrc.name,
+        "resource_id": rsrc.resource_id,
+        "live": rsrc.live,
+        "rows_before": before,
+        "rows_downloaded": rows,
+        "rows_after": after,
+        "sha256": sha256(out),
+        "bytes": out.stat().st_size,
+        "path": str(out),
+        **method,
+    }
 
-def snapshot_consistent(*, live: bool, before: int, downloaded: int, after: int) -> bool:
-    if live:
-        return after >= before and before <= downloaded <= after
-    return downloaded == before == after
 
 def main() -> None:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--mode", choices=("auto", "dump", "paged"), default="auto")
     ap.add_argument("--out-dir", default="data/external/neso_2026_bundle")
-    ap.add_argument("--manifest", default="reports/v18_real_archive/download_manifest.json")
-    ap.add_argument("--mode", choices=["auto", "dump", "paged"], default="auto")
+    ap.add_argument("--manifest", default="reports/v19_real_market/neso_download_manifest.json")
     ap.add_argument("--page-size", type=int, default=32000)
-    ap.add_argument("--sleep-seconds", type=float, default=1.05)
-    ap.add_argument("--timeout", type=int, default=300)
+    ap.add_argument("--sleep-seconds", type=float, default=0.05)
+    ap.add_argument("--timeout", type=int, default=180)
     args = ap.parse_args()
 
-    outdir = Path(args.out_dir)
-    outdir.mkdir(parents=True, exist_ok=True)
+    out_dir = Path(args.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = Path(args.manifest)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
     s = session()
-    manifest = {"version": "0.18.0", "resources": {}, "claim": "network snapshot; row totals are audited around each live download"}
-
+    entries = []
     for rsrc in RESOURCES:
-        out = outdir / rsrc.filename
-        before = metadata_total(s, rsrc.resource_id, args.timeout)
-        errors: list[str] = []
-        info = None
-        if args.mode in {"auto", "dump"}:
-            try:
-                info = download_dump(s, rsrc, out, args.timeout)
-            except Exception as e:
-                errors.append(f"dump:{type(e).__name__}:{e}")
-                if args.mode == "dump":
-                    raise
-        if info is None:
-            info = paged_resume(s, rsrc, out, args.page_size, args.sleep_seconds, args.timeout)
-        rows = count_rows(out)
-        after = metadata_total(s, rsrc.resource_id, args.timeout)
-        consistent = snapshot_consistent(live=rsrc.live, before=before, downloaded=rows, after=after)
-        if not consistent:
-            raise RuntimeError(f"snapshot row-count gate failed for {rsrc.name}: before={before}, downloaded={rows}, after={after}")
-        manifest["resources"][rsrc.name] = {
-            "resource_id": rsrc.resource_id,
-            "live": rsrc.live,
-            "path": str(out),
-            "total_before": before,
-            "downloaded_rows": rows,
-            "total_after": after,
-            "snapshot_consistent": consistent,
-            "bytes": out.stat().st_size,
-            "sha256": sha256(out),
-            "download": info,
-            "earlier_errors": errors,
-        }
-        print(f"DONE {rsrc.name}: {rows:,} rows")
+        out = out_dir / rsrc.filename
+        print(f"Downloading {rsrc.name} -> {out}", flush=True)
+        entry = download_resource(
+            s,
+            rsrc,
+            out,
+            mode=args.mode,
+            page_size=args.page_size,
+            sleep_s=args.sleep_seconds,
+            timeout=args.timeout,
+        )
+        entries.append(entry)
+        manifest_path.write_text(json.dumps({"version": "0.20.0", "source": "NESO", "resources": entries}, indent=2), encoding="utf-8")
+        print(f"{rsrc.name}: {entry['rows_downloaded']:,} rows, {entry['bytes'] / (1024*1024):.1f} MiB", flush=True)
 
-    mp = Path(args.manifest)
-    mp.parent.mkdir(parents=True, exist_ok=True)
-    mp.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    print(mp)
+    manifest_path.write_text(json.dumps({"version": "0.20.0", "source": "NESO", "resources": entries}, indent=2), encoding="utf-8")
+    print(manifest_path)
 
 
 if __name__ == "__main__":
