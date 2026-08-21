@@ -43,7 +43,10 @@ jobs:
           source_end = safe.date() + timedelta(days=1)
           print(f"AVAILABLE_END_UTC={safe.isoformat().replace('+00:00', 'Z')}")
           print(f"SOURCE_END_DATE={source_end.isoformat()}")
-          print("ELEXON_START_DATE=2026-07-10")
+          # The frozen feature set contains price_lag_7d_same_target. Download
+          # more than seven warm-up days before the 12 July scoring boundary so
+          # coverage is assessed on the scoring grid, not on feature warm-up.
+          print("ELEXON_START_DATE=2026-07-01")
           print("NESO_START_DATE=2026-07-12")
           PY
 
