@@ -23,6 +23,13 @@ def _rows(n=240):
     })
 
 
+def _rows_with_intervals(n=240):
+    x = _rows(n)
+    x["interval_lower_gbp_mwh"] = x["frozen_prediction_gbp_mwh"] - 20.0
+    x["interval_upper_gbp_mwh"] = x["frozen_prediction_gbp_mwh"] + 20.0
+    return x
+
+
 def test_correction_cannot_use_own_or_recent_unavailable_label():
     base = _rows()
     a = apply_causal_bias_correction(base)
@@ -46,15 +53,62 @@ def test_48h_mean_removes_persistent_level_bias_after_warmup():
     assert float(mature["adaptive_abs_error_gbp_mwh"].max()) < 1e-9
 
 
+def test_frozen_conformal_interval_is_translated_not_recalibrated():
+    x = apply_causal_bias_correction(_rows_with_intervals())
+    mature = x[x["bias_history_rows"] >= 24]
+    np.testing.assert_allclose(
+        mature["adaptive_interval_lower_gbp_mwh"],
+        mature["interval_lower_gbp_mwh"] + mature["bias_correction_gbp_mwh"],
+    )
+    np.testing.assert_allclose(
+        mature["adaptive_interval_upper_gbp_mwh"],
+        mature["interval_upper_gbp_mwh"] + mature["bias_correction_gbp_mwh"],
+    )
+    np.testing.assert_allclose(mature["adaptive_interval_width_gbp_mwh"], 40.0)
+    assert mature["adaptive_interval_covered"].all()
+
+
+def test_interval_endpoints_are_information_safe_at_decision_time():
+    base = _rows_with_intervals()
+    a = apply_causal_bias_correction(base)
+    changed = base.copy()
+    probe = 160
+    changed.loc[probe:, "realised_price_gbp_mwh"] = 5000.0
+    b = apply_causal_bias_correction(changed)
+    np.testing.assert_allclose(
+        a.loc[probe:probe + 4, "adaptive_interval_lower_gbp_mwh"],
+        b.loc[probe:probe + 4, "adaptive_interval_lower_gbp_mwh"],
+    )
+    np.testing.assert_allclose(
+        a.loc[probe:probe + 4, "adaptive_interval_upper_gbp_mwh"],
+        b.loc[probe:probe + 4, "adaptive_interval_upper_gbp_mwh"],
+    )
+
+
+def test_partial_interval_contract_fails_closed():
+    x = _rows(50)
+    x["interval_lower_gbp_mwh"] = x["frozen_prediction_gbp_mwh"] - 20.0
+    try:
+        apply_causal_bias_correction(x)
+    except ValueError as exc:
+        assert "both frozen interval endpoints" in str(exc)
+    else:
+        raise AssertionError("expected partial interval contract to fail")
+
+
 def test_candidate_segment_is_versioned_and_summarised():
-    x = apply_causal_bias_correction(_rows(400))
+    x = apply_causal_bias_correction(_rows_with_intervals(400))
     result = summarise_candidate(x, start_utc=V25_FORWARD_START_UTC)
     assert result["status"] in {"NO_FORWARD_ROWS", "FORWARD_MONITORING"}
+    if result["status"] == "FORWARD_MONITORING":
+        assert "adaptive_interval_coverage" in result
+        assert result["adaptive_interval_mean_width_gbp_mwh"] == 40.0
     spec = candidate_spec()
     assert spec["version"] == "0.25.0"
     assert spec["candidate"] == "2H_FROZEN_PLUS_CAUSAL_48H_RESIDUAL_MEAN"
     assert spec["rule"]["lookback_hours"] == 48
     assert spec["rule"]["horizon_minutes"] == 120
+    assert "translated" in spec["uncertainty_contract"]
 
 
 def test_wrong_decision_clock_fails_closed():
