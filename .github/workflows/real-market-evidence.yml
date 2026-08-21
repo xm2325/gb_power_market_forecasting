@@ -14,10 +14,6 @@ on:
         required: true
         default: false
         type: boolean
-  pull_request:
-    branches: [main]
-    paths:
-      - '.github/REAL_DATA_RUN'
 
 permissions:
   contents: read
