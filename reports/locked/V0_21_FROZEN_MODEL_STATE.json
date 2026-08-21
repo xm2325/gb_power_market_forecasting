@@ -12,21 +12,81 @@
       "source_evidence_id_sha256": "7c5f78b98c8ed877ab4c5cefa8a40b3068abb74cb2062ecf677f319d74a14661",
       "horizon_minutes": 30,
       "selected_family": "PRICE_HISTORY_ONLY",
-      "features": ["price_lag_last_completed", "price_lag_2_completed", "price_lag_1d_same_target", "price_lag_7d_same_target", "price_roll_3h_mean", "price_roll_24h_median", "hour_sin", "hour_cos", "dow_sin", "dow_cos"],
+      "features": [
+        "price_lag_last_completed",
+        "price_lag_2_completed",
+        "price_lag_1d_same_target",
+        "price_lag_7d_same_target",
+        "price_roll_3h_mean",
+        "price_roll_24h_median",
+        "hour_sin",
+        "hour_cos",
+        "dow_sin",
+        "dow_cos"
+      ],
       "training_row_contract": "same all-family complete-row intersection used by v0.20 selection",
       "alpha": 10.0,
-      "mean": [91.34721123627216, 91.33658664892238, 91.52345050736685, 91.78371724445915, 91.31532779069798, 91.53251028373452, 0.0003253707239694042, -0.00020331450038792658, -0.010378162231429513, -0.008627314361460007],
-      "scale": [33.17624008462404, 33.18675609998559, 32.850842003629324, 33.05873338805126, 31.938833538926502, 22.923335183024715, 0.7074583941058465, 0.7067548891987112, 0.7069336493502381, 0.707151100269215],
-      "coef": [91.36990501680826, 46.08059483499666, -4.752567590828114, 0.20820256251134406, 0.20081348235412902, -12.388498328495059, 1.6731703105292643, -0.7673866202786519, -0.1605053751752656, 0.28173440702390046, -0.02790335650309844],
+      "mean": [
+        91.34721123627216,
+        91.33658664892238,
+        91.52345050736685,
+        91.78371724445915,
+        91.31532779069798,
+        91.53251028373452,
+        0.0003253707239694042,
+        -0.00020331450038792658,
+        -0.010378162231429513,
+        -0.008627314361460007
+      ],
+      "scale": [
+        33.17624008462404,
+        33.18675609998559,
+        32.850842003629324,
+        33.05873338805126,
+        31.938833538926502,
+        22.923335183024715,
+        0.7074583941058465,
+        0.7067548891987112,
+        0.7069336493502381,
+        0.707151100269215
+      ],
+      "coef": [
+        91.36990501680826,
+        46.08059483499666,
+        -4.752567590828114,
+        0.20820256251134406,
+        0.20081348235412902,
+        -12.388498328495059,
+        1.6731703105292643,
+        -0.7673866202786519,
+        -0.1605053751752656,
+        0.28173440702390046,
+        -0.02790335650309844
+      ],
       "conformal_absolute_residual_quantile_gbp_mwh": 18.39479322699023,
       "point_fit_rows": 7573,
       "calibration_rows": 1319,
       "fit_boundary": "purged train + selection only; locked final labels excluded",
       "calibration_boundary": "purged calibration only; locked final labels excluded",
       "purge": {
-        "train": {"raw_rows": 6092, "kept_rows": 6091, "purged_rows": 1, "next_first_decision_time_utc": "2026-05-14T23:30:00+00:00"},
-        "selection": {"raw_rows": 1483, "kept_rows": 1482, "purged_rows": 1, "next_first_decision_time_utc": "2026-06-14T23:30:00+00:00"},
-        "calibration": {"raw_rows": 1320, "kept_rows": 1319, "purged_rows": 1, "next_first_decision_time_utc": "2026-07-12T11:30:00+00:00"}
+        "train": {
+          "raw_rows": 6092,
+          "kept_rows": 6091,
+          "purged_rows": 1,
+          "next_first_decision_time_utc": "2026-05-14T23:30:00+00:00"
+        },
+        "selection": {
+          "raw_rows": 1483,
+          "kept_rows": 1482,
+          "purged_rows": 1,
+          "next_first_decision_time_utc": "2026-06-14T23:30:00+00:00"
+        },
+        "calibration": {
+          "raw_rows": 1320,
+          "kept_rows": 1319,
+          "purged_rows": 1,
+          "next_first_decision_time_utc": "2026-07-12T11:30:00+00:00"
+        }
       }
     },
     "2h": {
@@ -34,21 +94,101 @@
       "source_evidence_id_sha256": "7c5f78b98c8ed877ab4c5cefa8a40b3068abb74cb2062ecf677f319d74a14661",
       "horizon_minutes": 120,
       "selected_family": "PRICE_PLUS_NESO_LEVELS",
-      "features": ["price_lag_last_completed", "price_lag_2_completed", "price_lag_1d_same_target", "price_lag_7d_same_target", "price_roll_3h_mean", "price_roll_24h_median", "hour_sin", "hour_cos", "dow_sin", "dow_cos", "neso_embedded_wind_forecast_mw", "neso_embedded_solar_forecast_mw", "neso_embedded_wind_capacity_mw", "neso_embedded_solar_capacity_mw", "neso_forecast_age_minutes"],
+      "features": [
+        "price_lag_last_completed",
+        "price_lag_2_completed",
+        "price_lag_1d_same_target",
+        "price_lag_7d_same_target",
+        "price_roll_3h_mean",
+        "price_roll_24h_median",
+        "hour_sin",
+        "hour_cos",
+        "dow_sin",
+        "dow_cos",
+        "neso_embedded_wind_forecast_mw",
+        "neso_embedded_solar_forecast_mw",
+        "neso_embedded_wind_capacity_mw",
+        "neso_embedded_solar_capacity_mw",
+        "neso_forecast_age_minutes"
+      ],
       "training_row_contract": "same all-family complete-row intersection used by v0.20 selection",
       "alpha": 1.0,
-      "mean": [91.31534514705038, 91.29597973192611, 91.5354535553, 91.77313599845176, 91.28195672822436, 91.55823048370198, 0.0007702249132538874, -0.0007883391360906559, -0.010069062947573313, -0.008219965369598044, 2227.5079323109467, 2176.9820200951876, 6603.276441036489, 21850.732020095187, 34.527425965097834],
-      "scale": [33.177681723127364, 33.186704037837984, 32.85040849432618, 33.076161147870074, 31.94192059215434, 22.891232773461386, 0.7076545633817833, 0.706557714698472, 0.7071388205911158, 0.7069552564014827, 1370.8878780207322, 3268.214325922221, 22.52409533534978, 325.4806545789176, 34.71163727918038],
-      "coef": [91.39932981124922, 40.009413446110955, -12.08344198604074, 1.3867281940678178, 1.4671769084971877, -11.037698905322232, 1.768774467647141, -4.190012714914717, -7.682552388293762, 2.1551323775225204, -0.8006916874078387, -9.000356923056138, -11.274096255127123, 0.8630780781511279, 1.7227286461093503, -0.1738881779525564],
+      "mean": [
+        91.31534514705038,
+        91.29597973192611,
+        91.5354535553,
+        91.77313599845176,
+        91.28195672822436,
+        91.55823048370198,
+        0.0007702249132538874,
+        -0.0007883391360906559,
+        -0.010069062947573313,
+        -0.008219965369598044,
+        2227.5079323109467,
+        2176.9820200951876,
+        6603.276441036489,
+        21850.732020095187,
+        34.527425965097834
+      ],
+      "scale": [
+        33.177681723127364,
+        33.186704037837984,
+        32.85040849432618,
+        33.076161147870074,
+        31.94192059215434,
+        22.891232773461386,
+        0.7076545633817833,
+        0.706557714698472,
+        0.7071388205911158,
+        0.7069552564014827,
+        1370.8878780207322,
+        3268.214325922221,
+        22.52409533534978,
+        325.4806545789176,
+        34.71163727918038
+      ],
+      "coef": [
+        91.39932981124922,
+        40.009413446110955,
+        -12.08344198604074,
+        1.3867281940678178,
+        1.4671769084971877,
+        -11.037698905322232,
+        1.768774467647141,
+        -4.190012714914717,
+        -7.682552388293762,
+        2.1551323775225204,
+        -0.8006916874078387,
+        -9.000356923056138,
+        -11.274096255127123,
+        0.8630780781511279,
+        1.7227286461093503,
+        -0.1738881779525564
+      ],
       "conformal_absolute_residual_quantile_gbp_mwh": 34.72370292926216,
       "point_fit_rows": 7564,
       "calibration_rows": 1316,
       "fit_boundary": "purged train + selection only; locked final labels excluded",
       "calibration_boundary": "purged calibration only; locked final labels excluded",
       "purge": {
-        "train": {"raw_rows": 6092, "kept_rows": 6088, "purged_rows": 4, "next_first_decision_time_utc": "2026-05-14T22:00:00+00:00"},
-        "selection": {"raw_rows": 1480, "kept_rows": 1476, "purged_rows": 4, "next_first_decision_time_utc": "2026-06-14T22:00:00+00:00"},
-        "calibration": {"raw_rows": 1320, "kept_rows": 1316, "purged_rows": 4, "next_first_decision_time_utc": "2026-07-12T10:00:00+00:00"}
+        "train": {
+          "raw_rows": 6092,
+          "kept_rows": 6088,
+          "purged_rows": 4,
+          "next_first_decision_time_utc": "2026-05-14T22:00:00+00:00"
+        },
+        "selection": {
+          "raw_rows": 1480,
+          "kept_rows": 1476,
+          "purged_rows": 4,
+          "next_first_decision_time_utc": "2026-06-14T22:00:00+00:00"
+        },
+        "calibration": {
+          "raw_rows": 1320,
+          "kept_rows": 1316,
+          "purged_rows": 4,
+          "next_first_decision_time_utc": "2026-07-12T10:00:00+00:00"
+        }
       }
     },
     "6h": {
@@ -56,21 +196,101 @@
       "source_evidence_id_sha256": "7c5f78b98c8ed877ab4c5cefa8a40b3068abb74cb2062ecf677f319d74a14661",
       "horizon_minutes": 360,
       "selected_family": "PRICE_PLUS_NESO_LEVELS",
-      "features": ["price_lag_last_completed", "price_lag_2_completed", "price_lag_1d_same_target", "price_lag_7d_same_target", "price_roll_3h_mean", "price_roll_24h_median", "hour_sin", "hour_cos", "dow_sin", "dow_cos", "neso_embedded_wind_forecast_mw", "neso_embedded_solar_forecast_mw", "neso_embedded_wind_capacity_mw", "neso_embedded_solar_capacity_mw", "neso_forecast_age_minutes"],
+      "features": [
+        "price_lag_last_completed",
+        "price_lag_2_completed",
+        "price_lag_1d_same_target",
+        "price_lag_7d_same_target",
+        "price_roll_3h_mean",
+        "price_roll_24h_median",
+        "hour_sin",
+        "hour_cos",
+        "dow_sin",
+        "dow_cos",
+        "neso_embedded_wind_forecast_mw",
+        "neso_embedded_solar_forecast_mw",
+        "neso_embedded_wind_capacity_mw",
+        "neso_embedded_solar_capacity_mw",
+        "neso_forecast_age_minutes"
+      ],
       "training_row_contract": "same all-family complete-row intersection used by v0.20 selection",
       "alpha": 100.0,
-      "mean": [91.35193775759804, 91.35616309290012, 91.45866189552906, 91.65455048969352, 91.36297462887025, 91.65377657542727, 0.003291704560562055, -0.0023256896571967104, -0.009271583590941677, -0.006995787080115488, 2253.6579575596816, 2211.77824933687, 6603.668832891247, 21849.038594164456, 34.54379310344828],
-      "scale": [33.17477242316393, 33.17814739847099, 32.83944174731891, 33.051368487229176, 31.89786290770136, 22.71126987961632, 0.7072806111485304, 0.7069214192129601, 0.7075342265189501, 0.7065836220894712, 1375.8706683903624, 3297.6768128035187, 20.860398928722418, 322.41110381510686, 34.74315053569714],
-      "coef": [91.3734191899588, 9.967010777659482, -5.599511596939256, 6.228869003841057, 3.479822080609131, 1.3758411930322243, -2.160801729328655, -6.045783994639815, -8.385032974686892, 3.729813197398616, -1.4198141881702455, -15.85307962619711, -13.780251686187603, 2.4383061398571395, 1.3133936737707081, -0.7571891921821222],
+      "mean": [
+        91.35193775759804,
+        91.35616309290012,
+        91.45866189552906,
+        91.65455048969352,
+        91.36297462887025,
+        91.65377657542727,
+        0.003291704560562055,
+        -0.0023256896571967104,
+        -0.009271583590941677,
+        -0.006995787080115488,
+        2253.6579575596816,
+        2211.77824933687,
+        6603.668832891247,
+        21849.038594164456,
+        34.54379310344828
+      ],
+      "scale": [
+        33.17477242316393,
+        33.17814739847099,
+        32.83944174731891,
+        33.051368487229176,
+        31.89786290770136,
+        22.71126987961632,
+        0.7072806111485304,
+        0.7069214192129601,
+        0.7075342265189501,
+        0.7065836220894712,
+        1375.8706683903624,
+        3297.6768128035187,
+        20.860398928722418,
+        322.41110381510686,
+        34.74315053569714
+      ],
+      "coef": [
+        91.3734191899588,
+        9.967010777659482,
+        -5.599511596939256,
+        6.228869003841057,
+        3.479822080609131,
+        1.3758411930322243,
+        -2.160801729328655,
+        -6.045783994639815,
+        -8.385032974686892,
+        3.729813197398616,
+        -1.4198141881702455,
+        -15.85307962619711,
+        -13.780251686187603,
+        2.4383061398571395,
+        1.3133936737707081,
+        -0.7571891921821222
+      ],
       "conformal_absolute_residual_quantile_gbp_mwh": 54.59276356546282,
       "point_fit_rows": 7540,
       "calibration_rows": 1308,
       "fit_boundary": "purged train + selection only; locked final labels excluded",
       "calibration_boundary": "purged calibration only; locked final labels excluded",
       "purge": {
-        "train": {"raw_rows": 6092, "kept_rows": 6080, "purged_rows": 12, "next_first_decision_time_utc": "2026-05-14T18:00:00+00:00"},
-        "selection": {"raw_rows": 1472, "kept_rows": 1460, "purged_rows": 12, "next_first_decision_time_utc": "2026-06-14T18:00:00+00:00"},
-        "calibration": {"raw_rows": 1320, "kept_rows": 1308, "purged_rows": 12, "next_first_decision_time_utc": "2026-07-12T06:00:00+00:00"}
+        "train": {
+          "raw_rows": 6092,
+          "kept_rows": 6080,
+          "purged_rows": 12,
+          "next_first_decision_time_utc": "2026-05-14T18:00:00+00:00"
+        },
+        "selection": {
+          "raw_rows": 1472,
+          "kept_rows": 1460,
+          "purged_rows": 12,
+          "next_first_decision_time_utc": "2026-06-14T18:00:00+00:00"
+        },
+        "calibration": {
+          "raw_rows": 1320,
+          "kept_rows": 1308,
+          "purged_rows": 12,
+          "next_first_decision_time_utc": "2026-07-12T06:00:00+00:00"
+        }
       }
     },
     "12h": {
@@ -78,29 +298,129 @@
       "source_evidence_id_sha256": "7c5f78b98c8ed877ab4c5cefa8a40b3068abb74cb2062ecf677f319d74a14661",
       "horizon_minutes": 720,
       "selected_family": "PRICE_PLUS_NESO_LEVELS",
-      "features": ["price_lag_last_completed", "price_lag_2_completed", "price_lag_1d_same_target", "price_lag_7d_same_target", "price_roll_3h_mean", "price_roll_24h_median", "hour_sin", "hour_cos", "dow_sin", "dow_cos", "neso_embedded_wind_forecast_mw", "neso_embedded_solar_forecast_mw", "neso_embedded_wind_capacity_mw", "neso_embedded_solar_capacity_mw", "neso_forecast_age_minutes"],
+      "features": [
+        "price_lag_last_completed",
+        "price_lag_2_completed",
+        "price_lag_1d_same_target",
+        "price_lag_7d_same_target",
+        "price_roll_3h_mean",
+        "price_roll_24h_median",
+        "hour_sin",
+        "hour_cos",
+        "dow_sin",
+        "dow_cos",
+        "neso_embedded_wind_forecast_mw",
+        "neso_embedded_solar_forecast_mw",
+        "neso_embedded_wind_capacity_mw",
+        "neso_embedded_solar_capacity_mw",
+        "neso_forecast_age_minutes"
+      ],
       "training_row_contract": "same all-family complete-row intersection used by v0.20 selection",
       "alpha": 100.0,
-      "mean": [91.59359284278906, 91.58193772551829, 91.56002807733064, 91.68599822658436, 91.56437109438819, 91.83203363255885, 0.005797634354264059, -0.002173634747317646, -0.007633195288872368, -0.0056873063673233085, 2259.3899253731342, 2236.194029850746, 6604.262126865671, 21846.515858208953, 34.5445828891258],
-      "scale": [32.88059590426063, 32.9007054441518, 32.64227424658986, 32.921301351189314, 31.652881251865622, 22.228041587389498, 0.7073469627126202, 0.7068393997854892, 0.7077042908267942, 0.7064446373363666, 1375.7259199831292, 3324.2530621641367, 18.039895214691224, 317.6203757738571, 34.78590983117538],
-      "coef": [91.39784657413226, 3.672299216010177, 1.0880984234119528, 6.832350618830236, 2.5489873273145593, 0.6926043145070725, -4.165013235029163, -6.122558381862525, -6.70424515494825, 4.043128189333232, -1.6276417164013757, -16.419846076725573, -13.233309479096338, 3.67285527190361, 1.1164000752368222, -0.5298331382702725],
+      "mean": [
+        91.59359284278906,
+        91.58193772551829,
+        91.56002807733064,
+        91.68599822658436,
+        91.56437109438819,
+        91.83203363255885,
+        0.005797634354264059,
+        -0.002173634747317646,
+        -0.007633195288872368,
+        -0.0056873063673233085,
+        2259.3899253731342,
+        2236.194029850746,
+        6604.262126865671,
+        21846.515858208953,
+        34.5445828891258
+      ],
+      "scale": [
+        32.88059590426063,
+        32.9007054441518,
+        32.64227424658986,
+        32.921301351189314,
+        31.652881251865622,
+        22.228041587389498,
+        0.7073469627126202,
+        0.7068393997854892,
+        0.7077042908267942,
+        0.7064446373363666,
+        1375.7259199831292,
+        3324.2530621641367,
+        18.039895214691224,
+        317.6203757738571,
+        34.78590983117538
+      ],
+      "coef": [
+        91.39784657413226,
+        3.672299216010177,
+        1.0880984234119528,
+        6.832350618830236,
+        2.5489873273145593,
+        0.6926043145070725,
+        -4.165013235029163,
+        -6.122558381862525,
+        -6.70424515494825,
+        4.043128189333232,
+        -1.6276417164013757,
+        -16.419846076725573,
+        -13.233309479096338,
+        3.67285527190361,
+        1.1164000752368222,
+        -0.5298331382702725
+      ],
       "conformal_absolute_residual_quantile_gbp_mwh": 68.09639079761932,
       "point_fit_rows": 7504,
       "calibration_rows": 1296,
       "fit_boundary": "purged train + selection only; locked final labels excluded",
       "calibration_boundary": "purged calibration only; locked final labels excluded",
       "purge": {
-        "train": {"raw_rows": 6092, "kept_rows": 6068, "purged_rows": 24, "next_first_decision_time_utc": "2026-05-14T12:00:00+00:00"},
-        "selection": {"raw_rows": 1460, "kept_rows": 1436, "purged_rows": 24, "next_first_decision_time_utc": "2026-06-14T12:00:00+00:00"},
-        "calibration": {"raw_rows": 1320, "kept_rows": 1296, "purged_rows": 24, "next_first_decision_time_utc": "2026-07-12T00:00:00+00:00"}
+        "train": {
+          "raw_rows": 6092,
+          "kept_rows": 6068,
+          "purged_rows": 24,
+          "next_first_decision_time_utc": "2026-05-14T12:00:00+00:00"
+        },
+        "selection": {
+          "raw_rows": 1460,
+          "kept_rows": 1436,
+          "purged_rows": 24,
+          "next_first_decision_time_utc": "2026-06-14T12:00:00+00:00"
+        },
+        "calibration": {
+          "raw_rows": 1320,
+          "kept_rows": 1296,
+          "purged_rows": 24,
+          "next_first_decision_time_utc": "2026-07-12T00:00:00+00:00"
+        }
       }
     }
   },
   "locked_prediction_replay_checks": {
-    "30m": {"locked_prediction_rows": 1623, "maximum_absolute_prediction_difference_gbp_mwh": 1.9610979506978765e-12, "prediction_tolerance_gbp_mwh": 1e-08, "status": "PASS"},
-    "2h": {"locked_prediction_rows": 1623, "maximum_absolute_prediction_difference_gbp_mwh": 1.5347723092418164e-12, "prediction_tolerance_gbp_mwh": 1e-08, "status": "PASS"},
-    "6h": {"locked_prediction_rows": 1623, "maximum_absolute_prediction_difference_gbp_mwh": 9.237055564881302e-13, "prediction_tolerance_gbp_mwh": 1e-08, "status": "PASS"},
-    "12h": {"locked_prediction_rows": 1623, "maximum_absolute_prediction_difference_gbp_mwh": 2.1174173525650986e-12, "prediction_tolerance_gbp_mwh": 1e-08, "status": "PASS"}
+    "30m": {
+      "locked_prediction_rows": 1623,
+      "maximum_absolute_prediction_difference_gbp_mwh": 1.9610979506978765e-12,
+      "prediction_tolerance_gbp_mwh": 1e-08,
+      "status": "PASS"
+    },
+    "2h": {
+      "locked_prediction_rows": 1623,
+      "maximum_absolute_prediction_difference_gbp_mwh": 1.5347723092418164e-12,
+      "prediction_tolerance_gbp_mwh": 1e-08,
+      "status": "PASS"
+    },
+    "6h": {
+      "locked_prediction_rows": 1623,
+      "maximum_absolute_prediction_difference_gbp_mwh": 9.237055564881302e-13,
+      "prediction_tolerance_gbp_mwh": 1e-08,
+      "status": "PASS"
+    },
+    "12h": {
+      "locked_prediction_rows": 1623,
+      "maximum_absolute_prediction_difference_gbp_mwh": 2.1174173525650986e-12,
+      "prediction_tolerance_gbp_mwh": 1e-08,
+      "status": "PASS"
+    }
   },
   "boundary": "Coefficients/scalers are reconstructed from pre-final development rows only and exactly reproduce the immutable v0.20 final predictions. No prospective outcomes are used."
 }
