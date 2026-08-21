@@ -1,0 +1,57 @@
+name: export-frozen-model-v21
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/FROZEN_MODEL_EXPORT_RUN'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+      - name: Tests before export
+        run: pytest -q
+      - name: Download locked successful evidence artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: gb-power-market-real-evidence-32469293682
+          path: locked-artifact
+          github-token: ${{ github.token }}
+          repository: xm2325/gb_power_market_forecasting
+          run-id: 32469293682
+      - name: Export exact frozen model states
+        run: |
+          python scripts/export_v21_frozen_models.py \
+            --artifact-root locked-artifact \
+            --spec reports/locked/V0_21_FROZEN_REPLAY_SPEC.json \
+            --out export/V0_21_FROZEN_MODEL_STATE.json
+      - name: Show export identity
+        run: |
+          cat export/V0_21_FROZEN_MODEL_STATE.json.sha256
+          python - <<'PY'
+          import json
+          p = json.load(open('export/V0_21_FROZEN_MODEL_STATE.json'))
+          for h, c in p['locked_prediction_replay_checks'].items():
+              print(h, c)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v21-frozen-model-state-${{ github.run_id }}
+          path: export/
+          if-no-files-found: error
+          retention-days: 30
