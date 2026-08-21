@@ -1,3 +1,0 @@
-2026-08-21 rerun after explicit DuckDB timezone dependency
-
-Purpose: trigger the permanent real-market-evidence workflow from PR #1 after declaring pytz as a live dependency. The previous corrected-clock run completed downloads and materialisation but both DuckDB benchmark scripts stopped because pytz was absent from the clean runner environment.
