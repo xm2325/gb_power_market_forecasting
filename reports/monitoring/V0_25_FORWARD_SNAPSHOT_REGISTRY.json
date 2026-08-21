@@ -1,0 +1,37 @@
+{
+  "schema": "gb-power-market-v25-forward-snapshot-registry-v1",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_48H_RESIDUAL_MEAN",
+  "forward_start_utc": "2026-08-21T11:30:00Z",
+  "append_only": true,
+  "snapshots": [
+    {
+      "sequence": 1,
+      "end_exclusive_utc": "2026-08-21T14:30:00Z",
+      "rows": 6,
+      "new_rows": 6,
+      "artifact_id": 9453438684,
+      "artifact_sha256": "64d30a6e18a2c3fa2243fa28ceb800afec1abc66f7dc0816515d96ff9faf885c",
+      "monitor_path": "reports/monitoring/V0_25_MONITOR_STATE_2026-08-21_1430Z.json",
+      "monitor_sha256": "611bfd2298bcfee603f1e4b7837665c9dfd4733ffab03b3a08ab3134108aa14f",
+      "ledger_path": "reports/monitoring/V0_25_FORWARD_LEDGER_FIRST6.csv",
+      "ledger_sha256": "e0fceb2d576a9f7e4e1e29bdaec4578af85d9a725ff05420f2e572d45e3d9657",
+      "ledger_chain_tip_sha256": "b27a99b21466c8a4cbf58d29ad9c980a174b278cee1a741582a978af747789f2",
+      "maturity_stage": "EARLY_ONLY"
+    },
+    {
+      "sequence": 2,
+      "end_exclusive_utc": "2026-08-21T16:00:00Z",
+      "rows": 9,
+      "new_rows": 3,
+      "artifact_id": 9456405888,
+      "artifact_sha256": "846545d52b4ff0c290a63f2c81059396f79d7c6c5e7edb9dbcef4815aa6ddb0d",
+      "monitor_path": "reports/monitoring/V0_25_MONITOR_STATE_2026-08-21_1600Z.json",
+      "monitor_sha256": "2e4932c9c6d8e8aa474c85ee983e1563b2f73254ef89ed0792084256194c0da0",
+      "ledger_path": "reports/monitoring/V0_25_FORWARD_LEDGER_2026-08-21_1600Z.csv",
+      "ledger_sha256": "2394a0932d7a048abe2ba4181798212a4cbe69ec560ff3837c0af1cf32a5617a",
+      "ledger_chain_tip_sha256": "f857a1f7f069961624cc3cb5d1f4e544e942d06658882ed56f519b09429257c6",
+      "maturity_stage": "EARLY_ONLY"
+    }
+  ],
+  "contract": "Snapshot sequence, row count and end time must increase monotonically. Every later ledger must reproduce every row of the preceding ledger before appending new targets. Registry entries are historical evidence and are never rewritten to make later performance look better."
+}
