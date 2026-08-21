@@ -1,3 +1,7 @@
+import hashlib
+import json
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -99,3 +103,17 @@ def test_duplicate_targets_fail_closed():
         assert "duplicate" in str(exc)
     else:
         raise AssertionError("expected duplicate-target validation to fail")
+
+
+def test_first_monitor_snapshot_is_locked_and_still_early_only():
+    path = Path("reports/monitoring/V0_25_MONITOR_STATE_2026-08-21_1430Z.json")
+    sidecar = Path(str(path) + ".sha256")
+    expected = sidecar.read_text(encoding="utf-8").split()[0]
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == expected
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["cumulative"]["rows"] == 6
+    assert payload["maturity_stage"] == "EARLY_ONLY"
+    assert payload["alert_status"] == "INSUFFICIENT_SAMPLE_FOR_ALERTS"
+    assert payload["alerts"] == []
+    assert payload["lineage"]["source_workflow_run_id"] == 32500771812
