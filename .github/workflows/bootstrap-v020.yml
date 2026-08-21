@@ -7,6 +7,10 @@ on:
     paths:
       - 'bootstrap/**'
       - '.github/workflows/bootstrap-v020.yml'
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
