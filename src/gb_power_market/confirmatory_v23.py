@@ -85,7 +85,11 @@ def _find_forbidden_keys(value: Any, path: tuple[str, ...] = ()) -> list[str]:
         for key, child in value.items():
             key_str = str(key)
             key_text = key_str.lower()
-            is_allowed_protocol_resampling = path == ("protocol",) and key_text in _ALLOWED_PROTOCOL_RESAMPLING_KEYS
+            is_allowed_protocol_resampling = (
+                bool(path)
+                and path[-1] == "protocol"
+                and key_text in _ALLOWED_PROTOCOL_RESAMPLING_KEYS
+            )
             if not is_allowed_protocol_resampling:
                 if "bootstrap" in key_text or any(
                     fragment in key_text for fragment in _FORBIDDEN_PRE_REVEAL_KEY_FRAGMENTS
