@@ -14,6 +14,10 @@ on:
         required: true
         default: false
         type: boolean
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/REAL_DATA_RUN'
 
 permissions:
   contents: read
@@ -46,7 +50,7 @@ jobs:
         continue-on-error: true
         run: |
           python scripts/download_neso_v18_bundle.py \
-            --mode "${{ inputs.neso_download_mode }}" \
+            --mode "${{ inputs.neso_download_mode || 'auto' }}" \
             --out-dir data/external/neso_2026_bundle \
             --manifest reports/v19_real_market/neso_download_manifest.json
 
