@@ -2,10 +2,6 @@ name: adaptive-2h-v25
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths:
-      - '.github/V25_FORWARD_APPEND'
 
 permissions:
   contents: read
@@ -91,7 +87,8 @@ jobs:
         run: |
           python scripts/run_v25_2h_adaptive_candidate.py \
             --v24-rows reports/v24_for_v25/forward_rows_2h.csv \
-            --locked-ledger reports/monitoring/V0_25_FORWARD_LEDGER_FIRST6.csv \
+            --snapshot-registry reports/monitoring/V0_25_FORWARD_SNAPSHOT_REGISTRY.json \
+            --genesis-ledger reports/monitoring/V0_25_FORWARD_LEDGER_FIRST6.csv \
             --out-dir reports/v25_2h
 
       - name: Enforce candidate, ledger, monitoring and promotion contracts
@@ -116,15 +113,21 @@ jobs:
           if promotion.get('automatic_promotion') is True:
               raise SystemExit('v0.25 must never auto-promote')
           if ledger['status'] != 'LOCKED_PREFIX_REPRODUCED':
-              raise SystemExit('v0.25 immutable forward prefix was not reproduced')
-          if ledger['locked_rows'] != 6:
-              raise SystemExit('v0.25 immutable forward prefix row count changed')
-          if ledger['locked_chain_tip_sha256'] != 'b27a99b21466c8a4cbf58d29ad9c980a174b278cee1a741582a978af747789f2':
-              raise SystemExit('v0.25 immutable forward chain tip changed')
+              raise SystemExit('latest immutable v0.25 prefix was not reproduced')
+          genesis = ledger['genesis_anchor']
+          if genesis['locked_rows'] != 6:
+              raise SystemExit('v0.25 genesis row count changed')
+          if genesis['locked_chain_tip_sha256'] != 'b27a99b21466c8a4cbf58d29ad9c980a174b278cee1a741582a978af747789f2':
+              raise SystemExit('v0.25 genesis chain tip changed')
           print({
               'candidate': spec['candidate'],
               'forward': summary['new_forward_segment'],
-              'ledger': ledger,
+              'latest_locked_prefix': {
+                  'sequence': ledger['locked_registry_sequence'],
+                  'rows': ledger['locked_rows'],
+                  'chain_tip': ledger['locked_chain_tip_sha256'],
+                  'new_rows': ledger['new_rows_after_locked_prefix'],
+              },
               'maturity_stage': monitor['maturity_stage'],
               'alert_status': monitor['alert_status'],
               'alerts': monitor['alerts'],
