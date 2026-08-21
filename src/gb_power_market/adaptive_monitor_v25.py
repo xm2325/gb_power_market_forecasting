@@ -48,7 +48,7 @@ def _metrics(rows: pd.DataFrame) -> dict:
         return 100.0 * (base - candidate) / base if base else None
 
     target = pd.to_datetime(rows["target_start_utc"], utc=True, errors="raise")
-    return {
+    result = {
         "rows": int(len(rows)),
         "start_utc": target.min().isoformat(),
         "end_exclusive_utc": (target.max() + pd.Timedelta(minutes=30)).isoformat(),
@@ -70,6 +70,28 @@ def _metrics(rows: pd.DataFrame) -> dict:
         "correction_min_gbp_mwh": float(correction.min()),
         "correction_max_gbp_mwh": float(correction.max()),
     }
+
+    if {
+        "adaptive_interval_covered",
+        "adaptive_interval_width_gbp_mwh",
+    }.issubset(rows.columns):
+        adaptive_coverage = float(rows["adaptive_interval_covered"].astype(float).mean())
+        result["adaptive_interval_coverage"] = adaptive_coverage
+        result["adaptive_interval_mean_width_gbp_mwh"] = float(
+            rows["adaptive_interval_width_gbp_mwh"].astype(float).mean()
+        )
+        if "interval_covered" in rows.columns:
+            frozen_coverage = float(rows["interval_covered"].astype(float).mean())
+            result["frozen_interval_coverage"] = frozen_coverage
+            result["adaptive_minus_frozen_interval_coverage"] = adaptive_coverage - frozen_coverage
+        if {"interval_lower_gbp_mwh", "interval_upper_gbp_mwh"}.issubset(rows.columns):
+            frozen_width = (
+                rows["interval_upper_gbp_mwh"].astype(float)
+                - rows["interval_lower_gbp_mwh"].astype(float)
+            )
+            result["frozen_interval_mean_width_gbp_mwh"] = float(frozen_width.mean())
+
+    return result
 
 
 def build_adaptive_monitor_state(
