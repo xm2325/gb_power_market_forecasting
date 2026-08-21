@@ -19,6 +19,7 @@ from gb_power_market.forward_ledger_v25 import (
     load_locked_ledger,
     verify_locked_prefix,
 )
+from gb_power_market.promotion_gate_v25 import assess_promotion_readiness
 
 
 FIRST_V25_FORWARD_ARTIFACT_SHA256 = "64d30a6e18a2c3fa2243fa28ceb800afec1abc66f7dc0816515d96ff9faf885c"
@@ -114,6 +115,9 @@ def main() -> None:
         previous_snapshot_sha256=args.previous_snapshot_sha256 or None,
     )
     monitor["ledger_integrity"] = ledger_check
+    promotion = assess_promotion_readiness(monitor)
+    monitor["promotion_readiness"] = promotion
+    summary["promotion_readiness"] = promotion
 
     (out / "v25_2h_summary.json").write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
     (out / "v25_2h_candidate_spec.json").write_text(json.dumps(spec, indent=2, default=str), encoding="utf-8")
