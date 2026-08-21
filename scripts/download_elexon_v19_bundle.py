@@ -30,7 +30,7 @@ def make_session() -> requests.Session:
     adapter = HTTPAdapter(max_retries=retry, pool_connections=4, pool_maxsize=4)
     s = requests.Session()
     s.mount("https://", adapter)
-    s.headers.update({"User-Agent": "volcore-real-elexon/0.19"})
+    s.headers.update({"User-Agent": "gb-power-market-forecasting/0.20"})
     return s
 
 
@@ -68,7 +68,7 @@ def main() -> None:
     sys_dir.mkdir(parents=True, exist_ok=True)
     s = make_session()
     manifest = {
-        "version": "0.19.0",
+        "version": "0.20.0",
         "source": "Elexon Insights API",
         "base": ELEXON_BASE,
         "start_settlement_date": start.isoformat(),
