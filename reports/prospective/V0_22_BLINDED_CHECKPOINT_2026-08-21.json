@@ -1,0 +1,56 @@
+{
+  "version": "0.22.0",
+  "status": "LOCKED_BLINDED_CONFIRMATORY_CHECKPOINT",
+  "checkpoint_date": "2026-08-21",
+  "workflow_run": {
+    "run_id": 32477240056,
+    "artifact_id": 9444746108,
+    "artifact_name": "v22-blinded-confirmatory-32477240056",
+    "artifact_sha256": "2d3999cba65c53e8a6a64bb3d161f8480988edefbb86147b97c88ca7549f3e89"
+  },
+  "frozen_model_state": {
+    "sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+    "source_v020_evidence_id_sha256": "7c5f78b98c8ed877ab4c5cefa8a40b3068abb74cb2062ecf677f319d74a14661",
+    "model_changed": false
+  },
+  "confirmatory_window": {
+    "start_utc": "2026-08-20T23:00:00+00:00",
+    "fixed_end_exclusive_utc": "2026-09-03T23:00:00+00:00",
+    "available_end_exclusive_utc": "2026-08-21T09:30:00+00:00",
+    "rows_required_for_reveal": 672,
+    "complete_rows_so_far": 21,
+    "rows_remaining_to_reveal": 651,
+    "coverage_so_far": 1.0,
+    "future_neso_publications": 0
+  },
+  "source_snapshot": {
+    "neso_current_window_rows": 30828,
+    "neso_current_window_sha256": "683dd14cf72c25dc451e0a011eb94d8dd8178d353822f1ced78f18d965753233",
+    "neso_raw_clock_mismatch_rows": 0,
+    "elexon_reference_rows": 409,
+    "elexon_first_target_start_utc": "2026-08-12T23:00:00+00:00",
+    "elexon_last_available_target_start_utc": "2026-08-21T11:00:00+00:00",
+    "elexon_current_day_raw_mid_rows": 50,
+    "elexon_apx_reference_rows": 409,
+    "elexon_n2ex_reference_rows": 409
+  },
+  "horizons": {
+    "30m": {"status": "BLINDED_ACCUMULATION", "complete_rows": 21, "coverage": 1.0, "future_neso_publications": 0},
+    "2h": {"status": "BLINDED_ACCUMULATION", "complete_rows": 21, "coverage": 1.0, "future_neso_publications": 0},
+    "6h": {"status": "BLINDED_ACCUMULATION", "complete_rows": 21, "coverage": 1.0, "future_neso_publications": 0},
+    "12h": {"status": "BLINDED_ACCUMULATION", "complete_rows": 21, "coverage": 1.0, "future_neso_publications": 0}
+  },
+  "blinding_assertion": {
+    "performance_metrics_computed_or_serialized": false,
+    "forbidden_pre_gate_outputs": [
+      "reference MAE",
+      "frozen-model MAE",
+      "improvement percentage",
+      "interval coverage",
+      "direction/abstention performance",
+      "bootstrap performance interval"
+    ],
+    "workflow_no_leak_gate": "PASS"
+  },
+  "claim_boundary": "This checkpoint proves data availability and information safety only. It contains no model-performance evidence and cannot support a CV/application numerical claim."
+}
