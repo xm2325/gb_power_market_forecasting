@@ -2,6 +2,8 @@
 
 This report replays the **unchanged frozen v0.20 models** continuously from the locked historical final period into later market observations. It is an operational/diagnostic monitoring view, not a replacement for the immutable v0.20 benchmark and not realised trading P&L.
 
+This file is a **dated monitoring snapshot**. Later continuous-monitor runs create new dated records rather than rewriting these values.
+
 ## Run identity
 
 - GitHub Actions run: `32485905691`
