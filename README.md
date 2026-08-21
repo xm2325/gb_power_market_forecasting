@@ -12,7 +12,7 @@ Leakage-safe forecasting of GB electricity market prices using real Elexon marke
 - GB settlement-clock handling, including 46/48/50-period DST days;
 - fixed chronological development windows and a frozen 1,623-period final window;
 - large-price-move guards, conformal uncertainty, abstention and evidence/claim controls;
-- CI on Python 3.11 and 3.12 plus a separate real-data evidence workflow.
+- CI on Python 3.11 and 3.12 plus separate real-data and prospective-shadow workflows.
 
 ## Locked real benchmark
 
@@ -43,6 +43,29 @@ Full result and provenance:
 - [`docs/PROSPECTIVE_HOLDOUT_POLICY.md`](docs/PROSPECTIVE_HOLDOUT_POLICY.md)
 
 These are public-data forecasting results, **not realised trading P&L**.
+
+## v0.21 prospective shadow
+
+The exact v0.20 ridge states are now serialised in [`reports/locked/V0_21_FROZEN_MODEL_STATE.json`](reports/locked/V0_21_FROZEN_MODEL_STATE.json). Reconstructing them from the locked successful artifact reproduced every old final prediction with maximum absolute differences of about `1e-12 GBP/MWh`, well below the `1e-8` replay tolerance.
+
+The first truly post-lock checkpoint used targets from **2026-08-15 07:30 UTC to 2026-08-20 23:00 UTC**. It contains **271/271 half-hours**, 100% coverage and zero future NESO publications. Because the predeclared gate requires **672 half-hours (14 days)**, every horizon remains `SHADOW_ONLY`.
+
+Early shadow behaviour, shown here only as diagnostic evidence:
+
+| Horizon | Frozen-model MAE | Reference MAE | Early shadow difference |
+|---|---:|---:|---:|
+| 30m | 7.491 £/MWh | 16.509 £/MWh | 54.6% better |
+| 2h | 17.013 £/MWh | 16.509 £/MWh | 3.1% worse |
+| 6h | 44.914 £/MWh | 16.509 £/MWh | 172.1% worse |
+| 12h | 66.843 £/MWh | 16.509 £/MWh | 304.9% worse |
+
+**These 271-row values are not new CV/application headline metrics.** The unchanged frozen models may continue accumulating later observations, but any model changed after inspecting this checkpoint must begin a new prospective evidence window after the checkpoint boundary.
+
+See:
+
+- [`docs/V0_21_PROSPECTIVE_PROTOCOL.md`](docs/V0_21_PROSPECTIVE_PROTOCOL.md)
+- [`docs/V0_21_SHADOW_CHECKPOINT_2026-08-21.md`](docs/V0_21_SHADOW_CHECKPOINT_2026-08-21.md)
+- [`reports/prospective/V0_21_SHADOW_CHECKPOINT_2026-08-21.json`](reports/prospective/V0_21_SHADOW_CHECKPOINT_2026-08-21.json)
 
 ## Real-data snapshot
 
@@ -77,8 +100,9 @@ tests/                        unit/regression tests and timing-leakage checks
 fixtures/                     synthetic contract fixtures + small official samples
 data/samples/                 small committed source samples only
 docs/                         experiment, results and evidence protocols
-reports/locked/               immutable small real-benchmark evidence records
-.github/workflows/            normal CI + real-data evidence workflow
+reports/locked/               immutable real-benchmark/model-state records
+reports/prospective/          immutable shadow checkpoints
+.github/workflows/            normal CI + manually triggered real/shadow workflows
 ```
 
 ## Run tests
@@ -90,7 +114,7 @@ pytest -q
 
 ## Run the real-data pipeline
 
-Use the **real-market-evidence** GitHub Actions workflow. It downloads official NESO/Elexon snapshots, materialises compact Parquet data, runs the physical and price benchmarks, uploads the full evidence artifact, and applies the final claim-integrity gate.
+Use the **real-market-evidence** GitHub Actions workflow for a full historical evidence run. Use **prospective-shadow-v21** to replay the frozen v0.20 model state on later observations. Both network workflows are manual so ordinary source/documentation commits do not redownload market data.
 
 Large network snapshots are intentionally excluded from Git history.
 
@@ -98,4 +122,4 @@ Large network snapshots are intentionally excluded from Git history.
 
 The v0.20 final window is locked. It may be used for diagnostics, but a model changed after inspecting these labels cannot claim the same 1,623 periods as independent evidence.
 
-Any new numerical post-v0.20 claim requires a later prospective holdout beginning no earlier than **2026-08-15 07:30 UTC**. See [`docs/PROSPECTIVE_HOLDOUT_POLICY.md`](docs/PROSPECTIVE_HOLDOUT_POLICY.md).
+The current frozen v0.20 model may continue accumulating its post-lock prospective stream. If a new model is changed in response to the first v0.21 checkpoint, that changed candidate must start its own prospective window no earlier than **2026-08-20 23:00 UTC**.
