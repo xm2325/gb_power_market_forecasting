@@ -100,7 +100,7 @@ jobs:
 
       - name: Run curated test suite
         if: steps.guard.outputs.bootstrap == 'true'
-        run: pytest -q
+        run: PYTHONPATH=.:src pytest -q
 
       - name: Publish normal source tree before long network run
         if: steps.guard.outputs.bootstrap == 'true'
