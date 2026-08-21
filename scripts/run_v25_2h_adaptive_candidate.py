@@ -25,6 +25,8 @@ from gb_power_market.promotion_gate_v25 import assess_promotion_readiness
 FIRST_V25_FORWARD_ARTIFACT_SHA256 = "64d30a6e18a2c3fa2243fa28ceb800afec1abc66f7dc0816515d96ff9faf885c"
 FIRST_V25_LEDGER_CHAIN_TIP_SHA256 = "b27a99b21466c8a4cbf58d29ad9c980a174b278cee1a741582a978af747789f2"
 FIRST_V25_LEDGER_ROWS = 6
+GENESIS_LEDGER_PATH = Path("reports/monitoring/V0_25_FORWARD_LEDGER_FIRST6.csv")
+SNAPSHOT_REGISTRY_PATH = Path("reports/monitoring/V0_25_FORWARD_SNAPSHOT_REGISTRY.json")
 
 
 def _segment(rows: pd.DataFrame, start: str, end: str | None = None) -> dict:
@@ -55,19 +57,42 @@ def _segment(rows: pd.DataFrame, start: str, end: str | None = None) -> dict:
     }
 
 
+def _registry_latest(path: Path) -> dict:
+    registry = json.loads(path.read_text(encoding="utf-8"))
+    if registry.get("candidate") != "2H_FROZEN_PLUS_CAUSAL_48H_RESIDUAL_MEAN":
+        raise SystemExit("v0.25 snapshot registry candidate identity changed")
+    snapshots = registry.get("snapshots", [])
+    if not snapshots:
+        raise SystemExit("v0.25 snapshot registry has no locked snapshots")
+    latest = snapshots[-1]
+    if int(latest["sequence"]) != len(snapshots):
+        raise SystemExit("v0.25 snapshot registry sequence is not contiguous")
+    return latest
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--v24-rows", default="reports/v24_forward/forward_rows_2h.csv")
     ap.add_argument("--out-dir", default="reports/v25_2h")
     ap.add_argument(
         "--locked-ledger",
-        default="reports/monitoring/V0_25_FORWARD_LEDGER_FIRST6.csv",
-        help="Immutable row-level prefix that every later v0.25 replay must reproduce.",
+        default=None,
+        help="Optional explicit latest immutable prefix. By default use the latest ledger in the snapshot registry.",
+    )
+    ap.add_argument(
+        "--snapshot-registry",
+        default=str(SNAPSHOT_REGISTRY_PATH),
+        help="Append-only registry whose latest ledger must be reproduced before new rows are accepted.",
+    )
+    ap.add_argument(
+        "--genesis-ledger",
+        default=str(GENESIS_LEDGER_PATH),
+        help="Permanent first-six genesis ledger anchor.",
     )
     ap.add_argument(
         "--previous-snapshot-sha256",
-        default=FIRST_V25_FORWARD_ARTIFACT_SHA256,
-        help="SHA-256 lineage anchor for the preceding immutable v0.25 forward snapshot/artifact.",
+        default=None,
+        help="Optional explicit previous monitor digest. By default use the latest registry monitor SHA-256.",
     )
     args = ap.parse_args()
 
@@ -75,21 +100,35 @@ def main() -> None:
     corrected = apply_causal_bias_correction(rows)
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
-
     corrected.to_csv(out / "adaptive_rows_2h.csv", index=False)
     spec = candidate_spec()
 
     current_ledger = build_forward_ledger(corrected, forward_start_utc=V25_FORWARD_START_UTC)
-    locked_ledger = load_locked_ledger(args.locked_ledger)
-    ledger_check = verify_locked_prefix(current_ledger, locked_ledger)
-    if ledger_check["locked_rows"] != FIRST_V25_LEDGER_ROWS:
-        raise SystemExit("v0.25 locked ledger row count changed")
-    if ledger_check["locked_chain_tip_sha256"] != FIRST_V25_LEDGER_CHAIN_TIP_SHA256:
-        raise SystemExit("v0.25 locked ledger chain tip changed")
+
+    genesis = load_locked_ledger(args.genesis_ledger)
+    genesis_check = verify_locked_prefix(current_ledger, genesis)
+    if genesis_check["locked_rows"] != FIRST_V25_LEDGER_ROWS:
+        raise SystemExit("v0.25 genesis ledger row count changed")
+    if genesis_check["locked_chain_tip_sha256"] != FIRST_V25_LEDGER_CHAIN_TIP_SHA256:
+        raise SystemExit("v0.25 genesis ledger chain tip changed")
+
+    latest_snapshot = _registry_latest(Path(args.snapshot_registry))
+    latest_ledger_path = Path(args.locked_ledger or latest_snapshot["ledger_path"])
+    latest_locked = load_locked_ledger(latest_ledger_path)
+    latest_check = verify_locked_prefix(current_ledger, latest_locked)
+    if int(latest_check["locked_rows"]) != int(latest_snapshot["rows"]):
+        raise SystemExit("latest locked ledger row count disagrees with snapshot registry")
+    if latest_check["locked_chain_tip_sha256"] != latest_snapshot["ledger_chain_tip_sha256"]:
+        raise SystemExit("latest locked ledger chain tip disagrees with snapshot registry")
+
+    ledger_check = {
+        **latest_check,
+        "locked_registry_sequence": int(latest_snapshot["sequence"]),
+        "locked_registry_ledger_path": str(latest_ledger_path),
+        "genesis_anchor": genesis_check,
+    }
     current_ledger.to_csv(out / "forward_ledger_2h.csv", index=False, lineterminator="\n")
-    (out / "forward_ledger_check.json").write_text(
-        json.dumps(ledger_check, indent=2), encoding="utf-8"
-    )
+    (out / "forward_ledger_check.json").write_text(json.dumps(ledger_check, indent=2), encoding="utf-8")
 
     summary = {
         "version": "0.25.0",
@@ -107,12 +146,14 @@ def main() -> None:
             "Only rows at or after 2026-08-21T11:30:00Z belong to the v0.25 versioned forward segment."
         ),
     }
+
+    previous_snapshot_sha = args.previous_snapshot_sha256 or latest_snapshot["monitor_sha256"]
     monitor = build_adaptive_monitor_state(
         corrected,
         forward_start_utc=V25_FORWARD_START_UTC,
         candidate_id=spec["candidate"],
         model_version=spec["version"],
-        previous_snapshot_sha256=args.previous_snapshot_sha256 or None,
+        previous_snapshot_sha256=previous_snapshot_sha,
     )
     monitor["ledger_integrity"] = ledger_check
     promotion = assess_promotion_readiness(monitor)
