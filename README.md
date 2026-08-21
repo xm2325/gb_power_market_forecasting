@@ -2,7 +2,7 @@
 
 Leakage-safe forecasting of GB electricity market prices using real Elexon market data and as-of NESO wind/solar forecast vintages.
 
-Current software version: **v0.24.0**. Historical evidence is versioned and never rewritten: v0.20 is the first locked real benchmark; v0.24 continuously replays the exact same frozen models as later market outcomes arrive.
+Current software version: **v0.25.0**. Historical evidence is versioned and never rewritten: v0.20 is the first locked real benchmark; v0.24 continuously monitors the unchanged frozen models; v0.25 adds a separately versioned causal adaptation candidate for the regime-sensitive 2h horizon.
 
 ## What this repository contains
 
@@ -12,6 +12,7 @@ Current software version: **v0.24.0**. Historical evidence is versioned and neve
 - fixed chronological development/selection/calibration/final boundaries;
 - exact serialisation and replay of frozen ridge model state;
 - continuous forward validation with daily, cumulative and rolling 24h/3d/7d monitoring;
+- causal online residual-level adaptation for versioned model upgrades;
 - conformal uncertainty, large-move diagnostics, abstention and evidence/claim controls;
 - CI on Python 3.11 and 3.12 plus manual network workflows.
 
@@ -73,19 +74,36 @@ The monitoring view changes the interpretation materially:
 
 The monitor writes row-level prediction/error histories, UTC-day summaries, cumulative error advantage and rolling 24h/3d/7d MAE. Monitoring data are intentionally visible. If monitoring motivates a model change, the revised model receives a new versioned forward segment; previously observed rows are never relabelled as fresh prospective evidence.
 
-This table is a dated **21 August 2026 monitoring snapshot**, not a value that silently updates inside Git. Later runs create new versioned monitoring snapshots rather than rewriting this one.
-
 Evidence:
 
 - [`docs/V0_24_CONTINUOUS_FORWARD_VALIDATION.md`](docs/V0_24_CONTINUOUS_FORWARD_VALIDATION.md)
 - [`docs/V0_24_FORWARD_RESULTS_2026-08-21.md`](docs/V0_24_FORWARD_RESULTS_2026-08-21.md)
 - [`reports/monitoring/V0_24_CONTINUOUS_FORWARD_2026-08-21.json`](reports/monitoring/V0_24_CONTINUOUS_FORWARD_2026-08-21.json)
 
-Run artifact:
+## v0.25 — causal 2h level adaptation
 
-- `v24-continuous-forward-32485905691`
-- artifact ID `9447877873`
-- SHA-256 `b79f86af22ea62a7c7e3fcccc3f0403353d0350f523ac432ed60d959e9abe6eb`
+v0.24 showed that the 2h model's main recent problem was a growing negative level bias: the frozen model under-predicted by about **£8.2/MWh** over the locked window and about **£15.1/MWh** after 15 August. v0.25 therefore leaves the original ridge model and NESO feature family unchanged and adds one low-capacity online correction.
+
+For a target `t`, the candidate adds the mean `realised - frozen_prediction` residual over the previous 48 hours, but a residual may enter only when its target outcome is already available by the current 2h decision time (`s + 30m <= decision_time(t)`). The current target and the most recent 150 minutes of target labels therefore cannot affect their own correction.
+
+Previously observed diagnostics suggested the rule was worth forward testing: post-lock-to-freeze adaptive MAE was **10.698 vs 15.885 £/MWh** for the previous-day reference. These rows are development diagnostics, not new evidence.
+
+The rule was frozen with a new forward start at **2026-08-21 11:30 UTC**. First successful run `32500771812` observed only **6 new half-hours** through 14:30 UTC (end exclusive):
+
+| Model | MAE |
+|---|---:|
+| frozen v0.20 2h | 13.185 £/MWh |
+| previous-day reference | 9.227 £/MWh |
+| **v0.25 adaptive 2h** | **3.859 £/MWh** |
+
+The adaptive candidate beat the reference on **5/6** targets and used an average causal correction of **+9.763 £/MWh**. This is explicitly `EARLY_ONLY_6_HALF_HOURS_NO_HEADLINE_CLAIM`; later runs extend the same v0.25 segment without changing these six observations.
+
+Evidence:
+
+- [`docs/V0_25_2H_ADAPTIVE_FORWARD.md`](docs/V0_25_2H_ADAPTIVE_FORWARD.md)
+- [`reports/monitoring/V0_25_2H_ADAPTIVE_FORWARD_2026-08-21.json`](reports/monitoring/V0_25_2H_ADAPTIVE_FORWARD_2026-08-21.json)
+
+Artifact: `v25-adaptive-2h-32500771812`, ID `9453438684`, SHA-256 `64d30a6e18a2c3fa2243fa28ceb800afec1abc66f7dc0816515d96ff9faf885c`.
 
 ## Earlier prospective/blinding experiments
 
@@ -94,11 +112,6 @@ v0.21 first inspected 271 genuinely post-lock half-hours as `SHADOW_ONLY`; those
 v0.22 demonstrated metric blinding but was invalidated for confirmatory use after an artifact audit found that a price-bearing processed Parquet had been uploaded pre-gate.
 
 v0.23 fixed that artifact-sealing problem and successfully completed a **0/672** smoke run before any sealed target entered the window. The project subsequently chose continuous forward monitoring as the more appropriate objective, so v0.23 was superseded before producing any confirmatory performance result. Its engineering audit remains in Git history, but its active network workflow has been removed.
-
-Records:
-
-- [`reports/prospective/V0_22_BLINDING_AUDIT_2026-08-21.json`](reports/prospective/V0_22_BLINDING_AUDIT_2026-08-21.json)
-- [`reports/prospective/V0_23_SUPERSEDED_BY_V0_24_2026-08-21.json`](reports/prospective/V0_23_SUPERSEDED_BY_V0_24_2026-08-21.json)
 
 ## Source-clock audit
 
@@ -130,6 +143,7 @@ pytest -q
 
 - **real-market-evidence** — rebuild the full historical real-data benchmark;
 - **prospective-shadow-v21** — historical diagnostic replay utility;
-- **continuous-forward-v24** — replay the unchanged frozen models through the latest safe Elexon/NESO observations and emit daily/rolling monitoring artifacts.
+- **continuous-forward-v24** — replay the unchanged frozen models through the latest safe Elexon/NESO observations;
+- **adaptive-2h-v25** — extend the versioned 2h causal-bias-correction candidate through later observations.
 
 Long-running network workflows are manual so ordinary documentation/source commits do not repeatedly download live market data.
