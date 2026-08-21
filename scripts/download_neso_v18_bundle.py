@@ -14,7 +14,6 @@ import gzip
 import hashlib
 import json
 import os
-import shutil
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -43,7 +42,14 @@ RESOURCES = (
 
 
 def session() -> requests.Session:
-    retry = Retry(total=6, connect=6, read=6, backoff_factor=1.5, status_forcelist=(429, 500, 502, 503, 504), allowed_methods=frozenset(["GET"]))
+    retry = Retry(
+        total=6,
+        connect=6,
+        read=6,
+        backoff_factor=1.5,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset(["GET"]),
+    )
     adapter = HTTPAdapter(max_retries=retry, pool_connections=4, pool_maxsize=4)
     s = requests.Session()
     s.mount("https://", adapter)
@@ -52,12 +58,16 @@ def session() -> requests.Session:
 
 
 def metadata_total(s: requests.Session, rid: str, timeout: int) -> int:
-    r = s.get(f"{BASE}/api/3/action/datastore_search", params={"resource_id": rid, "limit": 0}, timeout=(20, timeout))
+    r = s.get(
+        f"{BASE}/api/3/action/datastore_search",
+        params={"resource_id": rid, "limit": 0},
+        timeout=(20, timeout),
+    )
     r.raise_for_status()
-    p = r.json()
-    if not p.get("success"):
+    payload = r.json()
+    if not payload.get("success"):
         raise RuntimeError("NESO CKAN metadata request failed")
-    return int(p["result"]["total"])
+    return int(payload["result"]["total"])
 
 
 def sha256(path: Path) -> str:
@@ -73,14 +83,26 @@ def count_rows(path: Path) -> int:
         return max(0, sum(1 for _ in f) - 1)
 
 
+def snapshot_consistent(*, live: bool, before: int, downloaded: int, after: int) -> bool:
+    """Validate a network snapshot against metadata read before and after it.
+
+    Immutable resources must match exactly. A live resource is allowed to grow
+    during the download, but the downloaded row count cannot be below the
+    initial total or above the final total, and the source itself cannot shrink.
+    """
+    if live:
+        return after >= before and before <= downloaded <= after
+    return downloaded == before == after
+
+
 def download_dump(s: requests.Session, rsrc: Resource, out: Path, timeout: int) -> dict:
     url = f"{BASE}/datastore/dump/{rsrc.resource_id}"
     part = out.with_suffix(out.suffix + ".part")
     part.unlink(missing_ok=True)
-    with s.get(url, stream=True, timeout=(20, timeout), allow_redirects=True) as r:
-        r.raise_for_status()
+    with s.get(url, stream=True, timeout=(20, timeout), allow_redirects=True) as response:
+        response.raise_for_status()
         with part.open("wb") as f:
-            for block in r.iter_content(4 * 1024 * 1024):
+            for block in response.iter_content(4 * 1024 * 1024):
                 if block:
                     f.write(block)
     if part.stat().st_size == 0:
@@ -89,7 +111,14 @@ def download_dump(s: requests.Session, rsrc: Resource, out: Path, timeout: int) 
     return {"method": "datastore_dump", "url": url}
 
 
-def paged_resume(s: requests.Session, rsrc: Resource, out: Path, page_size: int, sleep_s: float, timeout: int) -> dict:
+def paged_resume(
+    s: requests.Session,
+    rsrc: Resource,
+    out: Path,
+    page_size: int,
+    sleep_s: float,
+    timeout: int,
+) -> dict:
     checkpoint = out.parent / ".checkpoints" / rsrc.name
     checkpoint.mkdir(parents=True, exist_ok=True)
     meta_path = checkpoint / "checkpoint.json"
@@ -110,17 +139,23 @@ def paged_resume(s: requests.Session, rsrc: Resource, out: Path, page_size: int,
         if known and chunk.exists() and int(known["rows"]) > 0:
             offset += int(known["rows"])
             continue
-        resp = s.get(url, params={"resource_id": rsrc.resource_id, "limit": page_size, "offset": offset}, timeout=(20, timeout))
-        resp.raise_for_status()
-        payload = resp.json()
+
+        response = s.get(
+            url,
+            params={"resource_id": rsrc.resource_id, "limit": page_size, "offset": offset},
+            timeout=(20, timeout),
+        )
+        response.raise_for_status()
+        payload = response.json()
         if not payload.get("success"):
             raise RuntimeError(f"CKAN page failed at offset {offset}")
         result = payload["result"]
         rows = result.get("records", [])
         if fields is None:
-            fields = [f["id"] for f in result.get("fields", [])]
+            fields = [field["id"] for field in result.get("fields", [])]
         if not rows:
             raise RuntimeError(f"empty CKAN page before total at offset {offset}/{total}")
+
         with gzip.open(chunk, "wt", newline="", encoding="utf-8") as gz:
             writer = csv.DictWriter(gz, fieldnames=fields, extrasaction="ignore")
             writer.writeheader()
@@ -136,6 +171,7 @@ def paged_resume(s: requests.Session, rsrc: Resource, out: Path, page_size: int,
     ordered = sorted(checkpoint.glob("part_*.csv.gz"))
     if not ordered:
         raise RuntimeError("no checkpoint chunks to assemble")
+
     first = True
     with tmp.open("wt", newline="", encoding="utf-8") as dst:
         for chunk in ordered:
@@ -146,10 +182,24 @@ def paged_resume(s: requests.Session, rsrc: Resource, out: Path, page_size: int,
                     dst.write(line)
             first = False
     os.replace(tmp, out)
-    return {"method": "ckan_paged_resume", "url": url, "checkpoint": str(checkpoint), "page_size": page_size}
+    return {
+        "method": "ckan_paged_resume",
+        "url": url,
+        "checkpoint": str(checkpoint),
+        "page_size": page_size,
+    }
 
 
-def download_resource(s: requests.Session, rsrc: Resource, out: Path, *, mode: str, page_size: int, sleep_s: float, timeout: int) -> dict:
+def download_resource(
+    s: requests.Session,
+    rsrc: Resource,
+    out: Path,
+    *,
+    mode: str,
+    page_size: int,
+    sleep_s: float,
+    timeout: int,
+) -> dict:
     before = metadata_total(s, rsrc.resource_id, timeout)
     method: dict
     if mode in {"auto", "dump"}:
@@ -161,14 +211,20 @@ def download_resource(s: requests.Session, rsrc: Resource, out: Path, *, mode: s
             method = paged_resume(s, rsrc, out, page_size, sleep_s, timeout)
     else:
         method = paged_resume(s, rsrc, out, page_size, sleep_s, timeout)
+
     rows = count_rows(out)
     after = metadata_total(s, rsrc.resource_id, timeout)
-    if rsrc.live:
-        snapshot_ok = before <= rows <= after
-    else:
-        snapshot_ok = before == rows == after
+    snapshot_ok = snapshot_consistent(
+        live=rsrc.live,
+        before=before,
+        downloaded=rows,
+        after=after,
+    )
     if not snapshot_ok:
-        raise RuntimeError(f"row-count snapshot gate failed for {rsrc.name}: before={before}, rows={rows}, after={after}, live={rsrc.live}")
+        raise RuntimeError(
+            f"row-count snapshot gate failed for {rsrc.name}: "
+            f"before={before}, rows={rows}, after={after}, live={rsrc.live}"
+        )
     return {
         "resource": rsrc.name,
         "resource_id": rsrc.resource_id,
@@ -176,6 +232,7 @@ def download_resource(s: requests.Session, rsrc: Resource, out: Path, *, mode: s
         "rows_before": before,
         "rows_downloaded": rows,
         "rows_after": after,
+        "snapshot_consistent": snapshot_ok,
         "sha256": sha256(out),
         "bytes": out.stat().st_size,
         "path": str(out),
@@ -199,6 +256,7 @@ def main() -> None:
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     s = session()
     entries = []
+
     for rsrc in RESOURCES:
         out = out_dir / rsrc.filename
         print(f"Downloading {rsrc.name} -> {out}", flush=True)
@@ -212,10 +270,16 @@ def main() -> None:
             timeout=args.timeout,
         )
         entries.append(entry)
-        manifest_path.write_text(json.dumps({"version": "0.20.0", "source": "NESO", "resources": entries}, indent=2), encoding="utf-8")
+        manifest_path.write_text(
+            json.dumps({"version": "0.20.0", "source": "NESO", "resources": entries}, indent=2),
+            encoding="utf-8",
+        )
         print(f"{rsrc.name}: {entry['rows_downloaded']:,} rows, {entry['bytes'] / (1024*1024):.1f} MiB", flush=True)
 
-    manifest_path.write_text(json.dumps({"version": "0.20.0", "source": "NESO", "resources": entries}, indent=2), encoding="utf-8")
+    manifest_path.write_text(
+        json.dumps({"version": "0.20.0", "source": "NESO", "resources": entries}, indent=2),
+        encoding="utf-8",
+    )
     print(manifest_path)
 
 
