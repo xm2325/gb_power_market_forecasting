@@ -1,0 +1,109 @@
+name: lock-v26-development
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - feat/real-data-v0.20
+    paths:
+      - '.github/V26_DEVELOPMENT_LOCK'
+
+permissions:
+  contents: write
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v026-causal-ewma-2h
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Test before locking development result
+        run: pytest -q
+
+      - name: Download exact v0.26 development artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: v26-development-32603302586
+          path: _v26_development
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 32603302586
+
+      - name: Lock negative development decision
+        run: |
+          python scripts/lock_v26_development_decision.py \
+            --artifact-dir _v26_development \
+            --artifact-id 9483484608 \
+            --artifact-sha256 b4d5b9e3f72da959d1a7f2a3786c5e87951e285efb8506d534f4c5305643af1d \
+            --run-id 32603302586
+
+      - name: Verify locked decision is blocked and content-addressed
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          lock = json.loads(Path('reports/locked/V0_26_DEVELOPMENT_LOCK.json').read_text())
+          decision_path = Path('reports/locked/V0_26_DEVELOPMENT_DECISION.json')
+          grid_path = Path('reports/locked/V0_26_CANDIDATE_GRID.csv')
+          decision = json.loads(decision_path.read_text())
+          sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+          if lock['status'] != 'LOCKED_NEGATIVE_DEVELOPMENT_DECISION':
+              raise SystemExit('wrong v0.26 lock status')
+          if decision['forward_test_allowed'] is not False:
+              raise SystemExit('blocked v0.26 decision unexpectedly allows forward testing')
+          if decision['validation_guards']['passed'] is not False:
+              raise SystemExit('v0.26 validation unexpectedly passed')
+          if sha(decision_path) != lock['decision_file_sha256']:
+              raise SystemExit('v0.26 decision digest mismatch')
+          if sha(grid_path) != lock['grid_file_sha256']:
+              raise SystemExit('v0.26 grid digest mismatch')
+          print({
+              'selected': lock['selected_candidate'],
+              'guards': lock['validation_guards'],
+              'decision_sha256': lock['decision_file_sha256'],
+              'grid_sha256': lock['grid_file_sha256'],
+          })
+          PY
+
+      - name: Print exact v0.26 metrics
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path('reports/locked/V0_26_DEVELOPMENT_DECISION.json').read_text())
+          print('selected =', d['selected']['candidate'])
+          print('selection winner metrics =', d['selected']['selection'])
+          print('selection frozen =', d['baseline_selection']['frozen'])
+          print('selection reference =', d['baseline_selection']['reference'])
+          print('validation winner metrics =', d['selected']['validation_diagnostic'])
+          print('validation frozen =', d['baseline_validation']['frozen'])
+          print('validation reference =', d['baseline_validation']['reference'])
+          print('validation guards =', d['validation_guards'])
+          print('GRID')
+          print(Path('reports/locked/V0_26_CANDIDATE_GRID.csv').read_text())
+          PY
+
+      - name: Commit locked v0.26 development evidence
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/locked docs
+          git diff --cached --stat
+          git commit -m "Lock blocked v0.26 development decision"
+          git fetch origin feat/v026-causal-ewma-2h
+          git rebase origin/feat/v026-causal-ewma-2h
+          pytest -q
+          git push origin HEAD:feat/v026-causal-ewma-2h
