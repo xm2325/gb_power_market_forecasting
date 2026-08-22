@@ -2,7 +2,7 @@
 
 Leakage-safe forecasting of GB electricity market prices using real Elexon market data and as-of NESO wind/solar forecast vintages.
 
-Current software version: **v0.25.0**. Historical evidence is versioned and never rewritten: v0.20 is the first locked real benchmark; v0.24 continuously monitors the unchanged frozen models; v0.25 adds a separately versioned causal adaptation candidate for the regime-sensitive 2h horizon.
+Current software version: **v0.25.0**. Historical evidence is versioned and never rewritten: v0.20 is the first locked real benchmark; v0.24 continuously monitors the unchanged frozen models; v0.25 is a separately versioned causal adaptation experiment for the regime-sensitive 2h horizon.
 
 ## What this repository contains
 
@@ -11,9 +11,10 @@ Current software version: **v0.25.0**. Historical evidence is versioned and neve
 - GB settlement-clock handling, including 46/48/50-period DST days;
 - fixed chronological development/selection/calibration/final boundaries;
 - exact serialisation and replay of frozen ridge model state;
-- continuous forward validation with daily, cumulative and rolling 24h/3d/7d monitoring;
+- continuous forward validation with daily, cumulative and rolling monitoring;
 - causal online residual-level adaptation for versioned model upgrades;
-- append-only row-level forward ledgers with SHA-256 hash chains and snapshot registry;
+- append-only row-level forward ledgers with SHA-256 hash chains and a snapshot registry;
+- predeclared degradation alerts and a promotion-readiness gate;
 - conformal uncertainty, large-move diagnostics, abstention and evidence/claim controls;
 - CI on Python 3.11 and 3.12 plus manual network workflows.
 
@@ -47,31 +48,20 @@ Reconstruction reproduced every locked final prediction with maximum absolute di
 
 ## v0.24 — continuous forward validation
 
-For an operational forecasting project, delaying all accuracy inspection until one future reveal date is less useful than continuously monitoring a frozen model. v0.24 therefore keeps the model unchanged but reads outcomes as they become available.
+v0.24 keeps the model unchanged and reads outcomes only as they become available. A 21 August snapshot first showed a regime in which 2h performance had temporarily deteriorated, while 30m remained stable and 6h/12h remained poor.
 
-Successful GitHub Actions run `32485905691` replayed all four frozen horizons from **12 July through 21 August 11:30 UTC (end exclusive)**:
+A later unchanged-model replay on **22 August 2026** extended the post-lock segment to **362 half-hours**. The larger sample materially changed the 2h interpretation:
 
-- **1,919 / 1,919** complete half-hours at every horizon;
-- 100% coverage;
-- zero duplicate/off-grid complete targets;
-- zero future NESO publications;
-- **612,906** bounded current-regime NESO forecast-vintage rows;
-- Elexon history starts on 1 July solely to warm up `price_lag_7d_same_target`; scoring still starts on 12 July.
+| Horizon | Post-lock frozen-model result vs previous-day reference |
+|---|---:|
+| **30m** | **61.3% better** |
+| **2h** | **13.6% better** |
+| **6h** | **106.8% worse** |
+| **12h** | **203.6% worse** |
 
-### Current frozen-model monitoring snapshot
+The 2h model therefore did **not** permanently collapse. It moved through a difficult level regime and later recovered enough that the unchanged frozen model again beat the previous-settlement-day baseline across the larger post-lock sample. This is exactly why the repository keeps rolling monitoring separate from model selection.
 
-| Horizon | Locked v0.20 | 1 Aug → 11:30 UTC | Post-lock → 11:30 UTC | Latest 7d |
-|---|---:|---:|---:|---:|
-| **30m** | **62.8% better** | **54.2% better** | **52.2% better** | **49.8% better** |
-| **2h** | **28.9% better** | **9.3% better** | **6.2% worse** | **11.2% worse** |
-| **6h** | 43.2% worse | 98.5% worse | 176.5% worse | 184.2% worse |
-| **12h** | 112.0% worse | 193.6% worse | 314.9% worse | 325.3% worse |
-
-The monitoring view changes the interpretation materially:
-
-- **30m is stable.** Post-lock MAE is **7.587 vs 15.885 £/MWh** for the previous-settlement-day reference; latest-7d interval coverage is 92.9% and the model beats the reference on 73.5% of half-hours.
-- **2h is regime-sensitive.** Its historical advantage turns negative in the post-lock segment (**16.875 vs 15.885 £/MWh**) and latest 7 days. Its rolling 7-day relative improvement crossed below zero around 15 August.
-- **6h/12h are persistent failures.** Recent forward monitoring strengthens, rather than weakens, the negative conclusion.
+The monitor writes row-level prediction/error histories, UTC-day summaries, cumulative error advantage and rolling 24h/3d/7d MAE. If monitoring motivates a model change, that revised model receives a new versioned forward segment; previously observed rows are never relabelled as fresh evidence.
 
 Evidence:
 
@@ -81,52 +71,62 @@ Evidence:
 
 ## v0.25 — causal 2h level adaptation
 
-v0.24 showed that the 2h model's main recent problem was a growing negative level bias. v0.25 leaves the original ridge model and NESO feature family unchanged and adds one low-capacity online correction: the mean `realised - frozen_prediction` residual over the previous 48 hours.
+The difficult mid-August 2h regime showed a growing level bias. v0.25 therefore left the original ridge model, NESO feature family, alpha, scaler and coefficients unchanged and added one deliberately low-capacity online correction: the mean `realised - frozen_prediction` residual over the previous 48 hours.
 
-For target `t`, a historical residual may enter only after its target outcome is already available by the current 2h decision time: `s + 30m <= decision_time(t)`. The current target and the most recent 150 minutes of target labels therefore cannot affect their own correction. The rule was frozen with a new versioned forward start at **2026-08-21 11:30 UTC**.
+For target `t`, a historical residual may enter only after its target outcome is already available by the current 2h decision time: `s + 30m <= decision_time(t)`. The current target and the most recent 150 minutes of target labels therefore cannot affect their own correction. The rule was frozen with a new forward start at **2026-08-21 11:30 UTC**.
 
-Previously observed rows are development diagnostics only. The versioned forward observations are appended without changing the candidate rule.
-
-### Append-only forward snapshots
+### Append-only forward sequence
 
 | Snapshot | Forward rows | Adaptive MAE | Frozen 2h MAE | Previous-day MAE | Interpretation |
 |---|---:|---:|---:|---:|---|
-| 14:30 UTC | 6 | **3.859** | 13.185 | 9.227 | very early positive start |
-| 16:00 UTC | 9 | **5.357** | 11.241 | 8.670 | latest 3 rows already weaker |
-| **18:00 UTC** | **13** | **6.828** | 10.832 | 9.621 | cumulative MAE still best; tail/overshoot risk visible |
+| 21 Aug 14:30 | 6 | **3.859** | 13.185 | 9.227 | strong but extremely early |
+| 21 Aug 16:00 | 9 | **5.357** | 11.241 | 8.670 | newest three rows already weaker |
+| 21 Aug 18:00 | 13 | **6.828** | 10.832 | 9.621 | tail/overshoot risk visible |
+| **22 Aug 20:30** | **66** | **21.918** | **20.082** | 39.545 | **first predeclared degradation alerts fired** |
 
-At the latest 13-row snapshot, adaptive cumulative MAE is **29.0% lower than the previous-day reference** and **37.0% lower than the frozen model**. These numbers remain `EARLY_ONLY` and are **not** a new headline/CV accuracy claim.
+Across all 66 versioned forward half-hours, the adaptive candidate still beats the previous-day reference by **44.6%**, but it is now **9.1% worse than the unchanged frozen 2h model**. Its P95 absolute error is also worse than frozen (**56.07 vs 52.29 £/MWh**), and adaptive interval coverage is lower (**72.7% vs 78.8%**) with unchanged interval width.
 
-The newest four targets, from 16:00 to 18:00 UTC, are intentionally reported separately:
+The early 6–13-row improvement was therefore not treated as sufficient evidence for promotion. Once the sample crossed the predeclared 48-row alert threshold, the latest 24h monitor produced:
 
-- adaptive MAE: **10.137 £/MWh**;
-- frozen MAE: **9.913 £/MWh**;
-- previous-day reference MAE: **11.760 £/MWh**;
-- adaptive is **13.8% better than reference**, but **2.3% worse than frozen**;
-- adaptive P95 absolute error is **19.465 £/MWh**, worse than frozen (11.685) and reference (16.671).
+| Latest 24h / 48 rows | Adaptive | Frozen 2h | Previous-day reference |
+|---|---:|---:|---:|
+| MAE | **26.853** | **22.796** | 50.780 |
+| Signed bias | **16.991** | **12.754** | 50.066 |
+| P95 absolute error | **60.237** | **55.844** | 121.400 |
+| Interval coverage | **62.5%** | **70.8%** | — |
 
-This is consistent with correction lag/overshoot: the causal correction remained around **+9.46 £/MWh** while the frozen model's signed bias over these four rows was only **+0.69 £/MWh**. The 48-hour rule is not changed in response to these observations.
+The resulting alerts are deliberately preserved:
+
+- `ADAPTIVE_TRAILS_FROZEN_24H`
+- `BIAS_CORRECTION_WORSENED_24H`
+
+There is **no** `ADAPTIVE_TRAILS_REFERENCE_24H` alert because the adaptive candidate still substantially beats the previous-day reference. The problem is more specific: the fixed 48h residual mean adapts too slowly to level reversals and can overshoot an already-recovering frozen model.
+
+The latest six hours reinforce that diagnosis. The causal correction has swung negative (mean approximately **-2.43 £/MWh**), while adaptive MAE remains slightly worse than frozen (**25.01 vs 23.99 £/MWh**). The v0.25 rule is not retuned in response; changing it requires a new model version and a new forward start.
 
 ### Forward-ledger governance
 
 Every versioned target stores target/decision time, realised price, frozen prediction, previous-day reference, causal correction, history cut-off and adaptive prediction in a canonical row. Row SHA-256 values are chained so a later run cannot silently rewrite an earlier observation.
 
-- first-six genesis chain tip: `b27a99b21466c8a4cbf58d29ad9c980a174b278cee1a741582a978af747789f2`;
+- 6-row genesis chain tip: `b27a99b21466c8a4cbf58d29ad9c980a174b278cee1a741582a978af747789f2`;
 - 9-row chain tip: `f857a1f7f069961624cc3cb5d1f4e544e942d06658882ed56f519b09429257c6`;
-- current 13-row chain tip: `5852d70b1a18acc0ff9ae46de71c372fc9d8878e8e2ecab8d2b2427dae997745`.
+- 13-row chain tip: `5852d70b1a18acc0ff9ae46de71c372fc9d8878e8e2ecab8d2b2427dae997745`;
+- **66-row chain tip:** `b618989dcd02f066cc3e6e38444ceb06eee549820a675d4142ed45094d33ba00`.
 
-The runner retains the first six rows as a permanent genesis anchor **and automatically loads the latest registered ledger as the rolling locked prefix**. Therefore the next run must reproduce all 13 current rows before it may append another target.
+The 66-row snapshot is registry sequence 4. It reproduced the complete 13-row preceding ledger plus the permanent first-six genesis anchor before appending **53** new targets. A dedicated snapshot-lock utility now verifies the full chain, requires rows and end time to advance, copies the exact artifact outputs, content-addresses the committed monitor/ledger and refuses to rewrite an existing snapshot.
 
-Performance alerts remain disabled before 48 forward rows. Promotion criteria are not evaluated before **336 half-hours / 7 days**, and the code never auto-promotes a candidate.
+Current maturity is `INTRADAY_TO_2DAY_MONITORING`. Promotion criteria remain unevaluated until **336 forward half-hours / 7 days**; the current state is `NOT_ELIGIBLE_INSUFFICIENT_ROWS`, with **270 rows still required**. Passing the eventual gate never auto-promotes a model.
 
 Evidence:
 
-- [`docs/V0_25_FORWARD_RESULTS_2026-08-21_1800Z.md`](docs/V0_25_FORWARD_RESULTS_2026-08-21_1800Z.md)
-- [`reports/monitoring/V0_25_MONITOR_STATE_2026-08-21_1800Z.json`](reports/monitoring/V0_25_MONITOR_STATE_2026-08-21_1800Z.json)
-- [`reports/monitoring/V0_25_FORWARD_LEDGER_2026-08-21_1800Z.csv`](reports/monitoring/V0_25_FORWARD_LEDGER_2026-08-21_1800Z.csv)
+- [`docs/V0_25_FORWARD_RESULTS_2026-08-22_2030Z.md`](docs/V0_25_FORWARD_RESULTS_2026-08-22_2030Z.md)
+- [`reports/monitoring/V0_25_MONITOR_STATE_2026-08-22_2030Z.json`](reports/monitoring/V0_25_MONITOR_STATE_2026-08-22_2030Z.json)
+- [`reports/monitoring/V0_25_FORWARD_LEDGER_2026-08-22_2030Z.csv`](reports/monitoring/V0_25_FORWARD_LEDGER_2026-08-22_2030Z.csv)
 - [`reports/monitoring/V0_25_FORWARD_SNAPSHOT_REGISTRY.json`](reports/monitoring/V0_25_FORWARD_SNAPSHOT_REGISTRY.json)
 
-Latest source artifact: `v25-adaptive-2h-32518932578`, ID `9459873801`, SHA-256 `351fe39863798a5a711489c157b8429a015c0b020115ed898aad701bbdc1e6d2`.
+Latest source artifact: `v25-adaptive-2h-32602423009`, ID `9483291389`, SHA-256 `eb2585458aaddb15a2485b4f5c349e8f90917cfc97bbdbe179cf95009e90ab95`.
+
+These 66 rows are **monitoring evidence, not a new CV/headline win**. The important result is that the predeclared governance caught a correction that looked excellent in the first few observations but did not remain better than the unchanged frozen model.
 
 ## Earlier prospective/blinding experiments
 
@@ -167,6 +167,7 @@ pytest -q
 - **real-market-evidence** — rebuild the full historical real-data benchmark;
 - **prospective-shadow-v21** — historical diagnostic replay utility;
 - **continuous-forward-v24** — replay the unchanged frozen models through the latest safe Elexon/NESO observations;
-- **adaptive-2h-v25** — extend the unchanged, versioned 2h causal-bias-correction candidate through later observations.
+- **adaptive-2h-v25** — extend the unchanged, versioned 2h causal-bias-correction candidate;
+- **lock-v25-snapshot** — content-address and commit a verified forward artifact into the append-only registry.
 
 Long-running network workflows are manual so ordinary documentation/source commits do not repeatedly download live market data.
