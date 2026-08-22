@@ -1,0 +1,132 @@
+name: adaptive-2h-v26
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: adaptive-2h-v26-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  consensus-forward:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Test before accessing v0.26 labels
+        run: pytest -q
+
+      - name: Set safe market-data boundary
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          from datetime import datetime, timedelta, timezone
+          now = datetime.now(timezone.utc)
+          safe = now - timedelta(minutes=90)
+          safe = safe.replace(minute=(safe.minute // 30) * 30, second=0, microsecond=0)
+          source_end = safe.date() + timedelta(days=1)
+          print(f"AVAILABLE_END_UTC={safe.isoformat().replace('+00:00', 'Z')}")
+          print(f"SOURCE_END_DATE={source_end.isoformat()}")
+          print("ELEXON_START_DATE=2026-07-01")
+          print("NESO_START_DATE=2026-07-12")
+          PY
+
+      - name: Download bounded NESO vintages
+        run: |
+          python scripts/download_neso_v21_window.py \
+            --start-date "$NESO_START_DATE" \
+            --end-date-exclusive "$SOURCE_END_DATE" \
+            --out data/external/v26/neso_current_window.csv \
+            --manifest reports/v26_2h/neso_window_manifest.json
+
+      - name: Materialise NESO vintages
+        run: |
+          python scripts/materialise_v21_current.py \
+            --input data/external/v26/neso_current_window.csv \
+            --out data/processed/v26/forecast_current.parquet \
+            --manifest reports/v26_2h/neso_materialise_manifest.json
+
+      - name: Download Elexon MID with warm-up
+        run: |
+          python scripts/download_elexon_v22_mid.py \
+            --start-date "$ELEXON_START_DATE" \
+            --end-date-exclusive "$SOURCE_END_DATE" \
+            --out-dir data/external/v26/elexon_mid \
+            --manifest reports/v26_2h/elexon_mid_manifest.json
+
+      - name: Materialise Elexon market reference
+        run: |
+          python scripts/materialise_elexon_v22_mid.py \
+            --bundle-dir data/external/v26/elexon_mid \
+            --out data/processed/v26/reference_market.parquet \
+            --manifest reports/v26_2h/elexon_mid_materialise_manifest.json
+
+      - name: Recreate unchanged frozen v0.24 rows
+        run: |
+          python scripts/run_v24_continuous_forward_monitor.py \
+            --elexon-reference data/processed/v26/reference_market.parquet \
+            --neso-current data/processed/v26/forecast_current.parquet \
+            --model-state reports/locked/V0_21_FROZEN_MODEL_STATE.json \
+            --start-utc 2026-07-12T12:00:00Z \
+            --end-exclusive-utc "$AVAILABLE_END_UTC" \
+            --out-dir reports/v24_for_v26
+
+      - name: Run v0.26 causal consensus candidate
+        run: |
+          python scripts/run_v26_2h_consensus_candidate.py \
+            --v24-rows reports/v24_for_v26/forward_rows_2h.csv \
+            --out-dir reports/v26_2h
+
+      - name: Enforce v0.26 contracts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          summary = json.loads(Path('reports/v26_2h/v26_summary.json').read_text())
+          spec = summary['candidate_spec']
+          ledger = summary['ledger_integrity']
+          promotion = summary['promotion_readiness']
+          if spec['version'] != '0.26.0':
+              raise SystemExit('v0.26 version changed')
+          if spec['candidate'] != '2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL':
+              raise SystemExit('v0.26 candidate identity changed')
+          if spec['forward_start_utc'] != '2026-08-22T20:30:00+00:00':
+              raise SystemExit('v0.26 forward boundary changed')
+          if spec['rule']['short_lookback_hours'] != 6 or spec['rule']['long_lookback_hours'] != 48:
+              raise SystemExit('v0.26 lookback contract changed')
+          if ledger['status'] not in {'FIRST_VERSIONED_FORWARD_LEDGER', 'LOCKED_PREFIX_REPRODUCED'}:
+              raise SystemExit('v0.26 ledger contract failed')
+          if promotion['minimum_forward_rows'] != 336:
+              raise SystemExit('v0.26 promotion sample gate changed')
+          if promotion.get('automatic_promotion') is not False:
+              raise SystemExit('v0.26 must never auto-promote')
+          print({
+              'development': summary['development_diagnostics'],
+              'forward': summary['forward_segment'],
+              'monitor': summary['monitor'],
+              'ledger': ledger,
+              'promotion': promotion,
+          })
+          PY
+
+      - name: Upload v0.26 candidate artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v26-consensus-2h-${{ github.run_id }}
+          path: reports/v26_2h/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
