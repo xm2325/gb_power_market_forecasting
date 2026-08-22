@@ -1,0 +1,86 @@
+name: v26-development
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - feat/real-data-v0.20
+    paths:
+      - '.github/V26_DEVELOPMENT_RUN'
+
+permissions:
+  contents: read
+
+jobs:
+  select-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Test candidate contracts before reading development artifact
+        run: pytest -q
+
+      - name: Download exact locked v0.25 source artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: v25-adaptive-2h-32602423009
+          path: _v25_source
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 32602423009
+
+      - name: Chronological v0.26 selection and development validation
+        run: |
+          python scripts/select_v26_2h_ewma_candidate.py \
+            --rows _v25_source/adaptive_rows_2h.csv \
+            --out-dir reports/v26_development \
+            --source-run-id 32602423009 \
+            --source-artifact-id 9483291389 \
+            --source-artifact-sha256 eb2585458aaddb15a2485b4f5c349e8f90917cfc97bbdbe179cf95009e90ab95
+
+      - name: Enforce v0.26 development boundary and predeclared grid
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          d = json.loads(Path('reports/v26_development/v26_candidate_decision.json').read_text())
+          if d['development_end_exclusive_utc'] != '2026-08-22T20:30:00+00:00':
+              raise SystemExit('v0.26 development boundary changed')
+          if d['validation_rows'] != 96:
+              raise SystemExit('v0.26 validation size changed')
+          if d['proposed_forward_start_utc'] != '2026-08-23T02:00:00+00:00':
+              raise SystemExit('v0.26 proposed forward boundary changed')
+          grid = d.get('grid_contract', {})
+          if grid:
+              if grid['half_life_hours'] != [3.0, 6.0, 12.0, 24.0]:
+                  raise SystemExit('v0.26 half-life grid changed')
+              if grid['shrinkage'] != [0.5, 1.0]:
+                  raise SystemExit('v0.26 shrinkage grid changed')
+          source = d['source_artifact']
+          if source['artifact_sha256'] != 'eb2585458aaddb15a2485b4f5c349e8f90917cfc97bbdbe179cf95009e90ab95':
+              raise SystemExit('wrong v0.26 source artifact')
+          print({
+              'status': d['status'],
+              'selected': None if d['selected'] is None else d['selected']['candidate'],
+              'validation_guards': d.get('validation_guards'),
+              'forward_test_allowed': d['forward_test_allowed'],
+          })
+          PY
+
+      - name: Upload v0.26 development decision
+        uses: actions/upload-artifact@v4
+        with:
+          name: v26-development-${{ github.run_id }}
+          path: reports/v26_development/
+          if-no-files-found: error
+          retention-days: 30
