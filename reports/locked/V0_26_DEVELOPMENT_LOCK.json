@@ -1,0 +1,24 @@
+{
+  "schema": "gb-power-market-v26-development-lock-v1",
+  "status": "LOCKED_NEGATIVE_DEVELOPMENT_DECISION",
+  "decision_status": "BLOCKED_BY_CHRONOLOGICAL_DEVELOPMENT_VALIDATION",
+  "forward_test_allowed": false,
+  "selected_candidate": "EWMA_24h_SHRINK_1",
+  "development_run_id": 32603302586,
+  "development_artifact_id": 9483484608,
+  "development_artifact_sha256": "b4d5b9e3f72da959d1a7f2a3786c5e87951e285efb8506d534f4c5305643af1d",
+  "source_v25_artifact_sha256": "eb2585458aaddb15a2485b4f5c349e8f90917cfc97bbdbe179cf95009e90ab95",
+  "development_end_exclusive_utc": "2026-08-22T20:30:00+00:00",
+  "validation_rows": 96,
+  "validation_guards": {
+    "mae_better_than_frozen": false,
+    "mae_better_than_reference": true,
+    "p95_non_worse_than_frozen": false,
+    "absolute_bias_non_worse_than_frozen": false,
+    "passed": false
+  },
+  "decision_file_sha256": "7e0dd0f354d618d641cc896057c85b0ea7836fc84b4d59135f4349a3f78a8414",
+  "grid_file_sha256": "8ccdaa65fed97060c8f0809a9e20ab114e4af444588f5a0cdcd5b4625a699869",
+  "selected_rows_file_sha256": "de4f110b0dea8d39213c291d9fd80c81536ee3a1f482d7c4cfaefeb06b39a71e",
+  "claim_boundary": "v0.26 development validation failed; no forward test was launched and no numerical v0.26 accuracy claim is permitted"
+}

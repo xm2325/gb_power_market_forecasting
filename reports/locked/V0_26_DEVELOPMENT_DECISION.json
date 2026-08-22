@@ -1,0 +1,322 @@
+{
+  "version": "0.26.0",
+  "status": "BLOCKED_BY_CHRONOLOGICAL_DEVELOPMENT_VALIDATION",
+  "candidate_family": "2H_FROZEN_PLUS_CAUSAL_EWMA_RESIDUAL",
+  "development_start_utc": "2026-08-15T07:30:00+00:00",
+  "development_end_exclusive_utc": "2026-08-22T20:30:00+00:00",
+  "selection_end_exclusive_utc": "2026-08-20T20:30:00+00:00",
+  "validation_rows": 96,
+  "proposed_forward_start_utc": "2026-08-23T02:00:00+00:00",
+  "grid_contract": {
+    "half_life_hours": [
+      3.0,
+      6.0,
+      12.0,
+      24.0
+    ],
+    "shrinkage": [
+      0.5,
+      1.0
+    ],
+    "minimum_history_rows": 24,
+    "selection_objective": "lowest selection MAE among candidates with non-worse frozen P95 and absolute signed bias",
+    "validation_gate": "selected rule must beat frozen and reference MAE and be non-worse than frozen P95 and absolute signed bias"
+  },
+  "baseline_selection": {
+    "frozen": {
+      "rows": 266,
+      "mae_gbp_mwh": 17.196855614939253,
+      "p95_abs_error_gbp_mwh": 38.41170904587722,
+      "signed_bias_gbp_mwh": 15.901212099528996
+    },
+    "reference": {
+      "rows": 266,
+      "mae_gbp_mwh": 16.72590055847706,
+      "p95_abs_error_gbp_mwh": 36.8125,
+      "signed_bias_gbp_mwh": 1.3300000000000003
+    }
+  },
+  "baseline_validation": {
+    "frozen": {
+      "rows": 96,
+      "mae_gbp_mwh": 18.18822466302794,
+      "p95_abs_error_gbp_mwh": 47.73822716956407,
+      "signed_bias_gbp_mwh": -2.371513182137598
+    },
+    "reference": {
+      "rows": 96,
+      "mae_gbp_mwh": 29.820624999999996,
+      "p95_abs_error_gbp_mwh": 116.95999999999998,
+      "signed_bias_gbp_mwh": -28.30020833333333
+    }
+  },
+  "grid": [
+    {
+      "candidate": "EWMA_3h_SHRINK_0.5",
+      "rule": {
+        "horizon_minutes": 120,
+        "outcome_delay_minutes": 30,
+        "half_life_hours": 3.0,
+        "shrinkage": 0.5,
+        "minimum_history_rows": 24
+      },
+      "selection": {
+        "rows": 266,
+        "mae_gbp_mwh": 12.185561022753074,
+        "p95_abs_error_gbp_mwh": 31.50099442497049,
+        "signed_bias_gbp_mwh": 7.847448672551224
+      },
+      "validation_diagnostic": {
+        "rows": 96,
+        "mae_gbp_mwh": 17.663749531280235,
+        "p95_abs_error_gbp_mwh": 52.29609525651126,
+        "signed_bias_gbp_mwh": -1.8942382526215285
+      },
+      "selection_guards": {
+        "mae_better_than_frozen": true,
+        "p95_non_worse_than_frozen": true,
+        "absolute_bias_non_worse_than_frozen": true,
+        "eligible": true
+      }
+    },
+    {
+      "candidate": "EWMA_3h_SHRINK_1",
+      "rule": {
+        "horizon_minutes": 120,
+        "outcome_delay_minutes": 30,
+        "half_life_hours": 3.0,
+        "shrinkage": 1.0,
+        "minimum_history_rows": 24
+      },
+      "selection": {
+        "rows": 266,
+        "mae_gbp_mwh": 11.992582167859092,
+        "p95_abs_error_gbp_mwh": 28.149802843010885,
+        "signed_bias_gbp_mwh": -0.20631475442654867
+      },
+      "validation_diagnostic": {
+        "rows": 96,
+        "mae_gbp_mwh": 17.90088139958006,
+        "p95_abs_error_gbp_mwh": 60.92599676893178,
+        "signed_bias_gbp_mwh": -1.4169633231054604
+      },
+      "selection_guards": {
+        "mae_better_than_frozen": true,
+        "p95_non_worse_than_frozen": true,
+        "absolute_bias_non_worse_than_frozen": true,
+        "eligible": true
+      }
+    },
+    {
+      "candidate": "EWMA_6h_SHRINK_0.5",
+      "rule": {
+        "horizon_minutes": 120,
+        "outcome_delay_minutes": 30,
+        "half_life_hours": 6.0,
+        "shrinkage": 0.5,
+        "minimum_history_rows": 24
+      },
+      "selection": {
+        "rows": 266,
+        "mae_gbp_mwh": 11.983569557874272,
+        "p95_abs_error_gbp_mwh": 31.25280350812334,
+        "signed_bias_gbp_mwh": 7.75241071478599
+      },
+      "validation_diagnostic": {
+        "rows": 96,
+        "mae_gbp_mwh": 17.955355954514193,
+        "p95_abs_error_gbp_mwh": 52.783226733477946,
+        "signed_bias_gbp_mwh": -3.151760294623634
+      },
+      "selection_guards": {
+        "mae_better_than_frozen": true,
+        "p95_non_worse_than_frozen": true,
+        "absolute_bias_non_worse_than_frozen": true,
+        "eligible": true
+      }
+    },
+    {
+      "candidate": "EWMA_6h_SHRINK_1",
+      "rule": {
+        "horizon_minutes": 120,
+        "outcome_delay_minutes": 30,
+        "half_life_hours": 6.0,
+        "shrinkage": 1.0,
+        "minimum_history_rows": 24
+      },
+      "selection": {
+        "rows": 266,
+        "mae_gbp_mwh": 11.223087608178904,
+        "p95_abs_error_gbp_mwh": 28.951658937790825,
+        "signed_bias_gbp_mwh": -0.3963906699570131
+      },
+      "validation_diagnostic": {
+        "rows": 96,
+        "mae_gbp_mwh": 18.329086500963662,
+        "p95_abs_error_gbp_mwh": 57.936963030570254,
+        "signed_bias_gbp_mwh": -3.932007407109671
+      },
+      "selection_guards": {
+        "mae_better_than_frozen": true,
+        "p95_non_worse_than_frozen": true,
+        "absolute_bias_non_worse_than_frozen": true,
+        "eligible": true
+      }
+    },
+    {
+      "candidate": "EWMA_12h_SHRINK_0.5",
+      "rule": {
+        "horizon_minutes": 120,
+        "outcome_delay_minutes": 30,
+        "half_life_hours": 12.0,
+        "shrinkage": 0.5,
+        "minimum_history_rows": 24
+      },
+      "selection": {
+        "rows": 266,
+        "mae_gbp_mwh": 11.877142989164732,
+        "p95_abs_error_gbp_mwh": 30.67377498508629,
+        "signed_bias_gbp_mwh": 7.619408312912987
+      },
+      "validation_diagnostic": {
+        "rows": 96,
+        "mae_gbp_mwh": 18.144599088490732,
+        "p95_abs_error_gbp_mwh": 49.20821720989428,
+        "signed_bias_gbp_mwh": -4.703224698889737
+      },
+      "selection_guards": {
+        "mae_better_than_frozen": true,
+        "p95_non_worse_than_frozen": true,
+        "absolute_bias_non_worse_than_frozen": true,
+        "eligible": true
+      }
+    },
+    {
+      "candidate": "EWMA_12h_SHRINK_1",
+      "rule": {
+        "horizon_minutes": 120,
+        "outcome_delay_minutes": 30,
+        "half_life_hours": 12.0,
+        "shrinkage": 1.0,
+        "minimum_history_rows": 24
+      },
+      "selection": {
+        "rows": 266,
+        "mae_gbp_mwh": 10.817390747520037,
+        "p95_abs_error_gbp_mwh": 27.890257454861846,
+        "signed_bias_gbp_mwh": -0.6623954737030214
+      },
+      "validation_diagnostic": {
+        "rows": 96,
+        "mae_gbp_mwh": 18.743748187897594,
+        "p95_abs_error_gbp_mwh": 53.804815742986776,
+        "signed_bias_gbp_mwh": -7.034936215641875
+      },
+      "selection_guards": {
+        "mae_better_than_frozen": true,
+        "p95_non_worse_than_frozen": true,
+        "absolute_bias_non_worse_than_frozen": true,
+        "eligible": true
+      }
+    },
+    {
+      "candidate": "EWMA_24h_SHRINK_0.5",
+      "rule": {
+        "horizon_minutes": 120,
+        "outcome_delay_minutes": 30,
+        "half_life_hours": 24.0,
+        "shrinkage": 0.5,
+        "minimum_history_rows": 24
+      },
+      "selection": {
+        "rows": 266,
+        "mae_gbp_mwh": 11.849642083913285,
+        "p95_abs_error_gbp_mwh": 30.331695963619058,
+        "signed_bias_gbp_mwh": 7.620912517888621
+      },
+      "validation_diagnostic": {
+        "rows": 96,
+        "mae_gbp_mwh": 18.344365430255095,
+        "p95_abs_error_gbp_mwh": 50.42068743835548,
+        "signed_bias_gbp_mwh": -6.434175243953267
+      },
+      "selection_guards": {
+        "mae_better_than_frozen": true,
+        "p95_non_worse_than_frozen": true,
+        "absolute_bias_non_worse_than_frozen": true,
+        "eligible": true
+      }
+    },
+    {
+      "candidate": "EWMA_24h_SHRINK_1",
+      "rule": {
+        "horizon_minutes": 120,
+        "outcome_delay_minutes": 30,
+        "half_life_hours": 24.0,
+        "shrinkage": 1.0,
+        "minimum_history_rows": 24
+      },
+      "selection": {
+        "rows": 266,
+        "mae_gbp_mwh": 10.642640610731606,
+        "p95_abs_error_gbp_mwh": 27.712209238611386,
+        "signed_bias_gbp_mwh": -0.659387063751756
+      },
+      "validation_diagnostic": {
+        "rows": 96,
+        "mae_gbp_mwh": 19.44019415212713,
+        "p95_abs_error_gbp_mwh": 52.71724304525544,
+        "signed_bias_gbp_mwh": -10.496837305768935
+      },
+      "selection_guards": {
+        "mae_better_than_frozen": true,
+        "p95_non_worse_than_frozen": true,
+        "absolute_bias_non_worse_than_frozen": true,
+        "eligible": true
+      }
+    }
+  ],
+  "selected": {
+    "candidate": "EWMA_24h_SHRINK_1",
+    "rule": {
+      "horizon_minutes": 120,
+      "outcome_delay_minutes": 30,
+      "half_life_hours": 24.0,
+      "shrinkage": 1.0,
+      "minimum_history_rows": 24
+    },
+    "selection": {
+      "rows": 266,
+      "mae_gbp_mwh": 10.642640610731606,
+      "p95_abs_error_gbp_mwh": 27.712209238611386,
+      "signed_bias_gbp_mwh": -0.659387063751756
+    },
+    "validation_diagnostic": {
+      "rows": 96,
+      "mae_gbp_mwh": 19.44019415212713,
+      "p95_abs_error_gbp_mwh": 52.71724304525544,
+      "signed_bias_gbp_mwh": -10.496837305768935
+    },
+    "selection_guards": {
+      "mae_better_than_frozen": true,
+      "p95_non_worse_than_frozen": true,
+      "absolute_bias_non_worse_than_frozen": true,
+      "eligible": true
+    }
+  },
+  "validation_guards": {
+    "mae_better_than_frozen": false,
+    "mae_better_than_reference": true,
+    "p95_non_worse_than_frozen": false,
+    "absolute_bias_non_worse_than_frozen": false,
+    "passed": false
+  },
+  "forward_test_allowed": false,
+  "evidence_contract": "Every row through 2026-08-22T20:30Z is development evidence already observed before v0.26. No v0.26 accuracy claim may use these rows. A successful development gate only permits a new versioned forward test beginning no earlier than 2026-08-23T02:00Z.",
+  "source_artifact": {
+    "run_id": 32602423009,
+    "artifact_id": 9483291389,
+    "artifact_sha256": "eb2585458aaddb15a2485b4f5c349e8f90917cfc97bbdbe179cf95009e90ab95",
+    "latest_input_target_start_utc": "2026-08-22T20:00:00+00:00"
+  }
+}
