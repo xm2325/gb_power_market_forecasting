@@ -47,6 +47,47 @@ The rule and tests were committed before reading v0.26 outcomes.
 - only targets at or after `2026-08-22T20:30:00Z` belong to the versioned v0.26 forward segment;
 - if the consensus rule, windows, clipping rule or frozen point model changes later, that change must receive a new version and new forward start.
 
+## Development diagnostic on the already-observed v0.25 window
+
+Applying the frozen v0.26 rule retrospectively to the 66 rows that motivated the redesign gives:
+
+| Model | MAE (£/MWh) |
+|---|---:|
+| v0.26 consensus candidate | **19.722** |
+| frozen v0.20 2h | 20.082 |
+| v0.25 48h correction | 21.918 |
+| previous-day reference | 39.545 |
+
+The consensus rule therefore removes much of the v0.25 overshoot on those observed rows and is 1.8% lower-MAE than frozen in this development diagnostic. It is not uniformly better: candidate P95 is 54.864 versus 52.287 frozen, absolute signed bias is 9.563 versus 7.046, and interval coverage is 77.3% versus 78.8%. These values are **development evidence only**.
+
+## First fresh forward checkpoint
+
+The first real v0.26 network run was GitHub Actions run `32604734019`. Tests were executed before accessing new labels; the safe data boundary was then fixed at `2026-08-22T21:30:00Z`.
+
+Only **2 fresh half-hours** were available after the frozen v0.26 start:
+
+| Model | MAE (£/MWh) |
+|---|---:|
+| v0.26 consensus candidate | 4.779 |
+| frozen v0.20 2h | 4.155 |
+| v0.25 48h correction | **4.095** |
+| previous-day reference | 8.160 |
+
+For these two rows, v0.26 is 41.4% better than the previous-day reference but 15.0% worse than frozen and 16.7% worse than v0.25 on mean MAE. One of the two targets fell back to frozen (`fallback_rate = 0.5`). Both frozen and v0.26 intervals covered both observations.
+
+This checkpoint is deliberately labelled `EARLY_ONLY_2_ROWS_NO_HEADLINE_CLAIM`. Two observations cannot establish whether the consensus gate improves 2h forecasting, and the rule is **not changed** in response to this early result.
+
+The first v0.26 forward ledger contains two rows and has chain tip:
+
+`49cc9148d1756ff1fce3bdcac5f8f9405850cf516b0c701215e81121a7677f9d`
+
+Evidence record:
+
+- `reports/monitoring/V0_26_FIRST_FORWARD_CHECKPOINT_2026-08-22_2130Z.json`
+- Actions run `32604734019`
+- artifact `v26-consensus-2h-32604734019`, ID `9483846187`
+- artifact SHA-256 `c26eccc3be5491bba50b2a583ebd3f7d169f7f10406974a080df6a4db663f6fb`
+
 ## Monitoring
 
 The new candidate keeps the existing outcome-independent monitoring cadence:
@@ -66,4 +107,4 @@ No candidate is automatically promoted. Seven days / 336 forward half-hours rema
 
 ## Claim boundary
 
-v0.26 is motivated by observed v0.25 degradation. Therefore retrospective performance before 20:30 UTC on 22 August is **development evidence**, regardless of how strong it looks. Only later observations can support a new forward-performance statement.
+v0.26 is motivated by observed v0.25 degradation. Therefore retrospective performance before 20:30 UTC on 22 August is **development evidence**, regardless of how strong it looks. Only later observations can support new forward-performance evidence, and the first two such observations remain too early for a new accuracy claim.
