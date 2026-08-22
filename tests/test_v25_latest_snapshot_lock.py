@@ -4,6 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 
+import pandas as pd
+
 from gb_power_market.forward_ledger_v25 import load_locked_ledger, verify_ledger_chain
 from scripts.run_v25_2h_adaptive_candidate import _registry_latest
 
@@ -16,15 +18,31 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def test_latest_registry_snapshot_is_13_row_append() -> None:
-    latest = _registry_latest(REGISTRY)
-    assert latest["sequence"] == 3
-    assert latest["rows"] == 13
-    assert latest["new_rows"] == 4
-    assert latest["end_exclusive_utc"] == "2026-08-21T18:00:00Z"
-    assert latest["ledger_chain_tip_sha256"] == (
-        "5852d70b1a18acc0ff9ae46de71c372fc9d8878e8e2ecab8d2b2427dae997745"
-    )
+def test_latest_registry_snapshot_strictly_extends_predecessor() -> None:
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    snapshots = registry["snapshots"]
+    assert len(snapshots) >= 2
+    previous, latest = snapshots[-2], snapshots[-1]
+
+    assert latest["sequence"] == previous["sequence"] + 1
+    assert latest["rows"] > previous["rows"]
+    assert latest["new_rows"] == latest["rows"] - previous["rows"]
+    assert pd.Timestamp(latest["end_exclusive_utc"]) > pd.Timestamp(previous["end_exclusive_utc"])
+
+    previous_ledger = load_locked_ledger(ROOT / previous["ledger_path"])
+    latest_ledger = load_locked_ledger(ROOT / latest["ledger_path"])
+    verify_ledger_chain(previous_ledger)
+    verify_ledger_chain(latest_ledger)
+    assert len(previous_ledger) == previous["rows"]
+    assert len(latest_ledger) == latest["rows"]
+    assert (
+        latest_ledger.iloc[: len(previous_ledger)]["row_sha256"].reset_index(drop=True)
+        == previous_ledger["row_sha256"].reset_index(drop=True)
+    ).all()
+    assert (
+        latest_ledger.iloc[: len(previous_ledger)]["chain_sha256"].reset_index(drop=True)
+        == previous_ledger["chain_sha256"].reset_index(drop=True)
+    ).all()
 
 
 def test_latest_registered_files_match_digests_and_chain() -> None:
@@ -45,9 +63,8 @@ def test_snapshot_registry_is_monotone_and_append_only() -> None:
     assert registry["append_only"] is True
     snapshots = registry["snapshots"]
     assert [x["sequence"] for x in snapshots] == list(range(1, len(snapshots) + 1))
-    assert [x["rows"] for x in snapshots] == sorted(x["rows"] for x in snapshots)
     assert all(b["rows"] > a["rows"] for a, b in zip(snapshots, snapshots[1:]))
     assert all(
-        b["end_exclusive_utc"] > a["end_exclusive_utc"]
+        pd.Timestamp(b["end_exclusive_utc"]) > pd.Timestamp(a["end_exclusive_utc"])
         for a, b in zip(snapshots, snapshots[1:])
     )
