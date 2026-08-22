@@ -52,11 +52,16 @@ jobs:
             tests/test_v25_snapshot_registry.py \
             tests/test_v25_latest_snapshot_lock.py
 
-      - name: Commit immutable snapshot
+      - name: Commit, rebase and push immutable snapshot
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports/monitoring docs
           git diff --cached --stat
           git commit -m "Lock v0.25 66-row forward snapshot"
+          git fetch origin feat/real-data-v0.20
+          git rebase origin/feat/real-data-v0.20
+          pytest -q \
+            tests/test_v25_snapshot_registry.py \
+            tests/test_v25_latest_snapshot_lock.py
           git push origin HEAD:feat/real-data-v0.20
