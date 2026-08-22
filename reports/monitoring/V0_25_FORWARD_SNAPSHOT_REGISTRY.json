@@ -45,6 +45,26 @@
       "ledger_sha256": "c7aeb082dc04fe53de2a2789fdd1072e148b8ee7ccae31db4e00bd4cece30929",
       "ledger_chain_tip_sha256": "5852d70b1a18acc0ff9ae46de71c372fc9d8878e8e2ecab8d2b2427dae997745",
       "maturity_stage": "EARLY_ONLY"
+    },
+    {
+      "sequence": 4,
+      "end_exclusive_utc": "2026-08-22T20:30:00Z",
+      "rows": 66,
+      "new_rows": 53,
+      "run_id": 32602423009,
+      "artifact_id": 9483291389,
+      "artifact_sha256": "eb2585458aaddb15a2485b4f5c349e8f90917cfc97bbdbe179cf95009e90ab95",
+      "monitor_path": "reports/monitoring/V0_25_MONITOR_STATE_2026-08-22_2030Z.json",
+      "monitor_sha256": "aa1167b76e8d709431b41fd7584b1907d48771d538cf58c102e5a6d9e3b460a3",
+      "ledger_path": "reports/monitoring/V0_25_FORWARD_LEDGER_2026-08-22_2030Z.csv",
+      "ledger_sha256": "ef4511c598e8391a3d0ca8d91d116a750c498beafa81cc8ecc0cf85bfd71c558",
+      "ledger_chain_tip_sha256": "b618989dcd02f066cc3e6e38444ceb06eee549820a675d4142ed45094d33ba00",
+      "maturity_stage": "INTRADAY_TO_2DAY_MONITORING",
+      "alert_status": "ALERTS_PRESENT",
+      "alerts": [
+        "ADAPTIVE_TRAILS_FROZEN_24H",
+        "BIAS_CORRECTION_WORSENED_24H"
+      ]
     }
   ],
   "contract": "Snapshot sequence, row count and end time must increase monotonically. Every later ledger must reproduce every row of the preceding ledger before appending new targets. The original six-row ledger remains the permanent genesis anchor; the latest registered ledger is the rolling locked prefix for the next replay. Registry entries are historical evidence and are never rewritten to make later performance look better."
