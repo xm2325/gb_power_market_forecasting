@@ -1,0 +1,25 @@
+{
+  "schema": "gb-power-market-v26-forward-snapshot-registry-v1",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL",
+  "forward_start_utc": "2026-08-22T20:30:00Z",
+  "append_only": true,
+  "snapshots": [
+    {
+      "sequence": 1,
+      "end_exclusive_utc": "2026-08-22T21:30:00Z",
+      "rows": 2,
+      "new_rows": 2,
+      "run_id": 32604734019,
+      "artifact_id": 9483846187,
+      "artifact_sha256": "c26eccc3be5491bba50b2a583ebd3f7d169f7f10406974a080df6a4db663f6fb",
+      "checkpoint_path": "reports/monitoring/V0_26_FIRST_FORWARD_CHECKPOINT_2026-08-22_2130Z.json",
+      "ledger_path": "reports/monitoring/V0_26_FORWARD_LEDGER_FIRST2.csv",
+      "ledger_sha256": "fe0742d826a1c418da09ceb73da0b4d16c46b43a964d840cbf0e8ef3c4671faf",
+      "ledger_chain_tip_sha256": "49cc9148d1756ff1fce3bdcac5f8f9405850cf516b0c701215e81121a7677f9d",
+      "maturity_stage": "EARLY_ONLY",
+      "alert_status": "INSUFFICIENT_SAMPLE_FOR_ALERTS",
+      "alerts": []
+    }
+  ],
+  "contract": "Snapshot sequence, row count and end time must increase monotonically. Every later ledger must reproduce every row of the preceding ledger before appending new targets. The first two-row ledger from run 32604734019 is the permanent v0.26 genesis anchor. Registry entries are historical forward evidence and are never rewritten after later labels are observed."
+}

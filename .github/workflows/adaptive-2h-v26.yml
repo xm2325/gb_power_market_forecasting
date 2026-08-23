@@ -87,6 +87,8 @@ jobs:
         run: |
           python scripts/run_v26_2h_consensus_candidate.py \
             --v24-rows reports/v24_for_v26/forward_rows_2h.csv \
+            --snapshot-registry reports/monitoring/V0_26_FORWARD_SNAPSHOT_REGISTRY.json \
+            --genesis-ledger reports/monitoring/V0_26_FORWARD_LEDGER_FIRST2.csv \
             --out-dir reports/v26_2h
 
       - name: Enforce v0.26 contracts
@@ -107,8 +109,15 @@ jobs:
               raise SystemExit('v0.26 forward boundary changed')
           if spec['rule']['short_lookback_hours'] != 6 or spec['rule']['long_lookback_hours'] != 48:
               raise SystemExit('v0.26 lookback contract changed')
-          if ledger['status'] not in {'FIRST_VERSIONED_FORWARD_LEDGER', 'LOCKED_PREFIX_REPRODUCED'}:
-              raise SystemExit('v0.26 ledger contract failed')
+          if ledger['status'] != 'LOCKED_PREFIX_REPRODUCED':
+              raise SystemExit('latest immutable v0.26 prefix was not reproduced')
+          genesis = ledger['genesis_anchor']
+          if genesis['locked_rows'] != 2:
+              raise SystemExit('v0.26 genesis row count changed')
+          if genesis['locked_chain_tip_sha256'] != '49cc9148d1756ff1fce3bdcac5f8f9405850cf516b0c701215e81121a7677f9d':
+              raise SystemExit('v0.26 genesis chain tip changed')
+          if ledger['locked_registry_sequence'] < 1:
+              raise SystemExit('v0.26 registry sequence is invalid')
           if promotion['minimum_forward_rows'] != 336:
               raise SystemExit('v0.26 promotion sample gate changed')
           if promotion.get('automatic_promotion') is not False:
@@ -117,7 +126,13 @@ jobs:
               'development': summary['development_diagnostics'],
               'forward': summary['forward_segment'],
               'monitor': summary['monitor'],
-              'ledger': ledger,
+              'latest_locked_prefix': {
+                  'sequence': ledger['locked_registry_sequence'],
+                  'rows': ledger['locked_rows'],
+                  'chain_tip': ledger['locked_chain_tip_sha256'],
+                  'new_rows': ledger['new_rows_after_locked_prefix'],
+              },
+              'genesis_anchor': genesis,
               'promotion': promotion,
           })
           PY

@@ -23,6 +23,15 @@ from gb_power_market.forward_ledger_v26 import (
 
 
 V25_FORWARD_START = pd.Timestamp("2026-08-21T11:30:00Z")
+GENESIS_LEDGER_PATH = Path("reports/monitoring/V0_26_FORWARD_LEDGER_FIRST2.csv")
+SNAPSHOT_REGISTRY_PATH = Path("reports/monitoring/V0_26_FORWARD_SNAPSHOT_REGISTRY.json")
+FIRST_V26_LEDGER_ROWS = 2
+FIRST_V26_LEDGER_CHAIN_TIP_SHA256 = (
+    "49cc9148d1756ff1fce3bdcac5f8f9405850cf516b0c701215e81121a7677f9d"
+)
+FIRST_V26_FORWARD_ARTIFACT_SHA256 = (
+    "c26eccc3be5491bba50b2a583ebd3f7d169f7f10406974a080df6a4db663f6fb"
+)
 
 
 def _metrics(x: pd.DataFrame) -> dict:
@@ -93,11 +102,61 @@ def _maturity(n: int) -> str:
     return "ONE_WEEK_PLUS_FORWARD"
 
 
+def _registry_latest(path: Path) -> dict:
+    registry = json.loads(path.read_text(encoding="utf-8"))
+    if registry.get("schema") != "gb-power-market-v26-forward-snapshot-registry-v1":
+        raise SystemExit("v0.26 snapshot registry schema changed")
+    if registry.get("candidate") != V26_CANDIDATE_ID:
+        raise SystemExit("v0.26 snapshot registry candidate identity changed")
+    if registry.get("forward_start_utc") != "2026-08-22T20:30:00Z":
+        raise SystemExit("v0.26 snapshot registry forward boundary changed")
+    if registry.get("append_only") is not True:
+        raise SystemExit("v0.26 snapshot registry must be append-only")
+
+    snapshots = registry.get("snapshots", [])
+    if not snapshots:
+        raise SystemExit("v0.26 snapshot registry has no locked snapshots")
+
+    previous_rows = 0
+    previous_end: pd.Timestamp | None = None
+    for expected_sequence, snapshot in enumerate(snapshots, start=1):
+        if int(snapshot["sequence"]) != expected_sequence:
+            raise SystemExit("v0.26 snapshot registry sequence is not contiguous")
+        rows = int(snapshot["rows"])
+        if rows <= previous_rows:
+            raise SystemExit("v0.26 snapshot row count is not strictly increasing")
+        if int(snapshot["new_rows"]) != rows - previous_rows:
+            raise SystemExit("v0.26 snapshot new-row count is inconsistent")
+        end = pd.Timestamp(snapshot["end_exclusive_utc"])
+        if end.tzinfo is None:
+            raise SystemExit("v0.26 snapshot end must be timezone-aware")
+        if previous_end is not None and end <= previous_end:
+            raise SystemExit("v0.26 snapshot end time is not strictly increasing")
+        previous_rows = rows
+        previous_end = end
+
+    return snapshots[-1]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--v24-rows", default="reports/v24_forward/forward_rows_2h.csv")
     ap.add_argument("--out-dir", default="reports/v26_2h")
-    ap.add_argument("--locked-ledger", default=None)
+    ap.add_argument(
+        "--locked-ledger",
+        default=None,
+        help="Optional explicit latest immutable prefix. By default use the latest ledger in the v0.26 snapshot registry.",
+    )
+    ap.add_argument(
+        "--snapshot-registry",
+        default=str(SNAPSHOT_REGISTRY_PATH),
+        help="Append-only registry whose latest ledger must be reproduced before new rows are accepted.",
+    )
+    ap.add_argument(
+        "--genesis-ledger",
+        default=str(GENESIS_LEDGER_PATH),
+        help="Permanent first-two v0.26 forward ledger anchor from run 32604734019.",
+    )
     args = ap.parse_args()
 
     rows = pd.read_csv(args.v24_rows)
@@ -112,19 +171,30 @@ def main() -> None:
 
     ledger = build_v26_forward_ledger(corrected, forward_start_utc=V26_FORWARD_START_UTC)
     ledger.to_csv(out / "v26_forward_ledger.csv", index=False, lineterminator="\n")
-    if args.locked_ledger:
-        locked = load_v26_locked_ledger(args.locked_ledger)
-        ledger_integrity = verify_v26_locked_prefix(ledger, locked)
-    else:
-        ledger_integrity = {
-            "status": "FIRST_VERSIONED_FORWARD_LEDGER",
-            "locked_rows": 0,
-            "current_rows": int(len(ledger)),
-            "new_rows_after_locked_prefix": int(len(ledger)),
-            "current_chain_tip_sha256": (
-                str(ledger.iloc[-1]["chain_sha256"]) if len(ledger) else None
-            ),
-        }
+
+    genesis = load_v26_locked_ledger(args.genesis_ledger)
+    genesis_check = verify_v26_locked_prefix(ledger, genesis)
+    if genesis_check["locked_rows"] != FIRST_V26_LEDGER_ROWS:
+        raise SystemExit("v0.26 genesis ledger row count changed")
+    if genesis_check["locked_chain_tip_sha256"] != FIRST_V26_LEDGER_CHAIN_TIP_SHA256:
+        raise SystemExit("v0.26 genesis ledger chain tip changed")
+
+    latest_snapshot = _registry_latest(Path(args.snapshot_registry))
+    latest_ledger_path = Path(args.locked_ledger or latest_snapshot["ledger_path"])
+    latest_locked = load_v26_locked_ledger(latest_ledger_path)
+    latest_check = verify_v26_locked_prefix(ledger, latest_locked)
+    if int(latest_check["locked_rows"]) != int(latest_snapshot["rows"]):
+        raise SystemExit("latest v0.26 locked ledger row count disagrees with snapshot registry")
+    if latest_check["locked_chain_tip_sha256"] != latest_snapshot["ledger_chain_tip_sha256"]:
+        raise SystemExit("latest v0.26 locked ledger chain tip disagrees with snapshot registry")
+
+    ledger_integrity = {
+        **latest_check,
+        "locked_registry_sequence": int(latest_snapshot["sequence"]),
+        "locked_registry_ledger_path": str(latest_ledger_path),
+        "genesis_anchor": genesis_check,
+        "first_forward_artifact_sha256": FIRST_V26_FORWARD_ARTIFACT_SHA256,
+    }
 
     development = _slice(corrected, V25_FORWARD_START, V26_FORWARD_START_UTC)
     forward = _slice(corrected, V26_FORWARD_START_UTC)
