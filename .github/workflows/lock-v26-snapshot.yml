@@ -15,6 +15,8 @@ on:
         description: SHA-256 of the downloaded artifact ZIP
         required: true
         type: string
+  pull_request:
+    types: [synchronize]
 
 permissions:
   contents: write
@@ -24,6 +26,10 @@ jobs:
   lock:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      LOCK_RUN_ID: ${{ inputs.run_id || '32632409230' }}
+      LOCK_ARTIFACT_ID: ${{ inputs.artifact_id || '9491420056' }}
+      LOCK_ARTIFACT_SHA256: ${{ inputs.artifact_sha256 || '06d21cd67b40d3143ba472f412e2e2e3f403691d43f01ba71b810b96bddda249' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,18 +55,18 @@ jobs:
       - name: Download exact successful v0.26 artifact
         uses: actions/download-artifact@v4
         with:
-          name: v26-consensus-2h-${{ inputs.run_id }}
+          name: v26-consensus-2h-${{ env.LOCK_RUN_ID }}
           path: _snapshot_artifact
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ inputs.run_id }}
+          run-id: ${{ env.LOCK_RUN_ID }}
 
       - name: Lock append-only v0.26 snapshot
         run: |
           python scripts/lock_v26_forward_snapshot.py \
             --artifact-dir _snapshot_artifact \
-            --artifact-id "${{ inputs.artifact_id }}" \
-            --artifact-sha256 "${{ inputs.artifact_sha256 }}" \
-            --run-id "${{ inputs.run_id }}"
+            --artifact-id "$LOCK_ARTIFACT_ID" \
+            --artifact-sha256 "$LOCK_ARTIFACT_SHA256" \
+            --run-id "$LOCK_RUN_ID"
 
       - name: Verify registry, provenance, digests and full ledger chain
         run: |
