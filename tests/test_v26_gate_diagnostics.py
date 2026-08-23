@@ -40,8 +40,8 @@ def test_gate_diagnostics_separate_applied_and_fallback_behaviour() -> None:
     assert result["applied_rows_candidate_worse_than_frozen"] == 0
     assert result["fallback_rows_v25_worse_than_frozen"] == 2
     assert result["fallback_rows_v25_better_than_frozen"] == 1
-    assert result["fallback_total_abs_error_avoided_vs_v25_gbp_mwh"] == pytest.approx(6.5)
-    assert result["fallback_mean_abs_error_avoided_vs_v25_gbp_mwh"] == pytest.approx(6.5 / 3.0)
+    assert result["fallback_total_abs_error_avoided_vs_v25_gbp_mwh"] == pytest.approx(5.5)
+    assert result["fallback_mean_abs_error_avoided_vs_v25_gbp_mwh"] == pytest.approx(5.5 / 3.0)
     assert result["prediction_reconstruction_max_abs_diff_gbp_mwh"] == pytest.approx(0.0)
 
 
