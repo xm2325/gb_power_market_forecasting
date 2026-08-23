@@ -122,19 +122,17 @@ These 66 rows are **monitoring evidence, not a new CV/headline win**. The import
 
 ## v0.26 — causal 6h/48h consensus-clipped 2h adaptation
 
-v0.26 responds to the observed v0.25 failure mechanism without refitting the frozen 2h ridge model. The 48h residual estimate is retained, and the **6h window comes from the already predeclared v0.25 monitoring policy**; there is no search over lookback lengths.
+v0.26 responds to the observed v0.25 lag/overshoot without refitting the frozen 2h ridge model. The 48h residual window is retained and the 6h window comes from the already predeclared v0.25 monitoring policy; there is no search over lookback lengths.
 
-For every 2h decision, both residual windows use only outcomes already available at decision time. The candidate applies a correction only when the 6h and 48h residual means agree in sign, and clips its magnitude to the smaller absolute mean. If the two windows disagree, the forecast falls back to the unchanged frozen model.
+At each 2h decision, both residual windows use only outcomes already available at decision time. A correction is applied only when the 6h and 48h residual means agree in sign, with magnitude clipped to the smaller absolute mean. Sign disagreement falls back to the unchanged frozen model.
 
-Candidate ID:
+Candidate ID: `2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL`.
 
-`2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL`
-
-The rule, leakage tests and forward boundary were committed before v0.26 outcomes were read. The new versioned forward segment begins at **2026-08-22 20:30 UTC**.
+The rule and forward boundary were fixed before v0.26 outcomes were read. Forward start: **2026-08-22T20:30:00Z**.
 
 ### Development diagnostic — not new evidence
 
-On the already-observed 66 v0.25 rows, the frozen v0.26 rule gives:
+The already-observed v0.25 forward window was reused only for development diagnostics:
 
 | Model | MAE (£/MWh) |
 |---|---:|
@@ -143,35 +141,36 @@ On the already-observed 66 v0.25 rows, the frozen v0.26 rule gives:
 | v0.25 48h correction | 21.918 |
 | previous-day reference | 39.545 |
 
-This is encouraging as a **development diagnostic**: the consensus gate removes much of the v0.25 overshoot and lowers MAE 1.8% versus frozen. It is not uniformly better: P95 remains higher than frozen (54.864 vs 52.287), absolute signed bias is worse (9.563 vs 7.046), and interval coverage is slightly lower (77.3% vs 78.8%). These 66 rows were already observed and cannot be used as fresh v0.26 evidence.
+These rows were already observed before v0.26 and are not counted as fresh v0.26 evidence.
 
-### First fresh forward checkpoint
+### Latest locked forward snapshot — sequence 2
 
-Successful Actions run `32604734019` evaluated the first **2 genuinely later half-hours**, `2026-08-22T20:30Z` through `21:30Z` end-exclusive:
+Snapshot sequence **2** contains **23 genuine forward half-hours** through `2026-08-23T08:00:00Z` end-exclusive, including **21 rows added** since the preceding locked snapshot.
 
-| Model | MAE (£/MWh) |
+| Model | Forward MAE (£/MWh) |
 |---|---:|
-| v0.26 consensus candidate | 4.779 |
-| frozen v0.20 2h | 4.155 |
-| v0.25 48h correction | **4.095** |
-| previous-day reference | 8.160 |
+| v0.26 consensus candidate | **7.623** |
+| frozen v0.20 2h | **7.569** |
+| v0.25 48h correction | 9.219 |
+| previous-day reference | 18.799 |
 
-The candidate is **41.4% better than the previous-day reference**, but in these two rows it is **15.0% worse than frozen** and **16.7% worse than v0.25** on mean MAE. One of the two rows fell back to frozen. Both v0.26 and frozen intervals covered both observations.
+Current v0.26 improvement vs frozen: **-0.7%**; vs v0.25: **17.3%**; vs previous-day reference: **59.4%**.
 
-This is deliberately labelled `EARLY_ONLY_2_ROWS_NO_HEADLINE_CLAIM`. Two observations are not evidence that v0.26 succeeds or fails, and the rule is not changed in response.
+Maturity: `EARLY_ONLY`. Alert status: `INSUFFICIENT_SAMPLE_FOR_ALERTS`; alerts: none. Performance alerts remain gated until 48 forward rows.
 
-The first v0.26 ledger contains two rows and has chain tip:
+Integrity:
 
-`49cc9148d1756ff1fce3bdcac5f8f9405850cf516b0c701215e81121a7677f9d`
+- source run: `32632409230`; artifact ID: `9491420056`;
+- artifact SHA-256: `06d21cd67b40d3143ba472f412e2e2e3f403691d43f01ba71b810b96bddda249`;
+- ledger chain tip: `487f1e33478f9c07a25b088b1297d8aa170db9959642e108388bebd613765ca2`;
+- locked checkpoint: [`reports/monitoring/V0_26_FORWARD_CHECKPOINT_2026-08-23_0800Z.json`](reports/monitoring/V0_26_FORWARD_CHECKPOINT_2026-08-23_0800Z.json);
+- snapshot registry: [`reports/monitoring/V0_26_FORWARD_SNAPSHOT_REGISTRY.json`](reports/monitoring/V0_26_FORWARD_SNAPSHOT_REGISTRY.json).
 
-Evidence:
+The two-row first v0.26 ledger remains the permanent genesis anchor. Every later snapshot must reproduce the latest registered prefix before appending rows. The predictive source and frozen model state are also byte-locked; changing either requires a new candidate version and forward boundary.
 
-- [`docs/V0_26_2H_CONSENSUS_FORWARD.md`](docs/V0_26_2H_CONSENSUS_FORWARD.md)
-- [`reports/monitoring/V0_26_FIRST_FORWARD_CHECKPOINT_2026-08-22_2130Z.json`](reports/monitoring/V0_26_FIRST_FORWARD_CHECKPOINT_2026-08-22_2130Z.json)
+For the 23-row sequence-2 gate analysis, see [`docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md`](docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md).
 
-Source artifact: `v26-consensus-2h-32604734019`, ID `9483846187`, SHA-256 `c26eccc3be5491bba50b2a583ebd3f7d169f7f10406974a080df6a4db663f6fb`.
-
-Performance alerts remain disabled before 48 v0.26 rows; promotion criteria remain unavailable before **336 half-hours / 7 days**, and no gate ever auto-promotes a candidate.
+Promotion review remains unavailable before **336 half-hours / 7 days**, and no gate auto-promotes a candidate.
 
 ## Earlier prospective/blinding experiments
 
