@@ -21,6 +21,25 @@
       "maturity_stage": "EARLY_ONLY",
       "alert_status": "INSUFFICIENT_SAMPLE_FOR_ALERTS",
       "alerts": []
+    },
+    {
+      "sequence": 2,
+      "end_exclusive_utc": "2026-08-23T08:00:00Z",
+      "rows": 23,
+      "new_rows": 21,
+      "run_id": 32632409230,
+      "artifact_id": 9491420056,
+      "artifact_sha256": "06d21cd67b40d3143ba472f412e2e2e3f403691d43f01ba71b810b96bddda249",
+      "checkpoint_path": "reports/monitoring/V0_26_FORWARD_CHECKPOINT_2026-08-23_0800Z.json",
+      "checkpoint_sha256": "d082a92ff6c5a4a20e05a05bc84198a1f92ead0a2e791bdb9282f31b97ec309f",
+      "provenance_path": "reports/monitoring/V0_26_IMPLEMENTATION_PROVENANCE_2026-08-23_0800Z.json",
+      "provenance_sha256": "c75b7102ddf9827697453d82f800a0ed85bb4d4c372675e500809f2a3a0584db",
+      "ledger_path": "reports/monitoring/V0_26_FORWARD_LEDGER_2026-08-23_0800Z.csv",
+      "ledger_sha256": "fcf174374848726ce0a0b9d5f9825ffc3c0889c00f86b384c13da136a8468039",
+      "ledger_chain_tip_sha256": "487f1e33478f9c07a25b088b1297d8aa170db9959642e108388bebd613765ca2",
+      "maturity_stage": "EARLY_ONLY",
+      "alert_status": "INSUFFICIENT_SAMPLE_FOR_ALERTS",
+      "alerts": []
     }
   ],
   "contract": "Snapshot sequence, row count and end time must increase monotonically. Every later ledger must reproduce every row of the preceding ledger before appending new targets. The first two-row ledger from run 32604734019 is the permanent v0.26 genesis anchor. Each snapshot also records execution provenance tied to the byte-identical predictive implementation and frozen model state. Registry entries are historical forward evidence and are never rewritten after later labels are observed."
