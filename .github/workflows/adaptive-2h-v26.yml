@@ -91,6 +91,13 @@ jobs:
             --genesis-ledger reports/monitoring/V0_26_FORWARD_LEDGER_FIRST2.csv \
             --out-dir reports/v26_2h
 
+      - name: Summarise frozen v0.26 gate behaviour
+        run: |
+          python scripts/run_v26_gate_diagnostics.py \
+            --rows reports/v26_2h/v26_rows_2h.csv \
+            --forward-start-utc 2026-08-22T20:30:00Z \
+            --out reports/v26_2h/v26_gate_diagnostics.json
+
       - name: Enforce v0.26 contracts
         run: |
           python - <<'PY'
@@ -98,6 +105,7 @@ jobs:
           from pathlib import Path
 
           summary = json.loads(Path('reports/v26_2h/v26_summary.json').read_text())
+          gate = json.loads(Path('reports/v26_2h/v26_gate_diagnostics.json').read_text())
           spec = summary['candidate_spec']
           forward = summary['forward_segment']
           ledger = summary['ledger_integrity']
@@ -116,6 +124,12 @@ jobs:
               raise SystemExit('v0.26 ledger row count disagrees with forward summary')
           if ledger['new_rows_after_locked_prefix'] <= 0:
               raise SystemExit('no new v0.26 forward rows are available after the latest locked prefix')
+          if gate['cumulative']['rows'] != forward['rows']:
+              raise SystemExit('v0.26 gate diagnostics row count disagrees with forward summary')
+          if gate['cumulative']['monitoring_only'] is not True:
+              raise SystemExit('v0.26 gate diagnostics must remain monitoring-only')
+          if gate['cumulative']['prediction_reconstruction_max_abs_diff_gbp_mwh'] > 1e-9:
+              raise SystemExit('v0.26 gate diagnostics found a prediction reconstruction mismatch')
           genesis = ledger['genesis_anchor']
           if genesis['locked_rows'] != 2:
               raise SystemExit('v0.26 genesis row count changed')
@@ -131,6 +145,7 @@ jobs:
               'development': summary['development_diagnostics'],
               'forward': forward,
               'monitor': summary['monitor'],
+              'gate_diagnostics': gate,
               'latest_locked_prefix': {
                   'sequence': ledger['locked_registry_sequence'],
                   'rows': ledger['locked_rows'],
