@@ -99,6 +99,7 @@ jobs:
 
           summary = json.loads(Path('reports/v26_2h/v26_summary.json').read_text())
           spec = summary['candidate_spec']
+          forward = summary['forward_segment']
           ledger = summary['ledger_integrity']
           promotion = summary['promotion_readiness']
           if spec['version'] != '0.26.0':
@@ -111,6 +112,10 @@ jobs:
               raise SystemExit('v0.26 lookback contract changed')
           if ledger['status'] != 'LOCKED_PREFIX_REPRODUCED':
               raise SystemExit('latest immutable v0.26 prefix was not reproduced')
+          if ledger['current_rows'] != forward['rows']:
+              raise SystemExit('v0.26 ledger row count disagrees with forward summary')
+          if ledger['new_rows_after_locked_prefix'] <= 0:
+              raise SystemExit('no new v0.26 forward rows are available after the latest locked prefix')
           genesis = ledger['genesis_anchor']
           if genesis['locked_rows'] != 2:
               raise SystemExit('v0.26 genesis row count changed')
@@ -124,7 +129,7 @@ jobs:
               raise SystemExit('v0.26 must never auto-promote')
           print({
               'development': summary['development_diagnostics'],
-              'forward': summary['forward_segment'],
+              'forward': forward,
               'monitor': summary['monitor'],
               'latest_locked_prefix': {
                   'sequence': ledger['locked_registry_sequence'],
