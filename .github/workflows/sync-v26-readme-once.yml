@@ -23,6 +23,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install test dependency
+        run: python -m pip install pytest
       - name: Render latest locked v0.26 status
         run: python scripts/update_readme_v26_status.py
       - name: Verify renderer
