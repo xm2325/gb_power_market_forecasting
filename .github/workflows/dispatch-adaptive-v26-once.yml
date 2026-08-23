@@ -1,0 +1,24 @@
+name: dispatch-adaptive-v26-once
+
+on:
+  pull_request:
+    types: [synchronize]
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: dispatch-adaptive-v26-once
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    if: github.head_ref == 'feat/real-data-v0.20'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch current manual v0.26 workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run adaptive-2h-v26.yml --ref feat/real-data-v0.20
