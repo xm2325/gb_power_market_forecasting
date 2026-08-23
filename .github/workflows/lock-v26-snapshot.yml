@@ -39,6 +39,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e '.[dev,live]'
 
+      - name: Verify implementation lock before artifact access
+        run: |
+          pytest -q \
+            tests/test_v26_implementation_lock.py \
+            tests/test_v26_implementation_provenance.py \
+            tests/test_v26_snapshot_registry.py
+
       - name: Download exact successful v0.26 artifact
         uses: actions/download-artifact@v4
         with:
@@ -55,10 +62,12 @@ jobs:
             --artifact-sha256 "${{ inputs.artifact_sha256 }}" \
             --run-id "${{ inputs.run_id }}"
 
-      - name: Verify registry, digests and full ledger chain
+      - name: Verify registry, provenance, digests and full ledger chain
         run: |
           pytest -q \
             tests/test_forward_ledger_v26.py \
+            tests/test_v26_implementation_lock.py \
+            tests/test_v26_implementation_provenance.py \
             tests/test_v26_snapshot_registry.py \
             tests/test_lock_v26_forward_snapshot.py
 
@@ -72,6 +81,7 @@ jobs:
           git fetch origin feat/real-data-v0.20
           git rebase origin/feat/real-data-v0.20
           pytest -q \
+            tests/test_v26_implementation_lock.py \
             tests/test_v26_snapshot_registry.py \
             tests/test_forward_ledger_v26.py
           git push origin HEAD:feat/real-data-v0.20

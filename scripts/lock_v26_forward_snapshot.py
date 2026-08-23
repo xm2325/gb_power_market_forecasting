@@ -19,7 +19,10 @@ from gb_power_market.forward_ledger_v26 import (
 
 EXPECTED_CANDIDATE = "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL"
 REGISTRY_SCHEMA = "gb-power-market-v26-forward-snapshot-registry-v1"
+PROVENANCE_SCHEMA = "gb-power-market-v26-execution-provenance-v1"
+IMPLEMENTATION_LOCK_SCHEMA = "gb-power-market-v26-implementation-lock-v1"
 FORWARD_START_UTC = "2026-08-22T20:30:00Z"
+IMPLEMENTATION_LOCK_PATH = Path("reports/locked/V0_26_IMPLEMENTATION_LOCK.json")
 
 
 def sha256_file(path: Path) -> str:
@@ -44,15 +47,43 @@ def _copy_exact(source: Path, destination: Path) -> None:
         raise RuntimeError(f"byte-exact snapshot copy failed for {destination}")
 
 
+def _validate_provenance(provenance: dict[str, Any], *, run_id: int) -> dict[str, Any]:
+    implementation = json.loads(IMPLEMENTATION_LOCK_PATH.read_text(encoding="utf-8"))
+    if implementation.get("schema") != IMPLEMENTATION_LOCK_SCHEMA:
+        raise ValueError("unsupported v0.26 implementation lock")
+    if provenance.get("schema") != PROVENANCE_SCHEMA:
+        raise ValueError("unsupported v0.26 execution provenance")
+    if provenance.get("version") != "0.26.0":
+        raise ValueError("provenance v0.26 version changed")
+    if provenance.get("candidate") != EXPECTED_CANDIDATE:
+        raise ValueError("provenance candidate identity changed")
+    if _utc(str(provenance.get("forward_start_utc"))) != _utc(FORWARD_START_UTC):
+        raise ValueError("provenance forward boundary changed")
+    if int(provenance.get("source_run_id", -1)) != int(run_id):
+        raise ValueError("provenance source run does not match requested artifact run")
+    if provenance.get("candidate_source") != implementation.get("candidate_source"):
+        raise ValueError("provenance predictive source identity changed")
+    if provenance.get("frozen_model_state") != implementation.get("frozen_model_state"):
+        raise ValueError("provenance frozen model state identity changed")
+    if provenance.get("implementation_lock_path") != IMPLEMENTATION_LOCK_PATH.as_posix():
+        raise ValueError("provenance implementation lock path changed")
+    execution_commit = str(provenance.get("execution_commit_sha", ""))
+    if len(execution_commit) != 40:
+        raise ValueError("provenance execution commit SHA is invalid")
+    return implementation
+
+
 def _result_markdown(
     *,
     summary: dict[str, Any],
+    provenance: dict[str, Any],
     sequence: int,
     new_rows: int,
     artifact_id: int,
     artifact_sha256: str,
     run_id: int,
     checkpoint_sha256: str,
+    provenance_sha256: str,
     ledger_sha256: str,
     chain_tip: str,
 ) -> str:
@@ -80,9 +111,13 @@ def _result_markdown(
         "## Integrity",
         "",
         f"- GitHub Actions run: `{run_id}`;",
+        f"- execution commit: `{provenance['execution_commit_sha']}`;",
+        f"- predictive source blob: `{provenance['candidate_source']['git_blob_sha1']}`;",
+        f"- frozen model-state SHA-256: `{provenance['frozen_model_state']['sha256']}`;",
         f"- artifact ID: `{artifact_id}`;",
         f"- artifact SHA-256: `{artifact_sha256}`;",
         f"- locked checkpoint SHA-256: `{checkpoint_sha256}`;",
+        f"- locked provenance SHA-256: `{provenance_sha256}`;",
         f"- locked ledger SHA-256: `{ledger_sha256}`;",
         f"- ledger chain tip: `{chain_tip}`.",
         "",
@@ -105,10 +140,16 @@ def lock_snapshot(
 ) -> dict[str, Any]:
     summary_source = artifact_dir / "v26_summary.json"
     ledger_source = artifact_dir / "v26_forward_ledger.csv"
-    if not summary_source.is_file() or not ledger_source.is_file():
-        raise FileNotFoundError("artifact must contain v26_summary.json and v26_forward_ledger.csv")
+    provenance_source = artifact_dir / "v26_implementation_provenance.json"
+    if not summary_source.is_file() or not ledger_source.is_file() or not provenance_source.is_file():
+        raise FileNotFoundError(
+            "artifact must contain v26_summary.json, v26_forward_ledger.csv and v26_implementation_provenance.json"
+        )
 
     summary = json.loads(summary_source.read_text(encoding="utf-8"))
+    provenance = json.loads(provenance_source.read_text(encoding="utf-8"))
+    _validate_provenance(provenance, run_id=run_id)
+
     spec = summary.get("candidate_spec", {})
     if spec.get("version") != "0.26.0":
         raise ValueError("artifact v0.26 version changed")
@@ -175,16 +216,32 @@ def lock_snapshot(
     sequence = int(latest["sequence"]) + 1
     slug = _slug(end)
     checkpoint_dest = monitoring_dir / f"V0_26_FORWARD_CHECKPOINT_{slug}.json"
+    provenance_dest = monitoring_dir / f"V0_26_IMPLEMENTATION_PROVENANCE_{slug}.json"
     ledger_dest = monitoring_dir / f"V0_26_FORWARD_LEDGER_{slug}.csv"
-    if checkpoint_dest.exists() or ledger_dest.exists():
+    doc_path = docs_dir / f"V0_26_FORWARD_RESULTS_{slug}.md"
+    destinations = [
+        checkpoint_dest,
+        provenance_dest,
+        ledger_dest,
+        checkpoint_dest.with_suffix(checkpoint_dest.suffix + ".sha256"),
+        provenance_dest.with_suffix(provenance_dest.suffix + ".sha256"),
+        ledger_dest.with_suffix(ledger_dest.suffix + ".sha256"),
+        doc_path,
+    ]
+    if any(path.exists() for path in destinations):
         raise FileExistsError("snapshot destination already exists; refusing to rewrite history")
 
     _copy_exact(summary_source, checkpoint_dest)
+    _copy_exact(provenance_source, provenance_dest)
     _copy_exact(ledger_source, ledger_dest)
     checkpoint_sha = sha256_file(checkpoint_dest)
+    provenance_sha = sha256_file(provenance_dest)
     ledger_sha = sha256_file(ledger_dest)
     checkpoint_dest.with_suffix(checkpoint_dest.suffix + ".sha256").write_text(
         f"{checkpoint_sha}  {checkpoint_dest.name}\n", encoding="utf-8"
+    )
+    provenance_dest.with_suffix(provenance_dest.suffix + ".sha256").write_text(
+        f"{provenance_sha}  {provenance_dest.name}\n", encoding="utf-8"
     )
     ledger_dest.with_suffix(ledger_dest.suffix + ".sha256").write_text(
         f"{ledger_sha}  {ledger_dest.name}\n", encoding="utf-8"
@@ -201,6 +258,8 @@ def lock_snapshot(
         "artifact_sha256": str(artifact_sha256),
         "checkpoint_path": checkpoint_dest.as_posix(),
         "checkpoint_sha256": checkpoint_sha,
+        "provenance_path": provenance_dest.as_posix(),
+        "provenance_sha256": provenance_sha,
         "ledger_path": ledger_dest.as_posix(),
         "ledger_sha256": ledger_sha,
         "ledger_chain_tip_sha256": current_tip,
@@ -208,28 +267,28 @@ def lock_snapshot(
         "alert_status": str(monitor.get("alert_status")),
         "alerts": list(monitor.get("alerts", [])),
     }
-    snapshots.append(entry)
-    registry["snapshots"] = snapshots
-    registry_path.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 
     docs_dir.mkdir(parents=True, exist_ok=True)
-    doc_path = docs_dir / f"V0_26_FORWARD_RESULTS_{slug}.md"
-    if doc_path.exists():
-        raise FileExistsError("snapshot documentation already exists; refusing to rewrite history")
     doc_path.write_text(
         _result_markdown(
             summary=summary,
+            provenance=provenance,
             sequence=sequence,
             new_rows=rows - previous_rows,
             artifact_id=artifact_id,
             artifact_sha256=artifact_sha256,
             run_id=run_id,
             checkpoint_sha256=checkpoint_sha,
+            provenance_sha256=provenance_sha,
             ledger_sha256=ledger_sha,
             chain_tip=current_tip,
         ),
         encoding="utf-8",
     )
+
+    snapshots.append(entry)
+    registry["snapshots"] = snapshots
+    registry_path.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 
     return {
         "status": "SNAPSHOT_LOCKED",
@@ -239,6 +298,8 @@ def lock_snapshot(
         "end_exclusive_utc": end.isoformat(),
         "checkpoint_path": checkpoint_dest.as_posix(),
         "checkpoint_sha256": checkpoint_sha,
+        "provenance_path": provenance_dest.as_posix(),
+        "provenance_sha256": provenance_sha,
         "ledger_path": ledger_dest.as_posix(),
         "ledger_sha256": ledger_sha,
         "ledger_chain_tip_sha256": current_tip,

@@ -142,6 +142,13 @@ jobs:
           })
           PY
 
+      - name: Record byte-locked v0.26 implementation provenance
+        run: |
+          python scripts/write_v26_implementation_provenance.py \
+            --execution-commit-sha "$GITHUB_SHA" \
+            --source-run-id "$GITHUB_RUN_ID" \
+            --out reports/v26_2h/v26_implementation_provenance.json
+
       - name: Upload v0.26 candidate artifact
         uses: actions/upload-artifact@v4
         with:
