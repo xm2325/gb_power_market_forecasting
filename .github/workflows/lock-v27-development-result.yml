@@ -49,7 +49,8 @@ jobs:
             tests/test_v27_candidate_lock.py \
             tests/test_v27_direction_candidate.py \
             tests/test_lock_v27_development_validation.py \
-            tests/test_v27_validation_workflow_contract.py
+            tests/test_v27_validation_workflow_contract.py \
+            tests/test_update_readme_v27_validation_status.py
 
       - name: Download exact successful sealed-validation artifact
         uses: actions/download-artifact@v4
@@ -68,7 +69,9 @@ jobs:
             --artifact-sha256 "${{ inputs.artifact_sha256 }}"
 
       - name: Refresh README from locked evidence state
-        run: python scripts/update_readme_v26_status.py
+        run: |
+          python scripts/update_readme_v26_status.py
+          python scripts/update_readme_v27_validation_status.py
 
       - name: Verify locked result, eligibility state and README
         run: |
@@ -76,7 +79,8 @@ jobs:
             tests/test_v27_candidate_lock.py \
             tests/test_lock_v27_development_validation.py \
             tests/test_v27_validation_workflow_contract.py \
-            tests/test_update_readme_v26_status.py
+            tests/test_update_readme_v26_status.py \
+            tests/test_update_readme_v27_validation_status.py
 
       - name: Commit, rebase and push immutable validation result
         run: |
@@ -88,6 +92,10 @@ jobs:
           git fetch origin feat/real-data-v0.20
           git rebase origin/feat/real-data-v0.20
           python scripts/update_readme_v26_status.py
+          python scripts/update_readme_v27_validation_status.py
           git diff --exit-code README.md
-          pytest -q tests/test_update_readme_v26_status.py tests/test_v27_candidate_lock.py
+          pytest -q \
+            tests/test_update_readme_v26_status.py \
+            tests/test_update_readme_v27_validation_status.py \
+            tests/test_v27_candidate_lock.py
           git push origin HEAD:feat/real-data-v0.20
