@@ -41,6 +41,17 @@ def build_v26_section(registry: dict, checkpoint: dict) -> str:
             f"The predeclared {alert_min_rows}-row degradation-alert gate is active on this snapshot."
         )
 
+    if alerts:
+        governance_text = (
+            "The unchanged frozen v0.20 2h model remains the current champion. v0.26 is an alerted "
+            "challenger and is not retuned after this checkpoint."
+        )
+    else:
+        governance_text = (
+            "The unchanged frozen v0.20 2h model remains the comparison champion while v0.26 continues "
+            "forward monitoring; no candidate auto-promotes."
+        )
+
     lines = [
         START_HEADING,
         "",
@@ -90,6 +101,8 @@ def build_v26_section(registry: dict, checkpoint: dict) -> str:
         f"Maturity: `{monitor['maturity_stage']}`. Alert status: `{monitor['alert_status']}`; alerts: {alerts_text}. "
         f"{alert_gate_text}",
         "",
+        governance_text,
+        "",
         "Integrity:",
         "",
         f"- source run: `{latest['run_id']}`; artifact ID: `{latest['artifact_id']}`;",
@@ -103,8 +116,13 @@ def build_v26_section(registry: dict, checkpoint: dict) -> str:
         "also byte-locked; changing either requires a new candidate version and forward boundary.",
         "",
         "The first post-lock gate-effectiveness analysis is preserved at "
-        "[`docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md`](docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md); "
-        "subsequent live artifacts also emit gate diagnostics without changing the frozen candidate.",
+        "[`docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md`](docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md). "
+        "The first active-alert root-cause analysis is preserved at "
+        "[`docs/V0_26_ALERT_ROOT_CAUSE_2026-08-23_2200Z.md`](docs/V0_26_ALERT_ROOT_CAUSE_2026-08-23_2200Z.md).",
+        "",
+        "Any later candidate must follow the independent evidence-separation rules in "
+        "[`docs/V0_27_DEVELOPMENT_PROTOCOL.md`](docs/V0_27_DEVELOPMENT_PROTOCOL.md): the 51-row v0.26 "
+        "alert window is failure-discovery data, not v0.27 validation or fresh forward evidence.",
         "",
         "Promotion review remains unavailable before **336 half-hours / 7 days**, and no gate auto-promotes a candidate.",
         "",
