@@ -143,32 +143,32 @@ The already-observed v0.25 forward window was reused only for development diagno
 
 These rows were already observed before v0.26 and are not counted as fresh v0.26 evidence.
 
-### Latest locked forward snapshot — sequence 2
+### Latest locked forward snapshot — sequence 3
 
-Snapshot sequence **2** contains **23 genuine forward half-hours** through `2026-08-23T08:00:00Z` end-exclusive, including **21 rows added** since the preceding locked snapshot.
+Snapshot sequence **3** contains **51 genuine forward half-hours** through `2026-08-23T22:00:00Z` end-exclusive, including **28 rows added** since the preceding locked snapshot.
 
 | Model | Forward MAE (£/MWh) |
 |---|---:|
-| v0.26 consensus candidate | **7.623** |
-| frozen v0.20 2h | **7.569** |
-| v0.25 48h correction | 9.219 |
-| previous-day reference | 18.799 |
+| v0.26 consensus candidate | **17.102** |
+| frozen v0.20 2h | **15.802** |
+| v0.25 48h correction | 18.243 |
+| previous-day reference | 19.527 |
 
-Current v0.26 improvement vs frozen: **-0.7%**; vs v0.25: **17.3%**; vs previous-day reference: **59.4%**.
+Current v0.26 improvement vs frozen: **-8.2%**; vs v0.25: **6.3%**; vs previous-day reference: **12.4%**.
 
-Maturity: `EARLY_ONLY`. Alert status: `INSUFFICIENT_SAMPLE_FOR_ALERTS`; alerts: none. Performance alerts remain gated until 48 forward rows.
+Maturity: `INTRADAY_TO_2DAY_MONITORING`. Alert status: `ALERTS_PRESENT`; alerts: `V26_TRAILS_FROZEN_24H`, `V26_BIAS_WORSE_THAN_FROZEN_24H`. The predeclared 48-row degradation-alert gate is active on this snapshot.
 
 Integrity:
 
-- source run: `32632409230`; artifact ID: `9491420056`;
-- artifact SHA-256: `06d21cd67b40d3143ba472f412e2e2e3f403691d43f01ba71b810b96bddda249`;
-- ledger chain tip: `487f1e33478f9c07a25b088b1297d8aa170db9959642e108388bebd613765ca2`;
-- locked checkpoint: [`reports/monitoring/V0_26_FORWARD_CHECKPOINT_2026-08-23_0800Z.json`](reports/monitoring/V0_26_FORWARD_CHECKPOINT_2026-08-23_0800Z.json);
+- source run: `32675196453`; artifact ID: `9502476322`;
+- artifact SHA-256: `a162270d94528429c0d3dcca89152f57fba9ed12654b0a2b70fbb0386fa8af1a`;
+- ledger chain tip: `dca4ef5173dcf18a81814a2bcfadaea72c4ed5fa5abc1b1c78555e55129e4a8b`;
+- locked checkpoint: [`reports/monitoring/V0_26_FORWARD_CHECKPOINT_2026-08-23_2200Z.json`](reports/monitoring/V0_26_FORWARD_CHECKPOINT_2026-08-23_2200Z.json);
 - snapshot registry: [`reports/monitoring/V0_26_FORWARD_SNAPSHOT_REGISTRY.json`](reports/monitoring/V0_26_FORWARD_SNAPSHOT_REGISTRY.json).
 
 The two-row first v0.26 ledger remains the permanent genesis anchor. Every later snapshot must reproduce the latest registered prefix before appending rows. The predictive source and frozen model state are also byte-locked; changing either requires a new candidate version and forward boundary.
 
-For the 23-row sequence-2 gate analysis, see [`docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md`](docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md).
+The first post-lock gate-effectiveness analysis is preserved at [`docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md`](docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md); subsequent live artifacts also emit gate diagnostics without changing the frozen candidate.
 
 Promotion review remains unavailable before **336 half-hours / 7 days**, and no gate auto-promotes a candidate.
 
