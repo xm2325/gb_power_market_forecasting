@@ -1,0 +1,51 @@
+{
+  "schema": "gb-power-market-v27-development-protocol-v1",
+  "status": "PROTOCOL_LOCKED_NO_V27_CANDIDATE_YET",
+  "created_after_v26_snapshot_sequence": 3,
+  "v26_discovery_evidence": {
+    "rows": 51,
+    "end_exclusive_utc": "2026-08-23T22:00:00Z",
+    "source_run_id": 32675196453,
+    "artifact_id": 9502476322,
+    "artifact_sha256": "a162270d94528429c0d3dcca89152f57fba9ed12654b0a2b70fbb0386fa8af1a",
+    "ledger_chain_tip_sha256": "dca4ef5173dcf18a81814a2bcfadaea72c4ed5fa5abc1b1c78555e55129e4a8b",
+    "role": "FAILURE_DISCOVERY_ONLY_NEVER_V27_VALIDATION_OR_FORWARD_EVIDENCE"
+  },
+  "failure_to_address": "V0_26_JOINTLY_STALE_SAME_SIGN_RESIDUAL_WINDOWS_ACROSS_TURNING_POINT",
+  "champion": "UNCHANGED_FROZEN_V0_20_2H",
+  "candidate_policy": {
+    "maximum_candidates_per_validation_block": 1,
+    "candidate_must_be_fully_specified_before_validation_labels_are_read": true,
+    "no_parameter_sweep_on_validation_block": true,
+    "no_retuning_failed_candidate_on_same_validation_block": true,
+    "residual_lookback_grid_alone_is_not_sufficient_new_structure": true,
+    "must_preserve_causal_decision_time_information_boundary": true,
+    "must_not_refit_or_modify_frozen_v0_20_model_state": true
+  },
+  "independent_development_validation": {
+    "start_utc_not_before": "2026-08-23T22:00:00Z",
+    "minimum_rows": 48,
+    "minimum_duration_hours": 24,
+    "must_be_strictly_later_than_failure_discovery_rows": true,
+    "validation_rows_become_development_data_after_evaluation": true,
+    "validation_rows_can_never_be_relabelled_as_fresh_v27_forward_evidence": true
+  },
+  "validation_gate": {
+    "candidate_mae_strictly_better_than_frozen": true,
+    "candidate_p95_abs_error_non_worse_than_frozen": true,
+    "candidate_absolute_signed_bias_non_worse_than_frozen": true,
+    "candidate_mae_strictly_better_than_previous_day_reference": true,
+    "all_required": true,
+    "automatic_forward_launch": false
+  },
+  "v27_forward_contract": {
+    "allowed_only_after_validation_gate_passes": true,
+    "new_version_required": "0.27.0",
+    "new_candidate_id_required": true,
+    "new_implementation_lock_required": true,
+    "forward_start_must_be_strictly_after_validation_end": true,
+    "fresh_forward_rows_must_be_unseen_when_candidate_is_locked": true,
+    "automatic_promotion": false
+  },
+  "interpretation": "The 51-row v0.26 alert window may motivate v0.27 structure but cannot validate it. A single fully specified candidate may be tested on a later, separate 24-hour/48-half-hour development-validation block. Failure ends that candidate on that block; success only permits a new v0.27 forward boundary and does not itself establish a production claim."
+}
