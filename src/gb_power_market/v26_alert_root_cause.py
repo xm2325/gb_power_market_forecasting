@@ -7,6 +7,11 @@ import pandas as pd
 
 
 APPLIED_REASON = "CONSENSUS_CLIPPED_CORRECTION"
+# Locked forward ledgers serialize GBP/MWh values to 9 decimal places. Reconstructing
+# prediction = frozen + correction can therefore accumulate just over 1e-9 of
+# decimal-to-binary/independent-rounding error. Keep this tolerance narrowly above
+# the observed serialization bound rather than reusing a looser model tolerance.
+LOCKED_LEDGER_FLOAT_TOLERANCE_GBP_MWH = 2e-9
 
 
 def _run_summary(x: pd.DataFrame, delta: pd.Series) -> dict[str, Any]:
@@ -70,7 +75,7 @@ def summarise_v26_alert_root_cause(ledger: pd.DataFrame) -> dict[str, Any]:
 
     reconstruction = (candidate - (frozen + correction)).abs()
     max_reconstruction_diff = float(reconstruction.max())
-    if max_reconstruction_diff > 1e-9:
+    if max_reconstruction_diff > LOCKED_LEDGER_FLOAT_TOLERANCE_GBP_MWH:
         raise ValueError("v0.26 prediction is not frozen prediction plus recorded correction")
 
     candidate_abs = (y - candidate).abs()
@@ -81,8 +86,8 @@ def summarise_v26_alert_root_cause(ledger: pd.DataFrame) -> dict[str, Any]:
     fallback_mismatch = (
         (~applied)
         & (
-            (correction.abs() > 1e-9)
-            | ((candidate - frozen).abs() > 1e-9)
+            (correction.abs() > LOCKED_LEDGER_FLOAT_TOLERANCE_GBP_MWH)
+            | ((candidate - frozen).abs() > LOCKED_LEDGER_FLOAT_TOLERANCE_GBP_MWH)
         )
     )
     if fallback_mismatch.any():
@@ -113,6 +118,7 @@ def summarise_v26_alert_root_cause(ledger: pd.DataFrame) -> dict[str, Any]:
         "harmful_applied_excess_abs_error_gbp_mwh": float(harmful.sum()),
         "helpful_applied_abs_error_saved_gbp_mwh": float(-helpful.sum()),
         "prediction_reconstruction_max_abs_diff_gbp_mwh": max_reconstruction_diff,
+        "locked_ledger_float_tolerance_gbp_mwh": LOCKED_LEDGER_FLOAT_TOLERANCE_GBP_MWH,
         "applied_runs": runs,
         "longest_applied_run": longest_run,
         "interpretation_contract": (
