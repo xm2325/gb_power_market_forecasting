@@ -33,24 +33,12 @@ jobs:
           pytest -q \
             tests/test_v27_candidate_lock.py \
             tests/test_v27_direction_candidate.py \
+            tests/test_v27_validation_maturity.py \
             tests/test_download_elexon_mid_exact_window.py \
             tests/test_v26_implementation_lock.py
 
       - name: Fail closed until the full sealed validation block is mature
-        run: |
-          python - <<'PY'
-          from datetime import datetime, timedelta, timezone
-          import pandas as pd
-
-          validation_end = pd.Timestamp('2026-08-24T22:00:00Z')
-          now = datetime.now(timezone.utc)
-          safe = now - timedelta(minutes=90)
-          safe = safe.replace(minute=(safe.minute // 30) * 30, second=0, microsecond=0)
-          safe = pd.Timestamp(safe)
-          print({'safe_market_data_boundary_utc': safe.isoformat(), 'required_validation_end_utc': validation_end.isoformat()})
-          if safe < validation_end:
-              raise SystemExit('SEALED_VALIDATION_NOT_MATURE: no Elexon/NESO validation download is permitted yet')
-          PY
+        run: python scripts/check_v27_validation_maturity.py
 
       - name: Download bounded NESO vintages needed for causal replay
         run: |
