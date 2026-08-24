@@ -9,6 +9,7 @@ from pathlib import Path
 START_HEADING = "## v0.26 — causal 6h/48h consensus-clipped 2h adaptation"
 END_HEADING = "## Earlier prospective/blinding experiments"
 CANDIDATE = "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL"
+V27_CANDIDATE = "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO"
 
 
 def _pct(value: float) -> str:
@@ -120,9 +121,22 @@ def build_v26_section(registry: dict, checkpoint: dict) -> str:
         "The first active-alert root-cause analysis is preserved at "
         "[`docs/V0_26_ALERT_ROOT_CAUSE_2026-08-23_2200Z.md`](docs/V0_26_ALERT_ROOT_CAUSE_2026-08-23_2200Z.md).",
         "",
-        "Any later candidate must follow the independent evidence-separation rules in "
-        "[`docs/V0_27_DEVELOPMENT_PROTOCOL.md`](docs/V0_27_DEVELOPMENT_PROTOCOL.md): the 51-row v0.26 "
-        "alert window is failure-discovery data, not v0.27 validation or fresh forward evidence.",
+        "### v0.27 development candidate — locked, not yet validated",
+        "",
+        f"A single later development candidate is now byte-locked as `{V27_CANDIDATE}`. It retains the unchanged "
+        "v0.26 consensus proposal and adds a sign-only frozen-direction veto: a residual correction is applied "
+        "only when its sign agrees with the frozen model's direction from the latest causally available history "
+        "target to the current 2h target. There is no magnitude threshold, lookback search or refit.",
+        "",
+        "Its one permitted independent validation block is sealed as "
+        "`[2026-08-23T22:00:00Z, 2026-08-24T22:00:00Z)` — exactly **48 half-hours / 24 hours**. "
+        "The validation workflow fails before any market-data download until the whole block is mature under the "
+        "90-minute safety lag, and it uses an exact Elexon timestamp cutoff so post-validation prices are not read.",
+        "",
+        "This is **development only**: software version remains `0.26.0`, no v0.27 forward experiment has been "
+        "launched, and pass/fail validation labels can never be relabelled as fresh v0.27 forward evidence. See "
+        "[`docs/V0_27_CANDIDATE_LOCK.md`](docs/V0_27_CANDIDATE_LOCK.md) and "
+        "[`docs/V0_27_DEVELOPMENT_PROTOCOL.md`](docs/V0_27_DEVELOPMENT_PROTOCOL.md).",
         "",
         "Promotion review remains unavailable before **336 half-hours / 7 days**, and no gate auto-promotes a candidate.",
         "",
