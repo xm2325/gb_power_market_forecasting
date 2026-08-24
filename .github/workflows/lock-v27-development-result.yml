@@ -52,6 +52,50 @@ jobs:
             tests/test_v27_validation_workflow_contract.py \
             tests/test_update_readme_v27_validation_status.py
 
+      - name: Verify source run and artifact identity with GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXPECTED_RUN_ID: ${{ inputs.run_id }}
+          EXPECTED_ARTIFACT_ID: ${{ inputs.artifact_id }}
+          EXPECTED_ARTIFACT_SHA256: ${{ inputs.artifact_sha256 }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${EXPECTED_RUN_ID}" > _v27_run.json
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${EXPECTED_RUN_ID}/artifacts" > _v27_artifacts.json
+          python - <<'PY'
+          import json
+          import os
+          import re
+
+          run = json.load(open('_v27_run.json', encoding='utf-8'))
+          artifacts = json.load(open('_v27_artifacts.json', encoding='utf-8'))['artifacts']
+          expected_run = int(os.environ['EXPECTED_RUN_ID'])
+          expected_id = int(os.environ['EXPECTED_ARTIFACT_ID'])
+          expected_sha = os.environ['EXPECTED_ARTIFACT_SHA256'].lower()
+          if not re.fullmatch(r'[0-9a-f]{64}', expected_sha):
+              raise SystemExit('artifact_sha256 input must be exactly 64 lowercase/uppercase hex digits')
+          if int(run['id']) != expected_run:
+              raise SystemExit('GitHub run identity mismatch')
+          if run.get('name') != 'validate-v27-development':
+              raise SystemExit(f"unexpected source workflow name: {run.get('name')}")
+          if run.get('conclusion') != 'success':
+              raise SystemExit(f"source validation run is not successful: {run.get('conclusion')}")
+          expected_name = f'v27-development-validation-{expected_run}'
+          matches = [a for a in artifacts if a.get('name') == expected_name]
+          if len(matches) != 1:
+              raise SystemExit(f'expected exactly one artifact named {expected_name}, found {len(matches)}')
+          artifact = matches[0]
+          if int(artifact['id']) != expected_id:
+              raise SystemExit('artifact ID does not match the source run artifact')
+          if artifact.get('expired') is True:
+              raise SystemExit('source validation artifact is expired')
+          digest = str(artifact.get('digest') or '')
+          if digest and digest.lower() != f'sha256:{expected_sha}':
+              raise SystemExit(f'artifact digest mismatch: GitHub={digest}, expected=sha256:{expected_sha}')
+          if not digest:
+              raise SystemExit('GitHub artifact metadata did not provide a digest; refusing unverified lock')
+          print({'run_id': expected_run, 'artifact_id': expected_id, 'artifact_digest': digest})
+          PY
+
       - name: Download exact successful sealed-validation artifact
         uses: actions/download-artifact@v4
         with:
