@@ -37,6 +37,10 @@ def test_update_readme_uses_latest_locked_v26_snapshot(tmp_path: Path) -> None:
         assert f"`{alert}`" in updated
     assert "The unchanged frozen v0.20 2h model remains the current champion." in updated
     assert "docs/V0_26_ALERT_ROOT_CAUSE_2026-08-23_2200Z.md" in updated
+    assert "### v0.27 development candidate — locked, not yet validated" in updated
+    assert "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO" in updated
+    assert "[2026-08-23T22:00:00Z, 2026-08-24T22:00:00Z)" in updated
+    assert "docs/V0_27_CANDIDATE_LOCK.md" in updated
     assert "docs/V0_27_DEVELOPMENT_PROTOCOL.md" in updated
     assert "## Earlier prospective/blinding experiments" in updated
 
@@ -50,6 +54,7 @@ def test_update_readme_is_idempotent(tmp_path: Path) -> None:
 
     assert second == first
     assert second.count("## v0.26 — causal 6h/48h consensus-clipped 2h adaptation") == 1
+    assert second.count("### v0.27 development candidate — locked, not yet validated") == 1
     assert second.count("## Earlier prospective/blinding experiments") == 1
 
 
