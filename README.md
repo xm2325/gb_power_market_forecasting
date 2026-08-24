@@ -158,6 +158,8 @@ Current v0.26 improvement vs frozen: **-8.2%**; vs v0.25: **6.3%**; vs previous-
 
 Maturity: `INTRADAY_TO_2DAY_MONITORING`. Alert status: `ALERTS_PRESENT`; alerts: `V26_TRAILS_FROZEN_24H`, `V26_BIAS_WORSE_THAN_FROZEN_24H`. The predeclared 48-row degradation-alert gate is active on this snapshot.
 
+The unchanged frozen v0.20 2h model remains the current champion. v0.26 is an alerted challenger and is not retuned after this checkpoint.
+
 Integrity:
 
 - source run: `32675196453`; artifact ID: `9502476322`;
@@ -168,7 +170,9 @@ Integrity:
 
 The two-row first v0.26 ledger remains the permanent genesis anchor. Every later snapshot must reproduce the latest registered prefix before appending rows. The predictive source and frozen model state are also byte-locked; changing either requires a new candidate version and forward boundary.
 
-The first post-lock gate-effectiveness analysis is preserved at [`docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md`](docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md); subsequent live artifacts also emit gate diagnostics without changing the frozen candidate.
+The first post-lock gate-effectiveness analysis is preserved at [`docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md`](docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md). The first active-alert root-cause analysis is preserved at [`docs/V0_26_ALERT_ROOT_CAUSE_2026-08-23_2200Z.md`](docs/V0_26_ALERT_ROOT_CAUSE_2026-08-23_2200Z.md).
+
+Any later candidate must follow the independent evidence-separation rules in [`docs/V0_27_DEVELOPMENT_PROTOCOL.md`](docs/V0_27_DEVELOPMENT_PROTOCOL.md): the 51-row v0.26 alert window is failure-discovery data, not v0.27 validation or fresh forward evidence.
 
 Promotion review remains unavailable before **336 half-hours / 7 days**, and no gate auto-promotes a candidate.
 
