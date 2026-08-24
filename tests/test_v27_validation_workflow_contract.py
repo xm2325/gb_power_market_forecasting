@@ -12,9 +12,8 @@ def test_v27_validation_maturity_gate_precedes_all_market_data_downloads() -> No
     elexon = text.index("Download Elexon MID with exact sealed end boundary")
 
     assert gate < neso < elexon
-    assert "SEALED_VALIDATION_NOT_MATURE" in text
-    assert "2026-08-24T22:00:00Z" in text
-    assert "timedelta(minutes=90)" in text
+    assert "python scripts/check_v27_validation_maturity.py" in text
+    assert "tests/test_v27_validation_maturity.py" in text
 
 
 def test_v27_validation_uses_exact_elexon_end_and_no_auto_forward() -> None:
