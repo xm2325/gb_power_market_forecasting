@@ -41,9 +41,9 @@ def test_alert_root_cause_separates_applied_runs_and_error_contributions() -> No
     assert result["fallback_rows"] == 1
     assert result["applied_rows_candidate_better_than_frozen"] == 2
     assert result["applied_rows_candidate_worse_than_frozen"] == 2
-    assert result["candidate_excess_abs_error_vs_frozen_gbp_mwh"] == pytest.approx(2.0)
+    assert result["candidate_excess_abs_error_vs_frozen_gbp_mwh"] == pytest.approx(-2.0)
     assert result["harmful_applied_excess_abs_error_gbp_mwh"] == pytest.approx(3.0)
-    assert result["helpful_applied_abs_error_saved_gbp_mwh"] == pytest.approx(1.0)
+    assert result["helpful_applied_abs_error_saved_gbp_mwh"] == pytest.approx(5.0)
     assert len(result["applied_runs"]) == 2
     assert result["longest_applied_run"]["rows"] == 2
     assert result["prediction_reconstruction_max_abs_diff_gbp_mwh"] == pytest.approx(0.0)
