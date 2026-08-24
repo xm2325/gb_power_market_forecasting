@@ -29,7 +29,7 @@ def test_v27_validation_uses_exact_elexon_end_and_no_auto_forward() -> None:
     assert "adaptive-2h-v27" not in text
 
 
-def test_result_lock_workflow_is_single_writer_and_never_dispatches_forward() -> None:
+def test_result_lock_workflow_verifies_artifact_identity_and_never_dispatches_forward() -> None:
     text = LOCK_WORKFLOW.read_text(encoding="utf-8")
 
     assert "concurrency:" in text
@@ -37,5 +37,12 @@ def test_result_lock_workflow_is_single_writer_and_never_dispatches_forward() ->
     assert "contents: write" in text
     assert "actions: read" in text
     assert "scripts/lock_v27_development_validation.py" in text
+    assert "Verify source run and artifact identity with GitHub" in text
+    assert "run.get('name') != 'validate-v27-development'" in text
+    assert "run.get('conclusion') != 'success'" in text
+    assert "artifact ID does not match the source run artifact" in text
+    assert "artifact digest mismatch" in text
+    assert "source validation artifact is expired" in text
+    assert "GitHub artifact metadata did not provide a digest" in text
     assert "adaptive-2h-v27" not in text
     assert "workflow_dispatch" in text
