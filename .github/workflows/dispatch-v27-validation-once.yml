@@ -1,0 +1,24 @@
+name: dispatch-v27-validation-once
+
+on:
+  pull_request:
+    types: [synchronize]
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    if: github.head_ref == 'feat/real-data-v0.20'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch sealed v0.27 development validation
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/actions/workflows/validate-v27-development.yml/dispatches \
+            -f ref=feat/real-data-v0.20
