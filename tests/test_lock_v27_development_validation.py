@@ -130,7 +130,7 @@ def test_lock_rejects_row_leak_beyond_sealed_boundary(monkeypatch, tmp_path: Pat
     artifact = _artifact(tmp_path, passed=True)
     rows_path = artifact / "v27_validation_rows.csv"
     rows = pd.read_csv(rows_path)
-    rows.loc[47, "target_start_utc"] = "2026-08-24T22:00:00Z"
+    rows.loc[47, "target_start_utc"] = "2026-08-24 22:00:00+00:00"
     rows.to_csv(rows_path, index=False)
     with pytest.raises(ValueError, match="exact sealed 48-row block"):
         locker.lock_validation_result(
