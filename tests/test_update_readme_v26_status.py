@@ -1,3 +1,4 @@
+import json
 import shutil
 from pathlib import Path
 
@@ -7,20 +8,33 @@ from scripts.update_readme_v26_status import update_readme
 REGISTRY = Path("reports/monitoring/V0_26_FORWARD_SNAPSHOT_REGISTRY.json")
 
 
+def _latest_locked_evidence() -> tuple[dict, dict]:
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    latest = registry["snapshots"][-1]
+    checkpoint = json.loads(Path(latest["checkpoint_path"]).read_text(encoding="utf-8"))
+    return latest, checkpoint
+
+
 def test_update_readme_uses_latest_locked_v26_snapshot(tmp_path: Path) -> None:
     readme = tmp_path / "README.md"
     shutil.copyfile("README.md", readme)
+    latest, checkpoint = _latest_locked_evidence()
+    forward = checkpoint["forward_segment"]
+    monitor = checkpoint["monitor"]
 
     updated = update_readme(readme_path=readme, registry_path=REGISTRY)
 
-    assert "### Latest locked forward snapshot — sequence 2" in updated
-    assert "**23 genuine forward half-hours**" in updated
-    assert "**7.623**" in updated
-    assert "**7.569**" in updated
-    assert "9.219" in updated
-    assert "18.799" in updated
-    assert "`32632409230`" in updated
-    assert "487f1e33478f9c07a25b088b1297d8aa170db9959642e108388bebd613765ca2" in updated
+    assert f"### Latest locked forward snapshot — sequence {latest['sequence']}" in updated
+    assert f"**{forward['rows']} genuine forward half-hours**" in updated
+    assert f"**{forward['candidate_mae_gbp_mwh']:.3f}**" in updated
+    assert f"**{forward['frozen_mae_gbp_mwh']:.3f}**" in updated
+    assert f"{forward['v25_mae_gbp_mwh']:.3f}" in updated
+    assert f"{forward['reference_mae_gbp_mwh']:.3f}" in updated
+    assert f"`{latest['run_id']}`" in updated
+    assert latest["ledger_chain_tip_sha256"] in updated
+    assert f"Alert status: `{monitor['alert_status']}`" in updated
+    for alert in monitor.get("alerts", []):
+        assert f"`{alert}`" in updated
     assert "## Earlier prospective/blinding experiments" in updated
 
 
