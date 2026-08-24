@@ -2,6 +2,8 @@ name: validate-v27-development
 
 on:
   workflow_dispatch:
+  pull_request:
+    types: [synchronize]
 
 permissions:
   contents: read
