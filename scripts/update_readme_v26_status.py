@@ -33,6 +33,13 @@ def build_v26_section(registry: dict, checkpoint: dict) -> str:
 
     alerts = monitor.get("alerts", [])
     alerts_text = ", ".join(f"`{x}`" for x in alerts) if alerts else "none"
+    alert_min_rows = int(monitor["alert_min_rows"])
+    if int(monitor["rows_observed"]) < alert_min_rows:
+        alert_gate_text = f"Performance alerts remain gated until {alert_min_rows} forward rows."
+    else:
+        alert_gate_text = (
+            f"The predeclared {alert_min_rows}-row degradation-alert gate is active on this snapshot."
+        )
 
     lines = [
         START_HEADING,
@@ -81,7 +88,7 @@ def build_v26_section(registry: dict, checkpoint: dict) -> str:
         f"vs previous-day reference: **{_pct(forward['candidate_improvement_vs_reference_pct'])}**.",
         "",
         f"Maturity: `{monitor['maturity_stage']}`. Alert status: `{monitor['alert_status']}`; alerts: {alerts_text}. "
-        f"Performance alerts remain gated until {monitor['alert_min_rows']} forward rows.",
+        f"{alert_gate_text}",
         "",
         "Integrity:",
         "",
@@ -95,8 +102,9 @@ def build_v26_section(registry: dict, checkpoint: dict) -> str:
         "the latest registered prefix before appending rows. The predictive source and frozen model state are "
         "also byte-locked; changing either requires a new candidate version and forward boundary.",
         "",
-        "For the 23-row sequence-2 gate analysis, see "
-        "[`docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md`](docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md).",
+        "The first post-lock gate-effectiveness analysis is preserved at "
+        "[`docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md`](docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md); "
+        "subsequent live artifacts also emit gate diagnostics without changing the frozen candidate.",
         "",
         "Promotion review remains unavailable before **336 half-hours / 7 days**, and no gate auto-promotes a candidate.",
         "",
