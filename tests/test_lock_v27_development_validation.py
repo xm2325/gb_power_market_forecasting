@@ -9,17 +9,23 @@ import scripts.lock_v27_development_validation as locker
 
 
 def _configure_outputs(monkeypatch, tmp_path: Path) -> None:
+    repo_lock = Path("reports/locked/V0_27_CANDIDATE_LOCK.json").resolve()
+    lock_payload = json.loads(repo_lock.read_text(encoding="utf-8"))
+    monkeypatch.setattr(locker, "CANDIDATE_LOCK", repo_lock)
+    monkeypatch.setattr(locker, "_verify_candidate_lock", lambda: lock_payload)
     monkeypatch.setattr(locker, "RESULT_PATH", tmp_path / "result.json")
     monkeypatch.setattr(locker, "PROVENANCE_PATH", tmp_path / "provenance.json")
     monkeypatch.setattr(locker, "ROWS_PATH", tmp_path / "rows.csv")
     monkeypatch.setattr(locker, "ELIGIBILITY_PATH", tmp_path / "eligibility.json")
     monkeypatch.setattr(locker, "DOC_PATH", tmp_path / "result.md")
+    (tmp_path / "reports/monitoring").mkdir(parents=True)
+    monkeypatch.chdir(tmp_path)
 
 
 def _artifact(tmp_path: Path, *, passed: bool, run_id: int = 12345) -> Path:
     artifact = tmp_path / "artifact"
     artifact.mkdir()
-    lock_path = Path("reports/locked/V0_27_CANDIDATE_LOCK.json")
+    lock_path = locker.CANDIDATE_LOCK
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
     gates = {
         "candidate_mae_strictly_better_than_frozen": passed,
@@ -66,7 +72,7 @@ def _artifact(tmp_path: Path, *, passed: bool, run_id: int = 12345) -> Path:
         "schema": "gb-power-market-v27-development-validation-provenance-v1",
         "workflow_run_id": run_id,
         "execution_commit_sha": "a" * 40,
-        "candidate_lock_path": str(lock_path),
+        "candidate_lock_path": lock_path.as_posix(),
         "candidate_lock_sha256": hashlib.sha256(lock_path.read_bytes()).hexdigest(),
         "validation_start_utc": "2026-08-23T22:00:00+00:00",
         "validation_end_exclusive_utc": "2026-08-24T22:00:00+00:00",
