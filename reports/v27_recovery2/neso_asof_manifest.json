@@ -1,0 +1,11 @@
+{
+  "schema": "gb-power-market-neso-asof-filter-v1",
+  "source": "data/processed/v27_recovery2/forecast_current_unfiltered.parquet",
+  "output": "data/processed/v27_recovery2/forecast_current_asof.parquet",
+  "cutoff_utc": "2026-08-25T13:00:00+00:00",
+  "source_rows": 674034,
+  "kept_rows": 674034,
+  "removed_post_cutoff_rows": 0,
+  "max_kept_publish_time_utc": "2026-08-25T11:54:29+00:00",
+  "contract": "Prediction input contains only NESO vintages published at or before the locked decision time."
+}
