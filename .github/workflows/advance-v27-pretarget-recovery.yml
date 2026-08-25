@@ -5,6 +5,7 @@ on:
   pull_request:
     types: [synchronize]
 
+# one-shot synchronize trigger for recovery sequence advancement
 permissions:
   contents: write
 
