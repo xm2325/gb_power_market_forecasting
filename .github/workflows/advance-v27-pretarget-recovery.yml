@@ -2,6 +2,8 @@ name: advance-v27-pretarget-recovery
 
 on:
   workflow_dispatch:
+  pull_request:
+    types: [synchronize]
 
 permissions:
   contents: write
@@ -32,7 +34,6 @@ jobs:
           pytest -q \
             tests/test_v27_implementation_lock.py \
             tests/test_v27_pretarget_recovery.py \
-            tests/test_v27_recovery_lock_record.py \
             tests/test_advance_v27_pretarget_recovery.py \
             tests/test_v27_prediction_freeze.py \
             tests/test_version_metadata.py
@@ -72,5 +73,5 @@ jobs:
           git commit -m "Record missed v0.27 recovery and lock next target"
           git fetch origin feat/real-data-v0.20
           git rebase origin/feat/real-data-v0.20
-          pytest -q tests/test_advance_v27_pretarget_recovery.py tests/test_v27_recovery_lock_record.py
+          pytest -q tests/test_advance_v27_pretarget_recovery.py tests/test_v27_pretarget_recovery.py
           git push origin HEAD:feat/real-data-v0.20
