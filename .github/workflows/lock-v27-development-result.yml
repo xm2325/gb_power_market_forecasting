@@ -107,7 +107,7 @@ jobs:
       - name: Lock immutable development-validation result
         run: |
           python scripts/lock_v27_development_validation.py \
-            --artifact-dir _v27_validation_artifact \
+            --artifact-dir _v27_validation_artifact/v27_validation \
             --run-id "${{ inputs.run_id }}" \
             --artifact-id "${{ inputs.artifact_id }}" \
             --artifact-sha256 "${{ inputs.artifact_sha256 }}"
