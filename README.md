@@ -190,6 +190,32 @@ v0.22 demonstrated metric blinding but was invalidated for confirmatory use afte
 
 v0.23 fixed that artifact-sealing problem and successfully completed a **0/672** smoke run before any sealed target entered the window. The project subsequently chose continuous forward monitoring as the more appropriate objective, so v0.23 was superseded before producing any confirmatory performance result. Its engineering audit remains in Git history, but its active network workflow has been removed.
 
+## v0.27 sealed development-validation result
+
+The single byte-locked direction-veto candidate has now been evaluated exactly once on its sealed independent development block `[2026-08-23T22:00:00Z, 2026-08-24T22:00:00Z)` (**48 half-hours**).
+
+| Metric | Candidate | Frozen |
+|---|---:|---:|
+| MAE (£/MWh) | **15.189** | **15.542** |
+| P95 abs error (£/MWh) | 33.850 | 38.604 |
+| Signed bias (£/MWh) | -12.253 | -13.630 |
+
+Previous-day reference MAE: **32.788 £/MWh**.
+
+Validation gates:
+
+- `candidate_mae_strictly_better_than_frozen`: **PASS**;
+- `candidate_p95_abs_error_non_worse_than_frozen`: **PASS**;
+- `candidate_absolute_signed_bias_non_worse_than_frozen`: **PASS**;
+- `candidate_mae_strictly_better_than_previous_day_reference`: **PASS**;
+
+Overall sealed development validation: **PASS**.
+Governed next state: `ELIGIBLE_TO_CREATE_FRESH_V27_FORWARD_LOCK`.
+
+These 48 labels are development evidence permanently. They are not fresh v0.27 forward evidence. Validation never auto-launches a challenger: a fail rejects this candidate on this block; a pass only permits a separately locked `0.27.0` experiment starting strictly after the validation boundary.
+
+Full locked result: [`docs/V0_27_DEVELOPMENT_VALIDATION_RESULT.md`](docs/V0_27_DEVELOPMENT_VALIDATION_RESULT.md).
+
 ## Source-clock audit
 
 The full historical run exposed **1,268** legacy NESO rows with a one-hour raw GMT/BST label inconsistency. The repository therefore uses `SETTLEMENT_DATE + SETTLEMENT_PERIOD` as the canonical GB target key, retains the raw clock for audit, accepts only the identified one-hour source-label offset and fails closed above it.
