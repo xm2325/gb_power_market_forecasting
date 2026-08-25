@@ -29,7 +29,7 @@ jobs:
           python scripts/update_readme_v27_validation_status.py
       - name: Verify rendered state
         run: |
-          python -m pip install pytest
+          python -m pip install -e '.[dev]'
           pytest -q tests/test_update_readme_v26_status.py tests/test_update_readme_v27_validation_status.py tests/test_v27_implementation_lock.py tests/test_version_metadata.py
       - name: Commit rendered README
         run: |
