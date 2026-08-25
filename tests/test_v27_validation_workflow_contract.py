@@ -36,6 +36,7 @@ def test_result_lock_workflow_verifies_artifact_identity_and_never_dispatches_fo
     assert "contents: write" in text
     assert "actions: read" in text
     assert "scripts/lock_v27_development_validation.py" in text
+    assert "--artifact-dir _v27_validation_artifact/v27_validation" in text
     assert "Verify source run and artifact identity with GitHub" in text
     assert "run.get('name') != 'validate-v27-development'" in text
     assert "run.get('conclusion') != 'success'" in text
