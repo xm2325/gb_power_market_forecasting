@@ -2,7 +2,7 @@
 
 Leakage-safe forecasting of GB electricity market prices using real Elexon market data and as-of NESO wind/solar forecast vintages.
 
-Current software version: **v0.26.0**. Historical evidence is versioned and never rewritten: v0.20 is the first locked real benchmark; v0.24 continuously monitors the unchanged frozen models; v0.25 records a 48h causal-bias correction that triggered its predeclared degradation alerts; v0.26 is a separately versioned 2h regime-adaptation candidate.
+Current software version: **v0.27.0**. Historical evidence is versioned and never rewritten: v0.20 is the first locked real benchmark; v0.24 continuously monitors the unchanged frozen models; v0.25 records a 48h causal-bias correction that triggered its predeclared degradation alerts; v0.26 is a separately versioned 2h regime-adaptation candidate.
 
 ## What this repository contains
 
@@ -172,13 +172,30 @@ The two-row first v0.26 ledger remains the permanent genesis anchor. Every later
 
 The first post-lock gate-effectiveness analysis is preserved at [`docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md`](docs/V0_26_GATE_EFFECTIVENESS_2026-08-23_0800Z.md). The first active-alert root-cause analysis is preserved at [`docs/V0_26_ALERT_ROOT_CAUSE_2026-08-23_2200Z.md`](docs/V0_26_ALERT_ROOT_CAUSE_2026-08-23_2200Z.md).
 
-### v0.27 development candidate — locked, not yet validated
+### v0.27 — sealed validation PASS, fresh forward boundary locked
 
-A single later development candidate is now byte-locked as `2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO`. It retains the unchanged v0.26 consensus proposal and adds a sign-only frozen-direction veto: a residual correction is applied only when its sign agrees with the frozen model's direction from the latest causally available history target to the current 2h target. There is no magnitude threshold, lookback search or refit.
+The single byte-locked direction-veto candidate `2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO` was evaluated exactly once on its sealed independent 48-half-hour development block. All four predeclared validation gates passed.
 
-Its one permitted independent validation block is sealed as `[2026-08-23T22:00:00Z, 2026-08-24T22:00:00Z)` — exactly **48 half-hours / 24 hours**. The validation workflow fails before any market-data download until the whole block is mature under the 90-minute safety lag, and it uses an exact Elexon timestamp cutoff so post-validation prices are not read.
+| Sealed development validation | Candidate | Frozen 2h |
+|---|---:|---:|
+| MAE (£/MWh) | **15.189** | 15.542 |
+| P95 abs error (£/MWh) | **33.850** | 38.604 |
+| Signed bias (£/MWh) | -12.253 | -13.630 |
 
-This is **development only**: software version remains `0.26.0`, no v0.27 forward experiment has been launched, and pass/fail validation labels can never be relabelled as fresh v0.27 forward evidence. See [`docs/V0_27_CANDIDATE_LOCK.md`](docs/V0_27_CANDIDATE_LOCK.md) and [`docs/V0_27_DEVELOPMENT_PROTOCOL.md`](docs/V0_27_DEVELOPMENT_PROTOCOL.md).
+Previous-day reference MAE: **32.788 £/MWh**. These 48 labels are permanently classified as development validation, **not v0.27 forward evidence**.
+
+After the PASS result was immutably locked, the validated predictive bytes were promoted without modification to software version `0.27.0`. The pre-registered boundary rule then fixed the fresh forward experiment before any v0.27 forward outcome was read:
+
+- implementation lock timestamp: `2026-08-25T00:11:28.620570+00:00`;
+- first forward decision: `2026-08-25T00:30:00+00:00`;
+- first forward target / forward start: **`2026-08-25T02:30:00+00:00`**;
+- predictive source blob: `3c361dbb0e1665bbbad2e1097b8580ce062a203f`;
+- forward outcomes present at implementation lock: **0**;
+- automatic forward launch: **false**.
+
+The first target is the 2h horizon from the next 30-minute decision grid strictly after the implementation lock. That boundary is deterministic and cannot be moved after observing prices.
+
+Evidence: [`reports/locked/V0_27_IMPLEMENTATION_LOCK.json`](reports/locked/V0_27_IMPLEMENTATION_LOCK.json), [`docs/V0_27_DEVELOPMENT_VALIDATION_RESULT.md`](docs/V0_27_DEVELOPMENT_VALIDATION_RESULT.md), and [`docs/V0_27_POST_VALIDATION_GOVERNANCE.md`](docs/V0_27_POST_VALIDATION_GOVERNANCE.md).
 
 Promotion review remains unavailable before **336 half-hours / 7 days**, and no gate auto-promotes a candidate.
 
