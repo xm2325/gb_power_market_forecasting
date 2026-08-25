@@ -28,6 +28,16 @@ def _utc(value: str | pd.Timestamp) -> pd.Timestamp:
     return ts.tz_convert("UTC")
 
 
+def _utc_series(values: pd.Series) -> pd.Series:
+    """Normalise equivalent CSV/ISO timestamp spellings without changing instants."""
+    try:
+        return pd.to_datetime(values, utc=True, errors="raise", format="mixed")
+    except TypeError:
+        # Compatibility fallback for older pandas versions that do not expose
+        # format='mixed'. Parsing item-by-item preserves the exact UTC instants.
+        return values.map(lambda value: _utc(value))
+
+
 def verify_freeze_window(*, implementation_lock: dict[str, Any], now_utc: str | pd.Timestamp) -> dict[str, str]:
     if implementation_lock.get("schema") != IMPLEMENTATION_LOCK_SCHEMA:
         raise ValueError("unsupported v0.27 implementation lock")
@@ -169,7 +179,8 @@ def freeze_first_prediction(
     implementation_lock: dict[str, Any],
 ) -> dict[str, Any]:
     history = historical_frozen_rows.copy()
-    history["target_start_utc"] = pd.to_datetime(history["target_start_utc"], utc=True, errors="raise")
+    history["target_start_utc"] = _utc_series(history["target_start_utc"])
+    history["decision_time_utc"] = _utc_series(history["decision_time_utc"])
     decision = _utc(implementation_lock["first_forward_decision_time_utc"])
     target = _utc(implementation_lock["forward_start_utc"])
     latest_allowed = decision - pd.Timedelta(minutes=30)
@@ -179,6 +190,8 @@ def freeze_first_prediction(
         raise ValueError("historical frozen rows leaked the first v0.27 target or later")
 
     first = pd.DataFrame([first_target_row])
+    first["target_start_utc"] = _utc_series(first["target_start_utc"])
+    first["decision_time_utc"] = _utc_series(first["decision_time_utc"])
     combined = pd.concat([history, first], ignore_index=True, sort=False)
     scored = apply_causal_direction_veto_candidate(combined)
     scored["target_start_utc"] = pd.to_datetime(scored["target_start_utc"], utc=True, errors="raise")
