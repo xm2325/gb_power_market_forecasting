@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Any
 
 import pandas as pd
@@ -10,6 +11,7 @@ from .v27_forward_governance import deterministic_forward_start
 EXPECTED_CANDIDATE = "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO"
 MISS_STATUS = "FIRST_PRETARGET_PREDICTION_WINDOW_MISSED"
 IMPLEMENTATION_STATUS = "FRESH_FORWARD_CANDIDATE_LOCKED_NOT_YET_EVALUATED"
+RECOVERY_STATUS = "PRETARGET_EVIDENCE_RECOVERY_LOCKED_NOT_YET_PREDICTED"
 
 
 def _utc(value: str | pd.Timestamp) -> pd.Timestamp:
@@ -60,7 +62,7 @@ def build_pretarget_recovery_lock(
 
     return {
         "schema": "gb-power-market-v27-pretarget-recovery-lock-v1",
-        "status": "PRETARGET_EVIDENCE_RECOVERY_LOCKED_NOT_YET_PREDICTED",
+        "status": RECOVERY_STATUS,
         "version": "0.27.0",
         "candidate": EXPECTED_CANDIDATE,
         "original_forward_start_utc": original_start.isoformat(),
@@ -81,3 +83,53 @@ def build_pretarget_recovery_lock(
             "It only selects the first future target eligible for stronger Git-committed pre-target prediction evidence after the missed 02:30 target."
         ),
     }
+
+
+def verify_recovery_prediction_window(
+    *,
+    recovery_lock: dict[str, Any],
+    now_utc: str | pd.Timestamp,
+) -> dict[str, str]:
+    if recovery_lock.get("schema") != "gb-power-market-v27-pretarget-recovery-lock-v1":
+        raise ValueError("unsupported v0.27 pre-target recovery lock")
+    if recovery_lock.get("status") != RECOVERY_STATUS:
+        raise ValueError("v0.27 pre-target recovery is not awaiting a prediction")
+    if recovery_lock.get("model_or_rule_changed_for_recovery") is not False:
+        raise ValueError("recovery lock changed model or rule")
+    if recovery_lock.get("target_outcome_accessed_to_select_recovery_boundary") is not False:
+        raise ValueError("recovery boundary used target outcome")
+
+    decision = _utc(recovery_lock["recovery_decision_time_utc"])
+    target = _utc(recovery_lock["recovery_target_start_utc"])
+    now = _utc(now_utc)
+    if target - decision != pd.Timedelta(minutes=120):
+        raise ValueError("recovery target is not exactly 2h after decision")
+    if now < decision:
+        raise RuntimeError("V27_RECOVERY_DECISION_NOT_REACHED")
+    if now >= target:
+        raise RuntimeError("V27_RECOVERY_TARGET_ALREADY_STARTED")
+    return {
+        "now_utc": now.isoformat(),
+        "decision_time_utc": decision.isoformat(),
+        "target_start_utc": target.isoformat(),
+    }
+
+
+def recovery_prediction_timing_lock(
+    *,
+    implementation_lock: dict[str, Any],
+    recovery_lock: dict[str, Any],
+) -> dict[str, Any]:
+    if implementation_lock.get("status") != IMPLEMENTATION_STATUS:
+        raise ValueError("unexpected v0.27 implementation-lock state")
+    if implementation_lock.get("candidate") != recovery_lock.get("candidate"):
+        raise ValueError("recovery candidate differs from implementation lock")
+    if implementation_lock["candidate_source"]["git_blob_sha1"] != recovery_lock.get("predictive_source_git_blob_sha1"):
+        raise ValueError("recovery predictive source differs from implementation lock")
+    if _utc(implementation_lock["forward_start_utc"]) != _utc(recovery_lock["original_forward_start_utc"]):
+        raise ValueError("recovery lock moved original forward boundary")
+
+    timing = deepcopy(implementation_lock)
+    timing["first_forward_decision_time_utc"] = _utc(recovery_lock["recovery_decision_time_utc"]).isoformat()
+    timing["forward_start_utc"] = _utc(recovery_lock["recovery_target_start_utc"]).isoformat()
+    return timing
