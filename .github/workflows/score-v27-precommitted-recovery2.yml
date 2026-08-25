@@ -1,0 +1,95 @@
+name: score-v27-precommitted-recovery2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: score-v27-precommitted-recovery2
+  cancel-in-progress: false
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/real-data-v0.20
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+      - name: Verify scoring contract before target access
+        run: |
+          pytest -q tests/test_v27_precommitted_scoring.py tests/test_v27_implementation_lock.py tests/test_version_metadata.py
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from gb_power_market.v27_precommitted_scoring import verify_scoring_maturity
+          p = Path('reports/forward/v27/V0_27_PRETARGET_RECOVERY_2_PREDICTION.json')
+          if not p.is_file():
+              raise SystemExit('precommitted recovery sequence 2 prediction is absent')
+          prediction = json.loads(p.read_text())
+          print(verify_scoring_maturity(prediction=prediction, now_utc=datetime.now(timezone.utc)))
+          PY
+      - name: Download only the committed target outcome after maturity gate
+        run: |
+          python scripts/download_elexon_mid_exact_window.py \
+            --start-utc 2026-08-25T15:00:00Z \
+            --end-exclusive-utc 2026-08-25T15:30:00Z \
+            --out-dir data/external/v27_recovery2_score/elexon_mid \
+            --manifest reports/v27_recovery2_score/elexon_mid_exact_manifest.json
+      - name: Materialise one realised market target
+        run: |
+          python scripts/materialise_elexon_v22_mid.py \
+            --bundle-dir data/external/v27_recovery2_score/elexon_mid \
+            --out data/processed/v27_recovery2_score/reference_market.parquet \
+            --manifest reports/v27_recovery2_score/elexon_mid_materialise_manifest.json
+      - name: Score only the already committed prediction
+        run: |
+          python scripts/score_v27_precommitted_prediction.py \
+            --prediction reports/forward/v27/V0_27_PRETARGET_RECOVERY_2_PREDICTION.json \
+            --reference-market data/processed/v27_recovery2_score/reference_market.parquet \
+            --out reports/forward/v27/V0_27_PRETARGET_RECOVERY_2_SCORE.json \
+            --provenance reports/forward/v27/V0_27_PRETARGET_RECOVERY_2_SCORE_PROVENANCE.json
+      - name: Enforce one-row descriptive claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          score = json.loads(Path('reports/forward/v27/V0_27_PRETARGET_RECOVERY_2_SCORE.json').read_text())
+          prov = json.loads(Path('reports/forward/v27/V0_27_PRETARGET_RECOVERY_2_SCORE_PROVENANCE.json').read_text())
+          if score['target_start_utc'] != '2026-08-25T15:00:00+00:00':
+              raise SystemExit('scored target changed')
+          if score['evidence_class'] != 'SINGLE_PRECOMMITTED_FORWARD_OUTCOME_DESCRIPTIVE_ONLY':
+              raise SystemExit('single outcome was overclaimed')
+          if score['promotion_eligible'] is not False or score['automatic_model_change'] is not False:
+              raise SystemExit('single outcome unexpectedly permits promotion/model change')
+          if prov['prediction_recomputed_during_scoring'] is not False:
+              raise SystemExit('scoring recomputed the prediction')
+          if prov['target_outcome_accessed_only_after_maturity_gate'] is not True:
+              raise SystemExit('outcome maturity provenance changed')
+          print(json.dumps(score, indent=2))
+          PY
+      - name: Commit immutable one-row score
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            reports/forward/v27/V0_27_PRETARGET_RECOVERY_2_SCORE.json \
+            reports/forward/v27/V0_27_PRETARGET_RECOVERY_2_SCORE_PROVENANCE.json \
+            reports/v27_recovery2_score/elexon_mid_exact_manifest.json \
+            reports/v27_recovery2_score/elexon_mid_materialise_manifest.json
+          git commit -m "Score one precommitted v0.27 forward outcome"
+          git fetch origin feat/real-data-v0.20
+          git rebase origin/feat/real-data-v0.20
+          git push origin HEAD:feat/real-data-v0.20
