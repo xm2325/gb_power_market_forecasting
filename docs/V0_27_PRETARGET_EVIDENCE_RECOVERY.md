@@ -72,12 +72,26 @@ The short causal residual mean was +4.590101 £/MWh over 12 rows and the long me
 
 The prediction file SHA-256 is `a94aa1c3f410c196bee4ab8276dd3f166b78a921ee7ada0cee0ba8c6633a6822`. Provenance records the implementation lock, recovery lock, frozen model state, Elexon history, NESO as-of file and historical frozen-row hashes and explicitly states `target_label_accessed=false`.
 
-A repository-level regression test now requires this exact prediction SHA and verifies the locked decision/target, pre-target freeze time, unchanged candidate blob, correction arithmetic and causal NESO publication time.
+A repository-level regression test requires this exact prediction SHA and verifies the locked decision/target, pre-target freeze time, unchanged candidate blob, correction arithmetic and causal NESO publication time.
 
-This is the first **Git-committed-before-outcome** numerical v0.27 prediction. It is not yet a performance result.
+## First scored precommitted forward outcome
 
-## Scoring boundary
+Scoring was a separate operation. For the `15:00Z` target, the 90-minute safety policy first allowed outcome access at **`2026-08-25T16:30:00Z`**. The scoring run `32871267883` stayed behind a no-network maturity barrier until that time, then downloaded only `[15:00Z, 15:30Z)`, joined the realised price to the existing Git-committed prediction, and did not recompute the forecast.
 
-Scoring is a separate operation. For the `15:00Z` target, the 90-minute safety policy means the first allowed scoring time is **`2026-08-25T16:30:00Z`**.
+The realised market price was **133.73 £/MWh**. The single-row errors are:
 
-The scorer and its workflow were committed and CI-tested before the target outcome became eligible for access. Scoring joins the realised target to the already committed prediction; it does not recompute the prediction. A single scored row is classified `SINGLE_PRECOMMITTED_FORWARD_OUTCOME_DESCRIPTIVE_ONLY` and is never sufficient for promotion, tuning, or an automatic model change.
+| Model / reference | Prediction (£/MWh) | Absolute error (£/MWh) |
+|---|---:|---:|
+| v0.27 direction-veto candidate | **97.513431** | **36.216569** |
+| unchanged frozen v0.20 2h | 92.923330 | 40.806670 |
+| previous-settlement-day reference | 118.320000 | **15.410000** |
+
+On this one row, the v0.27 correction reduced absolute error versus the frozen model by **4.590101 £/MWh**, exactly the size of the positive correction, but remained **20.806569 £/MWh worse than the previous-day reference**.
+
+This result is intentionally mixed rather than presented as a win. It shows that the direction-aligned correction moved the frozen prediction in the correct direction for this target, while both model predictions still materially underpredicted the realised price and the simple previous-day reference was substantially closer.
+
+The score is classified `SINGLE_PRECOMMITTED_FORWARD_OUTCOME_DESCRIPTIVE_ONLY`. `promotion_eligible=false` and `automatic_model_change=false`. Score provenance records `target_outcome_accessed_only_after_maturity_gate=true` and `prediction_recomputed_during_scoring=false`.
+
+Score SHA-256: `6f1a8e0e75734c7bbb78715b35c91fd94544eb2a55e4a6b63e5cdaa00a39dff8`.
+
+One genuinely precommitted scored row is useful evidence of the end-to-end causal process, but it is not sufficient to establish v0.27 superiority, trigger promotion, tune the candidate, or change the frozen comparison model.
