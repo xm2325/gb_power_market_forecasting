@@ -2,6 +2,8 @@ name: analyse-v27-historical-uncertainty
 
 on:
   workflow_dispatch:
+  pull_request:
+    types: [synchronize]
 
 permissions:
   contents: write
@@ -56,7 +58,7 @@ jobs:
           if x['weekly_consistency']['v0.26']['v27_better_folds'] != 7: raise SystemExit('weekly v0.26 consistency changed')
           if x['comparisons_vs_v27']['causal_base']['observed_mae_gain_gbp_mwh'] <= 0: raise SystemExit('v0.27/base observed ordering changed')
           if x['comparisons_vs_v27']['v0.26']['observed_mae_gain_gbp_mwh'] >= 0: raise SystemExit('v0.27/v0.26 observed ordering changed')
-          if 'not live-forward' not in x['claim_boundary'].lower() and 'live-forward' not in x['claim_boundary'].lower(): raise SystemExit('claim boundary missing')
+          if 'live-forward' not in x['claim_boundary'].lower(): raise SystemExit('claim boundary missing')
           print(json.dumps(x['comparisons_vs_v27'], indent=2))
           PY
       - name: Commit uncertainty evidence
