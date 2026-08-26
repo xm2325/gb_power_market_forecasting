@@ -21,3 +21,7 @@ def test_legacy_neso_downloader_executes_as_script() -> None:
 
 def test_neso_walkforward_materialiser_executes_as_script() -> None:
     _help('scripts/materialise_neso_walkforward.py')
+
+
+def test_corrected_historical_runner_executes_as_script() -> None:
+    _help('scripts/run_v27_historical_walkforward_v2.py')
