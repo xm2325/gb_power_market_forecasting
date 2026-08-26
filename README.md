@@ -237,6 +237,35 @@ Full locked result: [`docs/V0_27_DEVELOPMENT_VALIDATION_RESULT.md`](docs/V0_27_D
 
 The full historical run exposed **1,268** legacy NESO rows with a one-hour raw GMT/BST label inconsistency. The repository therefore uses `SETTLEMENT_DATE + SETTLEMENT_PERIOD` as the canonical GB target key, retains the raw clock for audit, accepts only the identified one-hour source-label offset and fails closed above it.
 
+<!-- V27_HISTORICAL_ROLLING_ORIGIN_START -->
+## v0.27 — May–August leakage-safe historical rolling-origin robustness
+
+To test whether the adaptive structure generalises beyond the short live-forward sequence, the repository now includes a separate retrospective **as-of rolling-origin** evaluation. It does not replay today's fitted coefficients into the past: every weekly fold refits/reselects its causal base using only prior data, then uses a 72h causal adaptation warm-up before scoring.
+
+Window: **2026-05-01 00:00 UTC → 2026-08-23 22:00 UTC**, exactly **5,516 contiguous half-hours**. Evidence class: `HISTORICAL_ASOF_ROLLING_ORIGIN_NOT_LIVE_FORWARD`.
+
+| Model | MAE (£/MWh) | Historical interpretation |
+|---|---:|---|
+| causal rolling-origin base | 18.720 | fold-specific refit/reselection |
+| v0.25 | 20.384 | clearly degraded |
+| **v0.26** | **18.380** | lowest overall MAE |
+| v0.27 | 18.578 | 0.76% better than base, but 1.08% worse than v0.26 |
+| previous-day reference | 25.170 | v0.27 is 26.2% better |
+
+Against the causal base, v0.27's observed MAE gain is **0.142 £/MWh**, but the paired 24h-block 95% interval is **[-0.129, 0.403]** and the 7-day-block sensitivity is **[-0.060, 0.341]**; both include zero. v0.27 beats the base in **12/17** weekly folds.
+
+Against v0.26, v0.27 is worse overall by **1.08%** and wins only **7/17** folds. The 24h-block interval for `v0.26 MAE − v0.27 MAE` is **[-0.446, -0.005] £/MWh**, while the 7-day sensitivity **[-0.499, 0.024]** narrowly includes zero. The repository therefore does **not** claim that v0.27 historically dominates v0.26.
+
+The stronger conclusions are narrower: v0.27 robustly improves on the failed v0.25 correction and on the previous-day reference, while its incremental benefit over the causal base is small and uncertain. These historical rows do not authorize retuning or promotion.
+
+Evidence:
+
+- [`docs/V0_27_HISTORICAL_ROLLING_ORIGIN.md`](docs/V0_27_HISTORICAL_ROLLING_ORIGIN.md)
+- [`reports/v27_historical_walkforward/historical_walkforward_summary.json`](reports/v27_historical_walkforward/historical_walkforward_summary.json)
+- [`reports/v27_historical_walkforward/historical_uncertainty.json`](reports/v27_historical_walkforward/historical_uncertainty.json)
+- [`reports/locked/V0_27_HISTORICAL_ROLLING_ORIGIN_EVIDENCE_MANIFEST.json`](reports/locked/V0_27_HISTORICAL_ROLLING_ORIGIN_EVIDENCE_MANIFEST.json)
+<!-- V27_HISTORICAL_ROLLING_ORIGIN_END -->
+
 ## Repository layout
 
 ```text
