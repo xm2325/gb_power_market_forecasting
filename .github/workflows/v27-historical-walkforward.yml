@@ -29,7 +29,7 @@ jobs:
           python -m pip install -e '.[dev,live]'
       - name: Verify historical protocol and unchanged adaptation sources before network access
         run: |
-          pytest -q tests/test_historical_walkforward_v27.py tests/test_v27_candidate_lock.py tests/test_version_metadata.py
+          pytest -q tests/test_historical_walkforward_v27.py tests/test_v27_historical_helper_entrypoints.py tests/test_v27_candidate_lock.py tests/test_version_metadata.py
           test "$(git hash-object src/gb_power_market/adaptive_bias_v25.py)" = "2ccb3d2a0762eec66d646e164262f8ac5b759d8e"
           test "$(git hash-object src/gb_power_market/adaptive_consensus_v26.py)" = "399915c6cdd0d3b016bde73cb0ef92eb2697adf8"
           test "$(git hash-object src/gb_power_market/adaptive_direction_v27_candidate.py)" = "3c361dbb0e1665bbbad2e1097b8580ce062a203f"
@@ -50,7 +50,7 @@ jobs:
           python scripts/materialise_elexon_v19.py --bundle-dir data/external/v27_historical_elexon --out-dir data/processed/v27_historical_elexon --report-dir reports/v27_historical_walkforward/elexon --start-date 2026-01-01 --end-date-exclusive 2026-08-24
       - name: Run May-to-August leakage-safe rolling-origin evaluation
         run: |
-          python scripts/run_v27_historical_walkforward.py --neso-dir data/processed/v27_historical_neso --elexon-reference data/processed/v27_historical_elexon/reference_market.parquet --score-start-utc 2026-05-01T00:00:00Z --score-end-exclusive-utc 2026-08-23T22:00:00Z --fold-days 7 --out-dir reports/v27_historical_walkforward
+          python scripts/run_v27_historical_walkforward_v2.py --neso-dir data/processed/v27_historical_neso --elexon-reference data/processed/v27_historical_elexon/reference_market.parquet --score-start-utc 2026-05-01T00:00:00Z --score-end-exclusive-utc 2026-08-23T22:00:00Z --fold-days 7 --out-dir reports/v27_historical_walkforward
       - name: Enforce historical evidence class, exact coverage and no future fold input
         run: |
           python - <<'PY'
@@ -69,6 +69,7 @@ jobs:
           if not target.reset_index(drop=True).equals(pd.Series(expected, name='target_start_utc')): raise SystemExit('historical score targets are not exactly contiguous')
           if any(f['future_labels_passed_to_fold_runner'] for f in s['folds']): raise SystemExit('a fold admits future labels into its base runner')
           if rows['evidence_class'].nunique() != 1 or rows['evidence_class'].iloc[0] != expected_class: raise SystemExit('row-level evidence class changed')
+          if s.get('final_score_support_rule') != 'DEPLOYED_FAMILY_FEATURES_ONLY_AFTER_COMMON_SUPPORT_SELECTION': raise SystemExit('deployed-family score support rule changed')
           print(json.dumps({'overall': s['overall'], 'monthly': s['monthly']}, indent=2))
           PY
       - name: Commit historical evidence
