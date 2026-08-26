@@ -5,7 +5,7 @@ import argparse
 import json
 from pathlib import Path
 
-from scripts.download_neso_v18_bundle import RESOURCES, download_resource, session
+from download_neso_v18_bundle import RESOURCES, download_resource, session
 
 
 RESOURCE_NAME = "forecast_legacy_2026_jan_jun"
