@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
 from gb_power_market.historical_walkforward_v27 import (
     EVIDENCE_CLASS,
     WalkForwardConfig,
     apply_candidate_suite,
+    build_deployed_base_rows,
     build_fold_schedule,
     summarise_score_rows,
 )
@@ -54,6 +56,31 @@ def test_warmup_must_cover_causal_48h_residual_window() -> None:
         assert "full 48h residual window" in str(exc)
     else:
         raise AssertionError("48h wall-clock warm-up should be rejected because horizon/delay also matter")
+
+
+def test_fallback_score_does_not_require_unused_revision_features() -> None:
+    target = pd.date_range("2026-04-28T00:00:00Z", "2026-05-08T00:00:00Z", freq="30min", inclusive="left")
+    frame = pd.DataFrame(
+        {
+            "target_start_utc": target,
+            "decision_time_utc": target - pd.Timedelta(minutes=120),
+            "reference_market_price_gbp_mwh": np.linspace(80.0, 100.0, len(target)),
+            "price_lag_1d_same_target": np.linspace(78.0, 98.0, len(target)),
+            "price_lag_last_completed": np.linspace(79.0, 99.0, len(target)),
+            # Deliberately absent revision/NESO columns: fallback does not use them.
+        }
+    )
+    fold = build_fold_schedule()[0]
+    selection = {
+        "deployed_source": "PREVIOUS_SETTLEMENT_DAY_FALLBACK",
+        "selected_family": "PRICE_PLUS_NESO_LEVELS_AND_REVISIONS",
+        "by_family": {},
+    }
+    base = build_deployed_base_rows(frame, fold=fold, selection=selection)
+    assert len(base) == 480
+    scored = base[pd.to_datetime(base["target_start_utc"], utc=True) >= pd.Timestamp("2026-05-01T00:00:00Z")]
+    assert len(scored) == 336
+    assert np.allclose(scored["frozen_prediction_gbp_mwh"], scored["previous_settlement_day_reference_gbp_mwh"])
 
 
 def test_candidate_suite_uses_only_causally_available_residual_history() -> None:
