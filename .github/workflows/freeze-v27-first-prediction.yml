@@ -1,0 +1,158 @@
+name: freeze-v27-first-prediction
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: freeze-v27-first-prediction
+  cancel-in-progress: false
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/real-data-v0.20
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Verify immutable v0.27 implementation before any market-data access
+        run: |
+          pytest -q \
+            tests/test_v27_implementation_lock.py \
+            tests/test_v27_prediction_freeze.py \
+            tests/test_version_metadata.py
+
+      - name: Require locked first decision and pre-target execution before network access
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from gb_power_market.v27_prediction_freeze import verify_freeze_window
+
+          lock = json.loads(Path('reports/locked/V0_27_IMPLEMENTATION_LOCK.json').read_text())
+          print(verify_freeze_window(implementation_lock=lock, now_utc=datetime.now(timezone.utc)))
+          PY
+
+      - name: Download bounded NESO vintages for causal first prediction
+        run: |
+          python scripts/download_neso_v21_window.py \
+            --start-date 2026-07-12 \
+            --end-date-exclusive 2026-08-26 \
+            --out data/external/v27_first_freeze/neso_current_window.csv \
+            --manifest reports/v27_first_freeze/neso_window_manifest.json
+
+      - name: Materialise NESO vintages
+        run: |
+          python scripts/materialise_v21_current.py \
+            --input data/external/v27_first_freeze/neso_current_window.csv \
+            --out data/processed/v27_first_freeze/forecast_current.parquet \
+            --manifest reports/v27_first_freeze/neso_materialise_manifest.json
+
+      - name: Download Elexon history only through the locked decision boundary
+        run: |
+          python scripts/download_elexon_mid_exact_window.py \
+            --start-utc 2026-07-01T00:00:00Z \
+            --end-exclusive-utc 2026-08-25T00:30:00Z \
+            --out-dir data/external/v27_first_freeze/elexon_mid \
+            --manifest reports/v27_first_freeze/elexon_mid_exact_manifest.json
+
+      - name: Materialise decision-time Elexon history
+        run: |
+          python scripts/materialise_elexon_v22_mid.py \
+            --bundle-dir data/external/v27_first_freeze/elexon_mid \
+            --out data/processed/v27_first_freeze/reference_market.parquet \
+            --manifest reports/v27_first_freeze/elexon_mid_materialise_manifest.json
+
+      - name: Replay frozen 2h history only through the latest causally available target
+        run: |
+          python scripts/run_v24_continuous_forward_monitor.py \
+            --elexon-reference data/processed/v27_first_freeze/reference_market.parquet \
+            --neso-current data/processed/v27_first_freeze/forecast_current.parquet \
+            --model-state reports/locked/V0_21_FROZEN_MODEL_STATE.json \
+            --start-utc 2026-07-12T12:00:00Z \
+            --end-exclusive-utc 2026-08-25T00:30:00Z \
+            --out-dir reports/v24_for_v27_first_freeze
+
+      - name: Freeze the 02:30Z v0.27 prediction without its realised target
+        run: |
+          python scripts/freeze_v27_first_forward_prediction.py \
+            --reference-history data/processed/v27_first_freeze/reference_market.parquet \
+            --neso-current data/processed/v27_first_freeze/forecast_current.parquet \
+            --historical-frozen-rows reports/v24_for_v27_first_freeze/forward_rows_2h.csv
+
+      - name: Enforce pre-target and no-label contracts immediately before commit
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          import pandas as pd
+
+          prediction = json.loads(Path('reports/forward/v27/V0_27_FIRST_FORWARD_PREDICTION_2026-08-25_0230Z.json').read_text())
+          provenance = json.loads(Path('reports/forward/v27/V0_27_FIRST_FORWARD_PREDICTION_PROVENANCE.json').read_text())
+          elexon = json.loads(Path('reports/v27_first_freeze/elexon_mid_exact_manifest.json').read_text())
+          decision = pd.Timestamp('2026-08-25T00:30:00Z')
+          target = pd.Timestamp('2026-08-25T02:30:00Z')
+          now = pd.Timestamp(datetime.now(timezone.utc))
+
+          if now >= target:
+              raise SystemExit('PRE_TARGET_COMMIT_WINDOW_MISSED: refusing retrospective first-prediction commit')
+          if pd.Timestamp(prediction['decision_time_utc']) != decision or pd.Timestamp(prediction['target_start_utc']) != target:
+              raise SystemExit('locked first decision/target changed')
+          if prediction['target_label_status'] != 'UNOBSERVED_NOT_ACCESSED' or prediction['realised_price_in_prediction_record'] is not False:
+              raise SystemExit('first prediction record contains or claims access to target outcome')
+          if provenance['target_label_accessed'] is not False or provenance['evidence_class'] != 'PRE_TARGET_PREDICTION_NOT_YET_SCORED':
+              raise SystemExit('first prediction provenance classification changed')
+          if pd.Timestamp(prediction['freeze_completed_utc']) >= target:
+              raise SystemExit('prediction freeze was not completed before target start')
+          if pd.Timestamp(prediction['neso_publish_time_utc']) > decision:
+              raise SystemExit('future NESO vintage entered first frozen prediction')
+          if elexon['end_exclusive_utc'] != '2026-08-25T00:30:00Z':
+              raise SystemExit('Elexon history escaped locked decision boundary')
+          if any(pd.Timestamp(c['request_to_inclusive_utc']) >= decision for c in elexon['chunks']):
+              raise SystemExit('Elexon request included target starts at or after locked decision')
+          print({'now_utc': now.isoformat(), 'prediction': prediction})
+          PY
+
+      - name: Commit prediction before target period begins
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            reports/forward/v27/V0_27_FIRST_FORWARD_PREDICTION_2026-08-25_0230Z.json \
+            reports/forward/v27/V0_27_FIRST_FORWARD_PREDICTION_PROVENANCE.json \
+            reports/v27_first_freeze/neso_window_manifest.json \
+            reports/v27_first_freeze/neso_materialise_manifest.json \
+            reports/v27_first_freeze/elexon_mid_exact_manifest.json \
+            reports/v27_first_freeze/elexon_mid_materialise_manifest.json
+          git diff --cached --stat
+          git commit -m "Freeze first v0.27 prediction before target outcome"
+          git fetch origin feat/real-data-v0.20
+          git rebase origin/feat/real-data-v0.20
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          import pandas as pd
+          prediction = json.loads(Path('reports/forward/v27/V0_27_FIRST_FORWARD_PREDICTION_2026-08-25_0230Z.json').read_text())
+          if pd.Timestamp(datetime.now(timezone.utc)) >= pd.Timestamp(prediction['target_start_utc']):
+              raise SystemExit('PRE_TARGET_PUSH_WINDOW_MISSED: refusing retrospective push')
+          if prediction['target_label_status'] != 'UNOBSERVED_NOT_ACCESSED':
+              raise SystemExit('target-label state changed before push')
+          PY
+          git push origin HEAD:feat/real-data-v0.20

@@ -1,0 +1,59 @@
+{
+  "version": "0.23.0",
+  "status": "LOCKED_SEALED_CONFIRMATORY_CHECKPOINT",
+  "checkpoint_date": "2026-08-21",
+  "workflow_run": {
+    "run_id": 32482320136,
+    "artifact_id": 9446545003,
+    "artifact_name": "v23-sealed-confirmatory-32482320136",
+    "artifact_sha256": "b5215327c5ba0450a19387fec633be5d93b22e6a42c244a8e1d680a234ecbef0",
+    "artifact_files": 10
+  },
+  "frozen_model_state": {
+    "sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+    "source_v020_evidence_id_sha256": "7c5f78b98c8ed877ab4c5cefa8a40b3068abb74cb2062ecf677f319d74a14661",
+    "model_changed": false
+  },
+  "sealed_window": {
+    "start_utc": "2026-08-21T11:30:00+00:00",
+    "fixed_end_exclusive_utc": "2026-09-04T11:30:00+00:00",
+    "exact_half_hours": 672,
+    "fixed_grid_sha256": "05f6487d7ae5adb6290ff1071f781bd77032c5a19c86028f971c0b9dbf4ba4af",
+    "available_end_exclusive_utc_at_checkpoint": "2026-08-21T11:00:00+00:00",
+    "complete_rows_so_far": 0,
+    "rows_remaining_to_reveal": 672,
+    "future_neso_publications": 0,
+    "reveal_occurred": false
+  },
+  "source_snapshot": {
+    "neso_current_resource_id": "31861619-0b86-47ba-bac2-d008a760af54",
+    "neso_current_window_rows": 15370,
+    "neso_current_window_sha256": "4568bb128e44be30e9f117d2bb1dd40e80e8dfe51ea63eb05b36555beb3528b8",
+    "neso_raw_clock_mismatch_rows": 0,
+    "elexon_mid_materialised_reference_rows_on_ephemeral_runner": 363,
+    "elexon_last_materialised_target_start_utc_on_ephemeral_runner": "2026-08-21T12:00:00+00:00"
+  },
+  "artifact_seal_audit": {
+    "pre_reveal_artifact_contains_only_reports_and_manifests": true,
+    "price_bearing_parquet_exported": false,
+    "raw_market_json_or_csv_exported": false,
+    "performance_metrics_exported": false,
+    "recursive_performance_key_scan": "PASS",
+    "uploaded_processed_sources_step": "SKIPPED_PRE_REVEAL",
+    "confirmatory_summary_columns": [
+      "horizon",
+      "status",
+      "complete_rows_so_far",
+      "rows_remaining_to_reveal",
+      "coverage_so_far",
+      "future_neso_publications"
+    ]
+  },
+  "horizons": {
+    "30m": {"status": "SEALED_ACCUMULATION", "complete_rows": 0, "rows_remaining": 672, "future_neso_publications": 0},
+    "2h": {"status": "SEALED_ACCUMULATION", "complete_rows": 0, "rows_remaining": 672, "future_neso_publications": 0},
+    "6h": {"status": "SEALED_ACCUMULATION", "complete_rows": 0, "rows_remaining": 672, "future_neso_publications": 0},
+    "12h": {"status": "SEALED_ACCUMULATION", "complete_rows": 0, "rows_remaining": 672, "future_neso_publications": 0}
+  },
+  "claim_boundary": "This checkpoint proves the v0.23 seal and fixed population identity only. It contains no confirmatory model-performance evidence and supports no new CV/application performance claim."
+}

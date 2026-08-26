@@ -1,0 +1,21 @@
+{
+  "schema": "gb-power-market-v27-pretarget-recovery-lock-v1",
+  "status": "PRETARGET_EVIDENCE_RECOVERY_LOCKED_NOT_YET_PREDICTED",
+  "sequence": 2,
+  "version": "0.27.0",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO",
+  "original_forward_start_utc": "2026-08-25T02:30:00+00:00",
+  "original_forward_boundary_changed": false,
+  "previous_recovery_miss_path": "reports/forward/v27/V0_27_PRETARGET_RECOVERY_1_MISSED.json",
+  "previous_recovery_target_start_utc": "2026-08-25T12:00:00+00:00",
+  "recovery_lock_timestamp_utc": "2026-08-25T12:47:06.253146+00:00",
+  "recovery_decision_time_utc": "2026-08-25T13:00:00+00:00",
+  "recovery_target_start_utc": "2026-08-25T15:00:00+00:00",
+  "horizon_minutes": 120,
+  "selection_rule": "next 30-minute decision grid strictly after recovery lock, then +120 minutes",
+  "predictive_source_git_blob_sha1": "3c361dbb0e1665bbbad2e1097b8580ce062a203f",
+  "model_or_rule_changed_for_recovery": false,
+  "target_outcome_accessed_to_select_recovery_boundary": false,
+  "automatic_prediction_launch": false,
+  "evidence_class": "PRETARGET_PREDICTION_RECOVERY_BOUNDARY_NOT_PERFORMANCE_EVIDENCE"
+}

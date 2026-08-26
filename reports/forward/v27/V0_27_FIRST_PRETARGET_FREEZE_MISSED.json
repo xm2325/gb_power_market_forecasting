@@ -1,0 +1,18 @@
+{
+  "schema": "gb-power-market-v27-pretarget-freeze-miss-v1",
+  "status": "FIRST_PRETARGET_PREDICTION_WINDOW_MISSED",
+  "version": "0.27.0",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO",
+  "implementation_lock_path": "reports/locked/V0_27_IMPLEMENTATION_LOCK.json",
+  "implementation_lock_git_blob_sha1": "04de14441087cf4c57e36bbf82ba877acae382b5",
+  "locked_first_decision_time_utc": "2026-08-25T00:30:00+00:00",
+  "locked_first_target_start_utc": "2026-08-25T02:30:00+00:00",
+  "expected_prediction_path": "reports/forward/v27/V0_27_FIRST_FORWARD_PREDICTION_2026-08-25_0230Z.json",
+  "prediction_committed_before_target": false,
+  "target_outcome_accessed_to_create_this_record": false,
+  "retrospective_prediction_reconstruction_allowed": false,
+  "original_forward_boundary_changed": false,
+  "evidence_class": "PRETARGET_PREDICTION_EVIDENCE_MISSED_NO_RETROSPECTIVE_SUBSTITUTION",
+  "recovery_policy": "Keep the original v0.27 forward boundary unchanged. Any stronger pre-target prediction evidence must start from a separately locked future decision selected mechanically after the recovery lock itself exists; missed targets are never relabelled as pre-target evidence.",
+  "claim_boundary": "This is an integrity record, not a performance result. It records that the first locked v0.27 target did not receive a prediction committed before its outcome period began."
+}

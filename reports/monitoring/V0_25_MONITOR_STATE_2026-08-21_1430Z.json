@@ -1,0 +1,64 @@
+{
+  "alert_status": "INSUFFICIENT_SAMPLE_FOR_ALERTS",
+  "alerts": [],
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_48H_RESIDUAL_MEAN",
+  "claim_boundary": "Six forward half-hours are early operational evidence only and are not a headline/CV claim.",
+  "cumulative": {
+    "adaptive_improvement_vs_frozen_pct": 70.72877602663435,
+    "adaptive_improvement_vs_reference_pct": 58.17041433486773,
+    "adaptive_mae_gbp_mwh": 3.859476437369539,
+    "adaptive_p95_abs_error_gbp_mwh": 7.603261889725307,
+    "adaptive_signed_bias_gbp_mwh": -3.4223799221508933,
+    "adaptive_win_rate_vs_frozen": 1.0,
+    "adaptive_win_rate_vs_reference": 0.8333333333333334,
+    "correction_max_gbp_mwh": 9.93035199224959,
+    "correction_mean_gbp_mwh": 9.762844040063113,
+    "correction_min_gbp_mwh": 9.421647666452388,
+    "correction_std_gbp_mwh": 0.1984475724747372,
+    "end_exclusive_utc": "2026-08-21T14:30:00+00:00",
+    "frozen_mae_gbp_mwh": 13.18522396221401,
+    "frozen_p95_abs_error_gbp_mwh": 17.05899448770238,
+    "frozen_signed_bias_gbp_mwh": -13.18522396221401,
+    "reference_mae_gbp_mwh": 9.226666666666668,
+    "reference_p95_abs_error_gbp_mwh": 15.980000000000011,
+    "reference_signed_bias_gbp_mwh": 9.226666666666668,
+    "rows": 6,
+    "start_utc": "2026-08-21T11:30:00+00:00"
+  },
+  "forward_start_utc": "2026-08-21T11:30:00+00:00",
+  "lineage": {
+    "append_only_contract": "Later snapshots may extend this unchanged candidate with later targets. Any rule change requires a new version and forward start.",
+    "previous_snapshot_sha256": null,
+    "source_artifact_id": 9453438684,
+    "source_artifact_sha256": "64d30a6e18a2c3fa2243fa28ceb800afec1abc66f7dc0816515d96ff9faf885c",
+    "source_workflow_run_id": 32500771812
+  },
+  "maturity_stage": "EARLY_ONLY",
+  "policy": {
+    "alert_min_rows": 48,
+    "rolling_rows_24h": 48,
+    "rolling_rows_3d": 144,
+    "rolling_rows_6h": 12,
+    "rolling_rows_7d": 336
+  },
+  "rolling": {
+    "last_24h": {
+      "rows": 6,
+      "status": "INSUFFICIENT_ROWS_NEED_48"
+    },
+    "last_3d": {
+      "rows": 6,
+      "status": "INSUFFICIENT_ROWS_NEED_144"
+    },
+    "last_6h": {
+      "rows": 6,
+      "status": "INSUFFICIENT_ROWS_NEED_12"
+    },
+    "last_7d": {
+      "rows": 6,
+      "status": "INSUFFICIENT_ROWS_NEED_336"
+    }
+  },
+  "snapshot_end_exclusive_utc": "2026-08-21T14:30:00+00:00",
+  "version": "0.25.0"
+}

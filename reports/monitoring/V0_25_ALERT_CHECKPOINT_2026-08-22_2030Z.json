@@ -1,0 +1,93 @@
+{
+  "version": "0.25.0",
+  "status": "DEGRADATION_ALERTED_FORWARD_MONITORING",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_48H_RESIDUAL_MEAN",
+  "forward_start_utc": "2026-08-21T11:30:00Z",
+  "snapshot_end_exclusive_utc": "2026-08-22T20:30:00Z",
+  "rows": 66,
+  "maturity_stage": "INTRADAY_TO_2DAY_MONITORING",
+  "alert_status": "ALERTS_PRESENT",
+  "alerts": [
+    "ADAPTIVE_TRAILS_FROZEN_24H",
+    "BIAS_CORRECTION_WORSENED_24H"
+  ],
+  "cumulative": {
+    "adaptive_mae_gbp_mwh": 21.91787591727037,
+    "frozen_mae_gbp_mwh": 20.082049042878275,
+    "reference_mae_gbp_mwh": 39.54545454545455,
+    "adaptive_improvement_vs_reference_pct": 44.57548618621286,
+    "adaptive_improvement_vs_frozen_pct": -9.1416312671696,
+    "adaptive_win_rate_vs_reference": 0.7424242424242424,
+    "adaptive_win_rate_vs_frozen": 0.3484848484848485,
+    "adaptive_signed_bias_gbp_mwh": 12.674256840018014,
+    "frozen_signed_bias_gbp_mwh": 7.046262645848768,
+    "adaptive_p95_abs_error_gbp_mwh": 56.06620832583796,
+    "frozen_p95_abs_error_gbp_mwh": 52.28690127393121,
+    "reference_p95_abs_error_gbp_mwh": 120.44750000000002,
+    "mean_bias_correction_gbp_mwh": 5.627994194169246,
+    "adaptive_interval_coverage": 0.7272727272727273,
+    "frozen_interval_coverage": 0.7878787878787878
+  },
+  "last_24h": {
+    "rows": 48,
+    "start_utc": "2026-08-21T20:30:00Z",
+    "end_exclusive_utc": "2026-08-22T20:30:00Z",
+    "adaptive_mae_gbp_mwh": 26.853354462403644,
+    "frozen_mae_gbp_mwh": 22.796448387161835,
+    "reference_mae_gbp_mwh": 50.78041666666667,
+    "adaptive_improvement_vs_reference_pct": 47.118680339559425,
+    "adaptive_improvement_vs_frozen_pct": -17.796219859960804,
+    "adaptive_signed_bias_gbp_mwh": 16.990890423904286,
+    "frozen_signed_bias_gbp_mwh": 12.753625374020734,
+    "adaptive_p95_abs_error_gbp_mwh": 60.23711990852023,
+    "frozen_p95_abs_error_gbp_mwh": 55.84405521126456,
+    "reference_p95_abs_error_gbp_mwh": 121.4,
+    "mean_bias_correction_gbp_mwh": 4.237265049883547,
+    "adaptive_interval_coverage": 0.625,
+    "frozen_interval_coverage": 0.7083333333333334
+  },
+  "new_53_rows_after_13_row_checkpoint": {
+    "rows": 53,
+    "start_utc": "2026-08-21T18:00:00Z",
+    "end_exclusive_utc": "2026-08-22T20:30:00Z",
+    "adaptive_mae_gbp_mwh": 25.61914776418414,
+    "frozen_mae_gbp_mwh": 22.350890656655425,
+    "reference_mae_gbp_mwh": 46.88547169811321,
+    "adaptive_improvement_vs_reference_pct": 45.358024274837,
+    "adaptive_improvement_vs_frozen_pct": -14.622489381431,
+    "adaptive_win_rate_vs_reference": 0.7547169811320755,
+    "adaptive_win_rate_vs_frozen": 0.2641509433962264,
+    "adaptive_signed_bias_gbp_mwh": 15.03722459668095,
+    "frozen_signed_bias_gbp_mwh": 10.39793961564599,
+    "mean_bias_correction_gbp_mwh": 4.63928498103486,
+    "adaptive_interval_coverage": 0.660377358490566,
+    "frozen_interval_coverage": 0.7358490566037735,
+    "derivation": "Increment metrics are arithmetic differences of the immutable 13-row and 66-row cumulative sums/counts; no window was re-selected."
+  },
+  "ledger": {
+    "previous_committed_prefix_rows": 13,
+    "previous_committed_chain_tip_sha256": "5852d70b1a18acc0ff9ae46de71c372fc9d8878e8e2ecab8d2b2427dae997745",
+    "artifact_current_rows": 66,
+    "artifact_current_chain_tip_sha256": "b618989dcd02f066cc3e6e38444ceb06eee549820a675d4142ed45094d33ba00",
+    "prefix_status": "LOCKED_PREFIX_REPRODUCED",
+    "new_rows_after_locked_prefix": 53
+  },
+  "source": {
+    "workflow_run_id": 32602423009,
+    "artifact_id": 9483291389,
+    "artifact_name": "v25-adaptive-2h-32602423009",
+    "artifact_sha256": "eb2585458aaddb15a2485b4f5c349e8f90917cfc97bbdbe179cf95009e90ab95",
+    "safe_scoring_end_exclusive_utc": "2026-08-22T20:30:00Z",
+    "neso_rows": 628448,
+    "elexon_materialised_rows": 2543,
+    "tests_before_new_labels": 130
+  },
+  "promotion_readiness": {
+    "minimum_forward_rows": 336,
+    "rows_observed": 66,
+    "status": "NOT_ELIGIBLE_INSUFFICIENT_ROWS",
+    "rows_needed": 270,
+    "automatic_promotion": false
+  },
+  "interpretation": "The 48h correction continues to beat the weak previous-day reference but now trails the frozen 2h model, with a pre-registered 24h degradation alert and worse signed bias. The v0.25 rule is not retuned; these observations become development data for a separately versioned v0.26 candidate starting after this checkpoint."
+}

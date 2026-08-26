@@ -1,0 +1,75 @@
+name: advance-v27-pretarget-recovery
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: advance-v27-pretarget-recovery
+  cancel-in-progress: false
+
+jobs:
+  advance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/real-data-v0.20
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+      - name: Verify unchanged implementation and prior recovery evidence
+        run: |
+          pytest -q \
+            tests/test_v27_implementation_lock.py \
+            tests/test_v27_pretarget_recovery.py \
+            tests/test_advance_v27_pretarget_recovery.py \
+            tests/test_v27_prediction_freeze.py \
+            tests/test_version_metadata.py
+      - name: Atomically record recovery miss and next zero-outcome boundary
+        run: python scripts/advance_v27_pretarget_recovery.py
+      - name: Verify no retrospective prediction and deterministic next boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+          from gb_power_market.v27_forward_governance import deterministic_forward_start
+
+          miss = json.loads(Path('reports/forward/v27/V0_27_PRETARGET_RECOVERY_1_MISSED.json').read_text())
+          nxt = json.loads(Path('reports/forward/v27/V0_27_PRETARGET_RECOVERY_LOCK_2.json').read_text())
+          if miss['prediction_file_present'] is not False or miss['retrospective_prediction_reconstruction_allowed'] is not False:
+              raise SystemExit('miss record permits retrospective substitution')
+          if miss['recovery_target_start_utc'] != '2026-08-25T12:00:00+00:00':
+              raise SystemExit('wrong missed recovery target')
+          lock_time = pd.Timestamp(nxt['recovery_lock_timestamp_utc'])
+          expected = deterministic_forward_start(lock_time)
+          if pd.Timestamp(nxt['recovery_target_start_utc']) != expected:
+              raise SystemExit('next recovery target is not deterministic')
+          if pd.Timestamp(nxt['recovery_decision_time_utc']) <= lock_time:
+              raise SystemExit('next recovery decision is not strictly post-lock')
+          if nxt['model_or_rule_changed_for_recovery'] is not False or nxt['original_forward_boundary_changed'] is not False:
+              raise SystemExit('recovery advancement changed model or original boundary')
+          print(json.dumps({'miss': miss, 'next_lock': nxt}, indent=2))
+          PY
+      - name: Commit, rebase and push sequence advancement
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            reports/forward/v27/V0_27_PRETARGET_RECOVERY_1_MISSED.json \
+            reports/forward/v27/V0_27_PRETARGET_RECOVERY_LOCK_2.json
+          git commit -m "Record missed v0.27 recovery and lock next target"
+          git fetch origin feat/real-data-v0.20
+          git rebase origin/feat/real-data-v0.20
+          pytest -q tests/test_advance_v27_pretarget_recovery.py tests/test_v27_pretarget_recovery.py
+          git push origin HEAD:feat/real-data-v0.20

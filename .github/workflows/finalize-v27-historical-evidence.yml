@@ -1,0 +1,70 @@
+name: finalize-v27-historical-evidence
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: finalize-v27-historical-evidence
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/real-data-v0.20
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+      - name: Verify finalizer and unchanged predictive sources
+        run: |
+          pytest -q tests/test_finalize_v27_historical_evidence.py tests/test_v27_historical_uncertainty.py tests/test_v27_candidate_lock.py
+          test "$(git hash-object src/gb_power_market/adaptive_bias_v25.py)" = "2ccb3d2a0762eec66d646e164262f8ac5b759d8e"
+          test "$(git hash-object src/gb_power_market/adaptive_consensus_v26.py)" = "399915c6cdd0d3b016bde73cb0ef92eb2697adf8"
+          test "$(git hash-object src/gb_power_market/adaptive_direction_v27_candidate.py)" = "3c361dbb0e1665bbbad2e1097b8580ce062a203f"
+      - name: Finalize manifest and README section
+        run: |
+          python scripts/finalize_v27_historical_evidence.py
+          first_manifest="$(sha256sum reports/locked/V0_27_HISTORICAL_ROLLING_ORIGIN_EVIDENCE_MANIFEST.json | cut -d' ' -f1)"
+          first_readme="$(sha256sum README.md | cut -d' ' -f1)"
+          python scripts/finalize_v27_historical_evidence.py
+          test "$first_manifest" = "$(sha256sum reports/locked/V0_27_HISTORICAL_ROLLING_ORIGIN_EVIDENCE_MANIFEST.json | cut -d' ' -f1)"
+          test "$first_readme" = "$(sha256sum README.md | cut -d' ' -f1)"
+      - name: Enforce locked historical claim boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('reports/locked/V0_27_HISTORICAL_ROLLING_ORIGIN_EVIDENCE_MANIFEST.json')
+          x = json.loads(p.read_text())
+          if x['status'] != 'HISTORICAL_EVIDENCE_LOCKED_NOT_FORWARD_VALIDATION': raise SystemExit('lock status changed')
+          if x['evidence_class'] != 'HISTORICAL_ASOF_ROLLING_ORIGIN_NOT_LIVE_FORWARD': raise SystemExit('evidence class changed')
+          if x['scope']['rows'] != 5516: raise SystemExit('scope changed')
+          if x['headline_metrics']['v0.27_improvement_vs_causal_base_pct'] <= 0: raise SystemExit('base ordering changed')
+          if x['headline_metrics']['v0.27_improvement_vs_v0.26_pct'] >= 0: raise SystemExit('v0.26 ordering changed')
+          if x['automatic_promotion'] or x['automatic_model_change'] or x['retuning_authorized']: raise SystemExit('historical evidence authorized model change')
+          readme = Path('README.md').read_text()
+          if readme.count('V27_HISTORICAL_ROLLING_ORIGIN_START') != 1: raise SystemExit('README section missing or duplicated')
+          if 'does **not** claim that v0.27 historically dominates v0.26' not in readme: raise SystemExit('negative comparison missing from README')
+          PY
+      - name: Commit final historical evidence lock
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md reports/locked/V0_27_HISTORICAL_ROLLING_ORIGIN_EVIDENCE_MANIFEST.json
+          git commit -m "Lock and surface v0.27 historical robustness evidence"
+          git fetch origin feat/real-data-v0.20
+          git rebase origin/feat/real-data-v0.20
+          pytest -q tests/test_finalize_v27_historical_evidence.py tests/test_v27_historical_uncertainty.py tests/test_v27_candidate_lock.py
+          git push origin HEAD:feat/real-data-v0.20

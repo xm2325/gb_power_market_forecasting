@@ -1,0 +1,18 @@
+{
+  "version": "0.27-development-validation",
+  "source": "Elexon Insights API Market Index Data",
+  "request_mode": "EXACT_START_TIME_NO_SETTLEMENT_PERIOD_FILTERS",
+  "start_utc": "2026-08-25T15:00:00Z",
+  "end_exclusive_utc": "2026-08-25T15:30:00Z",
+  "chunks": [
+    {
+      "request_from_utc": "2026-08-25T15:00:00Z",
+      "request_to_inclusive_utc": "2026-08-25T15:00:00Z",
+      "sealed_end_exclusive_utc": "2026-08-25T15:30:00Z",
+      "rows": 2,
+      "sha256": "c69422c31ddf85d8ca5481562c3562ffde75cb598620b1aec17a50af1309f150",
+      "path": "data/external/v27_recovery2_score/elexon_mid/mid_exact_20260825T1500Z.json"
+    }
+  ],
+  "boundary_contract": "No settlementPeriodFrom/To parameters are sent, so Elexon from/to are start-time filters. The API 'to' parameter is inclusive; each request therefore stops one 30-minute grid step before the sealed end-exclusive boundary, and every returned startTime is checked before bytes are persisted."
+}

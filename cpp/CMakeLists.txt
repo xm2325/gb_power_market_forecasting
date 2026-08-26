@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.16)
+project(gb_power_market_compiled_inference LANGUAGES CXX)
+
+add_executable(frozen_ridge_infer frozen_ridge_infer.cpp)
+target_compile_features(frozen_ridge_infer PRIVATE cxx_std_17)
+if (MSVC)
+  target_compile_options(frozen_ridge_infer PRIVATE /W4)
+else()
+  target_compile_options(frozen_ridge_infer PRIVATE -Wall -Wextra -Wpedantic)
+endif()

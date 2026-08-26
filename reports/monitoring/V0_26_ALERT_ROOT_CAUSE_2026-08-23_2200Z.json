@@ -1,0 +1,69 @@
+{
+  "schema": "gb-power-market-v26-alert-root-cause-v1",
+  "version": "0.26.0",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL",
+  "status": "POST_LOCK_DESCRIPTIVE_ALERT_ROOT_CAUSE",
+  "monitoring_only": true,
+  "locked_snapshot_sequence": 3,
+  "forward_start_utc": "2026-08-22T20:30:00Z",
+  "end_exclusive_utc": "2026-08-23T22:00:00Z",
+  "rows": 51,
+  "source": {
+    "workflow_run_id": 32675196453,
+    "artifact_id": 9502476322,
+    "artifact_sha256": "a162270d94528429c0d3dcca89152f57fba9ed12654b0a2b70fbb0386fa8af1a",
+    "locked_checkpoint": "reports/monitoring/V0_26_FORWARD_CHECKPOINT_2026-08-23_2200Z.json",
+    "locked_ledger": "reports/monitoring/V0_26_FORWARD_LEDGER_2026-08-23_2200Z.csv",
+    "ledger_chain_tip_sha256": "dca4ef5173dcf18a81814a2bcfadaea72c4ed5fa5abc1b1c78555e55129e4a8b"
+  },
+  "alerts": [
+    "V26_TRAILS_FROZEN_24H",
+    "V26_BIAS_WORSE_THAN_FROZEN_24H"
+  ],
+  "forward_performance": {
+    "candidate_mae_gbp_mwh": 17.102427988806106,
+    "frozen_mae_gbp_mwh": 15.801617675185842,
+    "v25_mae_gbp_mwh": 18.24329633172855,
+    "reference_mae_gbp_mwh": 19.52725490196078,
+    "candidate_improvement_vs_frozen_pct": -8.232133825532298,
+    "candidate_improvement_vs_v25_pct": 6.253630496251157,
+    "candidate_improvement_vs_reference_pct": 12.417653814265476
+  },
+  "root_cause": {
+    "correction_applied_rows": 17,
+    "fallback_rows": 34,
+    "applied_rows_candidate_better_than_frozen": 4,
+    "applied_rows_candidate_worse_than_frozen": 13,
+    "candidate_excess_abs_error_vs_frozen_gbp_mwh": 66.341325993,
+    "harmful_applied_excess_abs_error_gbp_mwh": 77.10573343600001,
+    "helpful_applied_abs_error_saved_gbp_mwh": 10.764407443000003,
+    "longest_applied_run": {
+      "rows": 16,
+      "start_utc": "2026-08-23T11:00:00Z",
+      "end_utc": "2026-08-23T18:30:00Z",
+      "candidate_excess_abs_error_vs_frozen_gbp_mwh": 65.09333830500002,
+      "candidate_better_rows": 4,
+      "candidate_worse_rows": 12,
+      "mean_abs_correction_gbp_mwh": 6.2840433488750005,
+      "negative_correction_rows": 16,
+      "positive_correction_rows": 0,
+      "realised_start_gbp_mwh": 13.63,
+      "realised_end_gbp_mwh": 167.64,
+      "frozen_start_gbp_mwh": 57.179775905,
+      "frozen_end_gbp_mwh": 160.872808537,
+      "short_residual_mean_start_gbp_mwh": -1.624568939,
+      "short_residual_mean_end_gbp_mwh": -1.888786257,
+      "long_residual_mean_start_gbp_mwh": -3.469386991,
+      "long_residual_mean_end_gbp_mwh": -6.887795306
+    }
+  },
+  "interpretation": "The consensus gate solved the v0.25 disagreement case but did not solve joint staleness. During the longest 16-row applied block, both residual windows remained negative while realised and frozen-model price levels rebounded sharply. The negative correction therefore amplified underprediction after the turning point. The failure is concentrated in applied-correction rows rather than fallback rows.",
+  "monitoring_decision": {
+    "champion": "UNCHANGED_FROZEN_V0_20_2H",
+    "challenger": "V0_26_CONSENSUS",
+    "challenger_status": "DEGRADATION_ALERTED_NOT_PROMOTABLE",
+    "action": "KEEP_FROZEN_CHAMPION_AND_DO_NOT_RETUNE_V0_26",
+    "v27_status": "NOT_LAUNCHED_FROM_THIS_ALERT_ALONE"
+  },
+  "claim_boundary": "This report was derived after snapshot sequence 3 was locked. The 51 rows are now development/monitoring data for any later candidate and can never be relabelled as fresh v0.27 evidence."
+}

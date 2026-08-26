@@ -1,0 +1,28 @@
+{
+  "schema": "gb-power-market-v27-pretarget-recovery-prediction-provenance-v1",
+  "status": "PRE_TARGET_RECOVERY_PREDICTION_FROZEN",
+  "implementation_lock_path": "reports/locked/V0_27_IMPLEMENTATION_LOCK.json",
+  "implementation_lock_sha256": "cd019fb1d35e065c16382307f815b1e0703d4a957a50b678de6985c1371184b2",
+  "recovery_lock_path": "reports/forward/v27/V0_27_PRETARGET_RECOVERY_LOCK_2.json",
+  "recovery_lock_sha256": "5839bd6835796dd6870d93b5f1edbf30a87a4e14efb0809a8c66bba6cb97a6ac",
+  "model_state_path": "reports/locked/V0_21_FROZEN_MODEL_STATE.json",
+  "model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "reference_history_path": "data/processed/v27_recovery2/reference_market.parquet",
+  "reference_history_sha256": "dbcc7ae7c5f8ebf4a5a404dce9a37b7074301aadf5a407ff5eb53fce63824194",
+  "neso_asof_path": "data/processed/v27_recovery2/forecast_current_asof.parquet",
+  "neso_asof_sha256": "14fed4f646d4fbf755015def0930982b17f81487748f404c455d855d9ff25faa",
+  "historical_frozen_rows_path": "reports/v24_for_v27_recovery2/forward_rows_2h.csv",
+  "historical_frozen_rows_sha256": "2348a2bd492f05e023b2c88260c854fffb73913cff0942ad2ce2ab66ce0f6b3b",
+  "prediction_path": "reports/forward/v27/V0_27_PRETARGET_RECOVERY_2_PREDICTION.json",
+  "prediction_sha256": "a94aa1c3f410c196bee4ab8276dd3f166b78a921ee7ada0cee0ba8c6633a6822",
+  "timing_preflight": {
+    "now_utc": "2026-08-25T13:01:18.442214+00:00",
+    "decision_time_utc": "2026-08-25T13:00:00+00:00",
+    "target_start_utc": "2026-08-25T15:00:00+00:00"
+  },
+  "freeze_completed_utc": "2026-08-25T13:01:19.290770+00:00",
+  "target_start_utc": "2026-08-25T15:00:00+00:00",
+  "target_label_accessed": false,
+  "original_forward_boundary_changed": false,
+  "evidence_class": "PRE_TARGET_GIT_COMMITTED_PREDICTION_NOT_YET_SCORED"
+}

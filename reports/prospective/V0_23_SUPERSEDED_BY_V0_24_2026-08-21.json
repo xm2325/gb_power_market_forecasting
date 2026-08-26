@@ -1,0 +1,22 @@
+{
+  "version": "0.24.0",
+  "status": "V0_23_SUPERSEDED_BY_CONTINUOUS_FORWARD_MONITORING",
+  "recorded_on": "2026-08-21",
+  "v0_23_last_valid_smoke": {
+    "run_id": 32482320136,
+    "sealed_start_utc": "2026-08-21T11:30:00Z",
+    "safe_boundary_utc": "2026-08-21T11:00:00Z",
+    "complete_rows_each_horizon": 0,
+    "performance_revealed": false,
+    "price_bearing_artifact_exported": false
+  },
+  "design_change": {
+    "reason": "The project objective is operational forecasting validation: inspect the unchanged frozen model continuously on already available and newly arriving market outcomes rather than delay all performance inspection for a single 14-day reveal.",
+    "replacement": "v0.24 continuous forward monitoring",
+    "replacement_start_utc": "2026-07-12T12:00:00Z",
+    "recent_regime_start_utc": "2026-08-01T00:00:00Z",
+    "post_lock_start_utc": "2026-08-15T07:30:00Z",
+    "versioning_rule": "Observed monitoring data may guide diagnosis. Any modified model starts a new versioned forward segment and cannot relabel previously observed rows as fresh prospective evidence."
+  },
+  "claim_boundary": "v0.23 remains a valid engineering demonstration of artifact sealing but is no longer an active confirmatory evidence programme. No v0.23 performance claim was ever produced."
+}

@@ -1,0 +1,63 @@
+name: lock-v25-snapshot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/real-data-v0.20
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Download exact successful v0.25 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: v25-adaptive-2h-32602423009
+          path: _snapshot_artifact
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 32602423009
+
+      - name: Lock append-only snapshot
+        run: |
+          python scripts/lock_v25_forward_snapshot.py \
+            --artifact-dir _snapshot_artifact \
+            --artifact-id 9483291389 \
+            --artifact-sha256 eb2585458aaddb15a2485b4f5c349e8f90917cfc97bbdbe179cf95009e90ab95 \
+            --run-id 32602423009
+
+      - name: Verify registry, digests and full ledger chain
+        run: |
+          pytest -q \
+            tests/test_lock_v25_forward_snapshot.py \
+            tests/test_v25_snapshot_registry.py \
+            tests/test_v25_latest_snapshot_lock.py
+
+      - name: Commit, rebase and push immutable snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/monitoring docs
+          git diff --cached --stat
+          git commit -m "Lock v0.25 forward snapshot"
+          git fetch origin feat/real-data-v0.20
+          git rebase origin/feat/real-data-v0.20
+          pytest -q \
+            tests/test_v25_snapshot_registry.py \
+            tests/test_v25_latest_snapshot_lock.py
+          git push origin HEAD:feat/real-data-v0.20

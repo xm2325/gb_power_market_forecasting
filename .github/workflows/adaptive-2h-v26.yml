@@ -1,0 +1,174 @@
+name: adaptive-2h-v26
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: adaptive-2h-v26-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  consensus-forward:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Test before accessing v0.26 labels
+        run: pytest -q
+
+      - name: Set safe market-data boundary
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          from datetime import datetime, timedelta, timezone
+          now = datetime.now(timezone.utc)
+          safe = now - timedelta(minutes=90)
+          safe = safe.replace(minute=(safe.minute // 30) * 30, second=0, microsecond=0)
+          source_end = safe.date() + timedelta(days=1)
+          print(f"AVAILABLE_END_UTC={safe.isoformat().replace('+00:00', 'Z')}")
+          print(f"SOURCE_END_DATE={source_end.isoformat()}")
+          print("ELEXON_START_DATE=2026-07-01")
+          print("NESO_START_DATE=2026-07-12")
+          PY
+
+      - name: Download bounded NESO vintages
+        run: |
+          python scripts/download_neso_v21_window.py \
+            --start-date "$NESO_START_DATE" \
+            --end-date-exclusive "$SOURCE_END_DATE" \
+            --out data/external/v26/neso_current_window.csv \
+            --manifest reports/v26_2h/neso_window_manifest.json
+
+      - name: Materialise NESO vintages
+        run: |
+          python scripts/materialise_v21_current.py \
+            --input data/external/v26/neso_current_window.csv \
+            --out data/processed/v26/forecast_current.parquet \
+            --manifest reports/v26_2h/neso_materialise_manifest.json
+
+      - name: Download Elexon MID with warm-up
+        run: |
+          python scripts/download_elexon_v22_mid.py \
+            --start-date "$ELEXON_START_DATE" \
+            --end-date-exclusive "$SOURCE_END_DATE" \
+            --out-dir data/external/v26/elexon_mid \
+            --manifest reports/v26_2h/elexon_mid_manifest.json
+
+      - name: Materialise Elexon market reference
+        run: |
+          python scripts/materialise_elexon_v22_mid.py \
+            --bundle-dir data/external/v26/elexon_mid \
+            --out data/processed/v26/reference_market.parquet \
+            --manifest reports/v26_2h/elexon_mid_materialise_manifest.json
+
+      - name: Recreate unchanged frozen v0.24 rows
+        run: |
+          python scripts/run_v24_continuous_forward_monitor.py \
+            --elexon-reference data/processed/v26/reference_market.parquet \
+            --neso-current data/processed/v26/forecast_current.parquet \
+            --model-state reports/locked/V0_21_FROZEN_MODEL_STATE.json \
+            --start-utc 2026-07-12T12:00:00Z \
+            --end-exclusive-utc "$AVAILABLE_END_UTC" \
+            --out-dir reports/v24_for_v26
+
+      - name: Run v0.26 causal consensus candidate
+        run: |
+          python scripts/run_v26_2h_consensus_candidate.py \
+            --v24-rows reports/v24_for_v26/forward_rows_2h.csv \
+            --snapshot-registry reports/monitoring/V0_26_FORWARD_SNAPSHOT_REGISTRY.json \
+            --genesis-ledger reports/monitoring/V0_26_FORWARD_LEDGER_FIRST2.csv \
+            --out-dir reports/v26_2h
+
+      - name: Summarise frozen v0.26 gate behaviour
+        run: |
+          python scripts/run_v26_gate_diagnostics.py \
+            --rows reports/v26_2h/v26_rows_2h.csv \
+            --forward-start-utc 2026-08-22T20:30:00Z \
+            --out reports/v26_2h/v26_gate_diagnostics.json
+
+      - name: Enforce v0.26 contracts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          summary = json.loads(Path('reports/v26_2h/v26_summary.json').read_text())
+          gate = json.loads(Path('reports/v26_2h/v26_gate_diagnostics.json').read_text())
+          spec = summary['candidate_spec']
+          forward = summary['forward_segment']
+          ledger = summary['ledger_integrity']
+          promotion = summary['promotion_readiness']
+          if spec['version'] != '0.26.0':
+              raise SystemExit('v0.26 version changed')
+          if spec['candidate'] != '2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL':
+              raise SystemExit('v0.26 candidate identity changed')
+          if spec['forward_start_utc'] != '2026-08-22T20:30:00+00:00':
+              raise SystemExit('v0.26 forward boundary changed')
+          if spec['rule']['short_lookback_hours'] != 6 or spec['rule']['long_lookback_hours'] != 48:
+              raise SystemExit('v0.26 lookback contract changed')
+          if ledger['status'] != 'LOCKED_PREFIX_REPRODUCED':
+              raise SystemExit('latest immutable v0.26 prefix was not reproduced')
+          if ledger['current_rows'] != forward['rows']:
+              raise SystemExit('v0.26 ledger row count disagrees with forward summary')
+          if ledger['new_rows_after_locked_prefix'] <= 0:
+              raise SystemExit('no new v0.26 forward rows are available after the latest locked prefix')
+          if gate['cumulative']['rows'] != forward['rows']:
+              raise SystemExit('v0.26 gate diagnostics row count disagrees with forward summary')
+          if gate['cumulative']['monitoring_only'] is not True:
+              raise SystemExit('v0.26 gate diagnostics must remain monitoring-only')
+          if gate['cumulative']['prediction_reconstruction_max_abs_diff_gbp_mwh'] > 1e-9:
+              raise SystemExit('v0.26 gate diagnostics found a prediction reconstruction mismatch')
+          genesis = ledger['genesis_anchor']
+          if genesis['locked_rows'] != 2:
+              raise SystemExit('v0.26 genesis row count changed')
+          if genesis['locked_chain_tip_sha256'] != '49cc9148d1756ff1fce3bdcac5f8f9405850cf516b0c701215e81121a7677f9d':
+              raise SystemExit('v0.26 genesis chain tip changed')
+          if ledger['locked_registry_sequence'] < 1:
+              raise SystemExit('v0.26 registry sequence is invalid')
+          if promotion['minimum_forward_rows'] != 336:
+              raise SystemExit('v0.26 promotion sample gate changed')
+          if promotion.get('automatic_promotion') is not False:
+              raise SystemExit('v0.26 must never auto-promote')
+          print({
+              'development': summary['development_diagnostics'],
+              'forward': forward,
+              'monitor': summary['monitor'],
+              'gate_diagnostics': gate,
+              'latest_locked_prefix': {
+                  'sequence': ledger['locked_registry_sequence'],
+                  'rows': ledger['locked_rows'],
+                  'chain_tip': ledger['locked_chain_tip_sha256'],
+                  'new_rows': ledger['new_rows_after_locked_prefix'],
+              },
+              'genesis_anchor': genesis,
+              'promotion': promotion,
+          })
+          PY
+
+      - name: Record byte-locked v0.26 implementation provenance
+        run: |
+          python scripts/write_v26_implementation_provenance.py \
+            --execution-commit-sha "$GITHUB_SHA" \
+            --source-run-id "$GITHUB_RUN_ID" \
+            --out reports/v26_2h/v26_implementation_provenance.json
+
+      - name: Upload v0.26 candidate artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v26-consensus-2h-${{ github.run_id }}
+          path: reports/v26_2h/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6

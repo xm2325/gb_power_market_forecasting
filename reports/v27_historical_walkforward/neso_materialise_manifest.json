@@ -1,0 +1,21 @@
+{
+  "version": "0.27.0-historical-walkforward-1",
+  "legacy": {
+    "source": "data/external/v27_historical/neso_embedded_archive_2026_jan_jun.csv",
+    "parquet": "data/processed/v27_historical_neso/forecast_legacy.parquet",
+    "rows": 2427930,
+    "target_key": "GB settlement date + settlement period",
+    "max_raw_clock_offset_seconds": 3600.0,
+    "raw_clock_mismatch_rows": 1268,
+    "raw_clock_mismatch_policy": "canonicalise by settlement key; allow <=1h GMT/BST label offset; fail above 1h"
+  },
+  "current": {
+    "source": "data/external/v27_historical/neso_current_2026_jun_aug.csv",
+    "parquet": "data/processed/v27_historical_neso/forecast_current.parquet",
+    "rows": 975608,
+    "target_key": "GB settlement date + settlement period",
+    "max_raw_clock_offset_seconds": 0.0,
+    "raw_clock_mismatch_rows": 0,
+    "raw_clock_mismatch_policy": "canonicalise by settlement key; allow <=1h GMT/BST label offset; fail above 1h"
+  }
+}

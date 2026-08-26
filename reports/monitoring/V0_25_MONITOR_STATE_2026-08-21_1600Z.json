@@ -1,0 +1,127 @@
+{
+  "version": "0.25.0",
+  "status": "EARLY_VERSIONED_FORWARD_MONITORING",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_48H_RESIDUAL_MEAN",
+  "forward_start_utc": "2026-08-21T11:30:00Z",
+  "snapshot_end_exclusive_utc": "2026-08-21T16:00:00Z",
+  "maturity_stage": "EARLY_ONLY",
+  "alert_status": "INSUFFICIENT_SAMPLE_FOR_ALERTS",
+  "alerts": [],
+  "promotion_readiness": {
+    "status": "NOT_ELIGIBLE_INSUFFICIENT_ROWS",
+    "minimum_forward_rows": 336,
+    "rows_observed": 9,
+    "rows_needed": 327,
+    "criteria": "NOT_EVALUATED_BEFORE_MINIMUM_SAMPLE",
+    "automatic_promotion": false
+  },
+  "ledger_integrity": {
+    "status": "LOCKED_PREFIX_REPRODUCED",
+    "locked_rows": 6,
+    "current_rows": 9,
+    "new_rows_after_locked_prefix": 3,
+    "locked_chain_tip_sha256": "b27a99b21466c8a4cbf58d29ad9c980a174b278cee1a741582a978af747789f2",
+    "current_chain_tip_sha256": "f857a1f7f069961624cc3cb5d1f4e544e942d06658882ed56f519b09429257c6"
+  },
+  "cumulative": {
+    "rows": 9,
+    "start_utc": "2026-08-21T11:30:00+00:00",
+    "end_exclusive_utc": "2026-08-21T16:00:00+00:00",
+    "adaptive_mae_gbp_mwh": 5.357342064207046,
+    "frozen_mae_gbp_mwh": 11.240722155194906,
+    "reference_mae_gbp_mwh": 8.669999999999998,
+    "adaptive_improvement_vs_reference_pct": 38.208280689653435,
+    "adaptive_improvement_vs_frozen_pct": 52.33987647554167,
+    "adaptive_win_rate_vs_reference": 0.7777777777777778,
+    "adaptive_win_rate_vs_frozen": 0.7777777777777778,
+    "adaptive_signed_bias_gbp_mwh": 0.4926288393292977,
+    "frozen_signed_bias_gbp_mwh": -9.253939751818624,
+    "reference_signed_bias_gbp_mwh": 8.669999999999998,
+    "adaptive_p95_abs_error_gbp_mwh": 14.51219103327217,
+    "frozen_p95_abs_error_gbp_mwh": 16.58341317737761,
+    "reference_p95_abs_error_gbp_mwh": 15.62000000000001,
+    "correction_mean_gbp_mwh": 9.746568591147915,
+    "correction_std_gbp_mwh": 0.17255945106303316,
+    "correction_min_gbp_mwh": 9.421647666452388,
+    "correction_max_gbp_mwh": 9.93035199224959,
+    "adaptive_interval_coverage": 1.0,
+    "frozen_interval_coverage": 1.0,
+    "adaptive_minus_frozen_interval_coverage": 0.0,
+    "adaptive_interval_mean_width_gbp_mwh": 69.4474058585243,
+    "frozen_interval_mean_width_gbp_mwh": 69.4474058585243
+  },
+  "new_since_previous_snapshot": {
+    "rows": 3,
+    "start_utc": "2026-08-21T14:30:00+00:00",
+    "end_exclusive_utc": "2026-08-21T16:00:00+00:00",
+    "adaptive_mae_gbp_mwh": 8.35307331788205,
+    "frozen_mae_gbp_mwh": 7.351718541156681,
+    "reference_mae_gbp_mwh": 7.556666666666658,
+    "adaptive_improvement_vs_reference_pct": -10.539126394557472,
+    "adaptive_improvement_vs_frozen_pct": -13.620689790006848,
+    "adaptive_win_rate_vs_reference": 0.6666666666666666,
+    "adaptive_win_rate_vs_frozen": 0.3333333333333333,
+    "adaptive_signed_bias_gbp_mwh": 8.322646362289689,
+    "frozen_signed_bias_gbp_mwh": -1.3913713310278364,
+    "reference_signed_bias_gbp_mwh": 7.556666666666658,
+    "adaptive_p95_abs_error_gbp_mwh": 17.354955415877768,
+    "frozen_p95_abs_error_gbp_mwh": 9.638063788608779,
+    "reference_p95_abs_error_gbp_mwh": 9.235999999999994,
+    "correction_mean_gbp_mwh": 9.71401769331752,
+    "correction_std_gbp_mwh": 0.09475269382422129,
+    "correction_min_gbp_mwh": 9.626476014621746,
+    "correction_max_gbp_mwh": 9.845648935286636,
+    "adaptive_interval_coverage": 1.0,
+    "frozen_interval_coverage": 1.0,
+    "adaptive_minus_frozen_interval_coverage": 0.0,
+    "adaptive_interval_mean_width_gbp_mwh": 69.44740585852433,
+    "frozen_interval_mean_width_gbp_mwh": 69.44740585852433
+  },
+  "rolling": {
+    "last_6h": {
+      "rows": 9,
+      "status": "INSUFFICIENT_ROWS_NEED_12"
+    },
+    "last_24h": {
+      "rows": 9,
+      "status": "INSUFFICIENT_ROWS_NEED_48"
+    },
+    "last_3d": {
+      "rows": 9,
+      "status": "INSUFFICIENT_ROWS_NEED_144"
+    },
+    "last_7d": {
+      "rows": 9,
+      "status": "INSUFFICIENT_ROWS_NEED_336"
+    }
+  },
+  "uncertainty_contract": {
+    "method": "translate frozen conformal interval by the same causal level correction; width unchanged",
+    "cumulative_adaptive_interval_coverage": 1.0,
+    "cumulative_frozen_interval_coverage": 1.0,
+    "mean_interval_width_gbp_mwh": 69.4474058585243,
+    "recalibrated_on_v25_forward_labels": false,
+    "claim": "diagnostic only; no independent adaptive conformal recalibration claim"
+  },
+  "source_snapshot": {
+    "workflow_run_id": 32500771812,
+    "artifact_id": 9456405888,
+    "artifact_name": "v25-adaptive-2h-32500771812",
+    "artifact_sha256": "846545d52b4ff0c290a63f2c81059396f79d7c6c5e7edb9dbcef4815aa6ddb0d",
+    "neso_rows": 612986,
+    "neso_sha256": "4394e423fdd133e3934882ec1eb97eb4fc182bd1a0b8a5e3c093611b2e52b367",
+    "neso_snapshot_consistent": true,
+    "elexon_materialised_rows": 2486,
+    "elexon_last_target_start_utc": "2026-08-21T17:30:00+00:00"
+  },
+  "lineage": {
+    "previous_monitor_snapshot_sha256": "611bfd2298bcfee603f1e4b7837665c9dfd4733ffab03b3a08ab3134108aa14f",
+    "first_forward_artifact_sha256": "64d30a6e18a2c3fa2243fa28ceb800afec1abc66f7dc0816515d96ff9faf885c",
+    "append_only": true
+  },
+  "interpretation": {
+    "cumulative": "Across all 9 versioned forward half-hours, the adaptive candidate remains better on MAE than both baselines.",
+    "latest_increment": "The 3 newly appended half-hours are weaker: adaptive MAE trails both the frozen model and previous-settlement-day reference, showing the first six observations were not sufficient evidence of stable improvement.",
+    "claim_boundary": "Nine rows remain EARLY_ONLY. No new headline accuracy or promotion claim is allowed."
+  }
+}

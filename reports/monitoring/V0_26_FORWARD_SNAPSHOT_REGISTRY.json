@@ -1,0 +1,68 @@
+{
+  "schema": "gb-power-market-v26-forward-snapshot-registry-v1",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL",
+  "forward_start_utc": "2026-08-22T20:30:00Z",
+  "append_only": true,
+  "snapshots": [
+    {
+      "sequence": 1,
+      "end_exclusive_utc": "2026-08-22T21:30:00Z",
+      "rows": 2,
+      "new_rows": 2,
+      "run_id": 32604734019,
+      "artifact_id": 9483846187,
+      "artifact_sha256": "c26eccc3be5491bba50b2a583ebd3f7d169f7f10406974a080df6a4db663f6fb",
+      "checkpoint_path": "reports/monitoring/V0_26_FIRST_FORWARD_CHECKPOINT_2026-08-22_2130Z.json",
+      "provenance_path": "reports/monitoring/V0_26_IMPLEMENTATION_PROVENANCE_FIRST2.json",
+      "provenance_sha256": "184b75a9ca6b53e8a62d98026e618475e4ab7e32a12361f64a12c7ab48f48131",
+      "ledger_path": "reports/monitoring/V0_26_FORWARD_LEDGER_FIRST2.csv",
+      "ledger_sha256": "fe0742d826a1c418da09ceb73da0b4d16c46b43a964d840cbf0e8ef3c4671faf",
+      "ledger_chain_tip_sha256": "49cc9148d1756ff1fce3bdcac5f8f9405850cf516b0c701215e81121a7677f9d",
+      "maturity_stage": "EARLY_ONLY",
+      "alert_status": "INSUFFICIENT_SAMPLE_FOR_ALERTS",
+      "alerts": []
+    },
+    {
+      "sequence": 2,
+      "end_exclusive_utc": "2026-08-23T08:00:00Z",
+      "rows": 23,
+      "new_rows": 21,
+      "run_id": 32632409230,
+      "artifact_id": 9491420056,
+      "artifact_sha256": "06d21cd67b40d3143ba472f412e2e2e3f403691d43f01ba71b810b96bddda249",
+      "checkpoint_path": "reports/monitoring/V0_26_FORWARD_CHECKPOINT_2026-08-23_0800Z.json",
+      "checkpoint_sha256": "d082a92ff6c5a4a20e05a05bc84198a1f92ead0a2e791bdb9282f31b97ec309f",
+      "provenance_path": "reports/monitoring/V0_26_IMPLEMENTATION_PROVENANCE_2026-08-23_0800Z.json",
+      "provenance_sha256": "c75b7102ddf9827697453d82f800a0ed85bb4d4c372675e500809f2a3a0584db",
+      "ledger_path": "reports/monitoring/V0_26_FORWARD_LEDGER_2026-08-23_0800Z.csv",
+      "ledger_sha256": "fcf174374848726ce0a0b9d5f9825ffc3c0889c00f86b384c13da136a8468039",
+      "ledger_chain_tip_sha256": "487f1e33478f9c07a25b088b1297d8aa170db9959642e108388bebd613765ca2",
+      "maturity_stage": "EARLY_ONLY",
+      "alert_status": "INSUFFICIENT_SAMPLE_FOR_ALERTS",
+      "alerts": []
+    },
+    {
+      "sequence": 3,
+      "end_exclusive_utc": "2026-08-23T22:00:00Z",
+      "rows": 51,
+      "new_rows": 28,
+      "run_id": 32675196453,
+      "artifact_id": 9502476322,
+      "artifact_sha256": "a162270d94528429c0d3dcca89152f57fba9ed12654b0a2b70fbb0386fa8af1a",
+      "checkpoint_path": "reports/monitoring/V0_26_FORWARD_CHECKPOINT_2026-08-23_2200Z.json",
+      "checkpoint_sha256": "86464b385071d516b37ae06a9f1237eb4cda62456b00de9ca7504751c27c58d8",
+      "provenance_path": "reports/monitoring/V0_26_IMPLEMENTATION_PROVENANCE_2026-08-23_2200Z.json",
+      "provenance_sha256": "0dabb5f9920de7d693267f146676747846363dcac8757681f8a39ac0e86365b9",
+      "ledger_path": "reports/monitoring/V0_26_FORWARD_LEDGER_2026-08-23_2200Z.csv",
+      "ledger_sha256": "529952d0e7dfa6f0446cebecc4ee9733779fde720645556509ca677e04f5b08a",
+      "ledger_chain_tip_sha256": "dca4ef5173dcf18a81814a2bcfadaea72c4ed5fa5abc1b1c78555e55129e4a8b",
+      "maturity_stage": "INTRADAY_TO_2DAY_MONITORING",
+      "alert_status": "ALERTS_PRESENT",
+      "alerts": [
+        "V26_TRAILS_FROZEN_24H",
+        "V26_BIAS_WORSE_THAN_FROZEN_24H"
+      ]
+    }
+  ],
+  "contract": "Snapshot sequence, row count and end time must increase monotonically. Every later ledger must reproduce every row of the preceding ledger before appending new targets. The first two-row ledger from run 32604734019 is the permanent v0.26 genesis anchor. Each snapshot also records execution provenance tied to the byte-identical predictive implementation and frozen model state. Registry entries are historical forward evidence and are never rewritten after later labels are observed."
+}
