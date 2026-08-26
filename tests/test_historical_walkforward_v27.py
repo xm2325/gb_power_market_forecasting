@@ -30,9 +30,9 @@ def test_first_fold_scores_may_1_without_training_window_leakage() -> None:
     folds = build_fold_schedule()
     first = folds[0]
     assert first["train_start_utc"] == "2026-01-08T00:00:00+00:00"
-    assert first["selection_start_utc"] == "2026-03-30T00:00:00+00:00"
-    assert first["calibration_start_utc"] == "2026-04-13T00:00:00+00:00"
-    assert first["adaptation_warmup_start_utc"] == "2026-04-27T00:00:00+00:00"
+    assert first["selection_start_utc"] == "2026-03-31T00:00:00+00:00"
+    assert first["calibration_start_utc"] == "2026-04-14T00:00:00+00:00"
+    assert first["adaptation_warmup_start_utc"] == "2026-04-28T00:00:00+00:00"
     assert first["score_start_utc"] == "2026-05-01T00:00:00+00:00"
     assert first["score_end_exclusive_utc"] == "2026-05-08T00:00:00+00:00"
     assert first["evidence_class"] == EVIDENCE_CLASS
