@@ -9,6 +9,8 @@ import pandas as pd
 from gb_power_market.adaptive_bias_v25 import apply_causal_bias_correction
 from gb_power_market.adaptive_consensus_v26 import apply_causal_consensus_correction
 from gb_power_market.adaptive_direction_v27_candidate import apply_causal_direction_veto_candidate
+from gb_power_market.fixed_market_experiment import FAMILIES
+from gb_power_market.price_forecasting import NumpyRidge
 
 
 EVIDENCE_CLASS = "HISTORICAL_ASOF_ROLLING_ORIGIN_NOT_LIVE_FORWARD"
@@ -72,6 +74,90 @@ def build_fold_schedule(config: WalkForwardConfig = WalkForwardConfig()) -> list
     return folds
 
 
+def _purge_for_next(block: pd.DataFrame, next_block: pd.DataFrame) -> pd.DataFrame:
+    if block.empty or next_block.empty:
+        raise ValueError("rolling-origin development block is empty")
+    first_next_decision = pd.to_datetime(next_block["decision_time_utc"], utc=True).min()
+    available = pd.to_datetime(block["target_start_utc"], utc=True) + pd.Timedelta(minutes=30)
+    return block.loc[available <= first_next_decision].copy()
+
+
+def build_deployed_base_rows(
+    frame: pd.DataFrame,
+    *,
+    fold: dict[str, Any],
+    selection: dict[str, Any],
+    horizon_minutes: int = 120,
+    target_col: str = "reference_market_price_gbp_mwh",
+) -> pd.DataFrame:
+    """Reconstruct the selected base on all rows supported by the deployed family.
+
+    Family/alpha selection remains on the original all-family common support. After
+    deployment is fixed, a row is not discarded merely because an *unused* revision
+    feature is absent (notably at the legacy/current NESO transition).
+    """
+    df = frame.copy()
+    df["target_start_utc"] = pd.to_datetime(df["target_start_utc"], utc=True, errors="raise")
+    df["decision_time_utc"] = pd.to_datetime(df["decision_time_utc"], utc=True, errors="raise")
+    df = df.sort_values("target_start_utc").reset_index(drop=True)
+
+    final_start = _utc(fold["adaptation_warmup_start_utc"])
+    final_end = _utc(fold["score_end_exclusive_utc"])
+    final = df[(df["target_start_utc"] >= final_start) & (df["target_start_utc"] < final_end)].copy()
+    core = [target_col, "target_start_utc", "decision_time_utc", "price_lag_1d_same_target", "price_lag_last_completed"]
+
+    deployed = selection["deployed_source"]
+    if deployed == "PREVIOUS_SETTLEMENT_DAY_FALLBACK":
+        final = final.dropna(subset=core).copy()
+        prediction = final["price_lag_1d_same_target"].to_numpy(float)
+    else:
+        family = selection["selected_family"]
+        if deployed != family:
+            raise ValueError("historical deployed source disagrees with selected family")
+        features = FAMILIES[family]
+        final_required = list(dict.fromkeys([*core, *features]))
+        if family != "PRICE_HISTORY_ONLY":
+            final_required.append("neso_publish_time_utc")
+        final = final.dropna(subset=final_required).copy()
+        if family != "PRICE_HISTORY_ONLY":
+            pub = pd.to_datetime(final["neso_publish_time_utc"], utc=True, errors="raise")
+            if (pub > final["decision_time_utc"]).any():
+                raise ValueError("post-decision NESO vintage entered deployed-family scoring")
+
+        common_required = list(dict.fromkeys([
+            target_col,
+            "target_start_utc",
+            "decision_time_utc",
+            "neso_publish_time_utc",
+            "price_lag_1d_same_target",
+            "price_lag_last_completed",
+            *FAMILIES["PRICE_PLUS_NESO_LEVELS_AND_REVISIONS"],
+        ]))
+        common = df.dropna(subset=common_required).copy()
+        train_start = _utc(fold["train_start_utc"])
+        selection_start = _utc(fold["selection_start_utc"])
+        calibration_start = _utc(fold["calibration_start_utc"])
+        raw_train = common[(common["target_start_utc"] >= train_start) & (common["target_start_utc"] < selection_start)]
+        raw_selection = common[(common["target_start_utc"] >= selection_start) & (common["target_start_utc"] < calibration_start)]
+        raw_calibration = common[(common["target_start_utc"] >= calibration_start) & (common["target_start_utc"] < final_start)]
+        train = _purge_for_next(raw_train, raw_selection)
+        selected_rows = _purge_for_next(raw_selection, raw_calibration)
+        point_fit = pd.concat([train, selected_rows], ignore_index=True)
+        alpha = float(selection["by_family"][family]["selected_alpha"])
+        point = NumpyRidge(alpha).fit(point_fit[features].to_numpy(float), point_fit[target_col].to_numpy(float))
+        prediction = point.predict(final[features].to_numpy(float))
+
+    return pd.DataFrame(
+        {
+            "target_start_utc": final["target_start_utc"].to_numpy(),
+            "decision_time_utc": final["decision_time_utc"].to_numpy(),
+            "realised_price_gbp_mwh": final[target_col].to_numpy(float),
+            "frozen_prediction_gbp_mwh": prediction,
+            "previous_settlement_day_reference_gbp_mwh": final["price_lag_1d_same_target"].to_numpy(float),
+        }
+    )
+
+
 def apply_candidate_suite(base_rows: pd.DataFrame) -> pd.DataFrame:
     """Apply v0.25, v0.26 and v0.27 independently to one causal base sequence."""
     required = {
@@ -95,35 +181,11 @@ def apply_candidate_suite(base_rows: pd.DataFrame) -> pd.DataFrame:
     v27 = apply_causal_direction_veto_candidate(base)
 
     out = base.copy()
-    for col in [
-        "bias_correction_gbp_mwh",
-        "bias_history_rows",
-        "bias_history_latest_target_utc",
-        "adaptive_prediction_gbp_mwh",
-        "adaptive_abs_error_gbp_mwh",
-    ]:
+    for col in ["bias_correction_gbp_mwh", "bias_history_rows", "bias_history_latest_target_utc", "adaptive_prediction_gbp_mwh", "adaptive_abs_error_gbp_mwh"]:
         out[col] = v25[col].to_numpy()
-    for col in [
-        "v26_short_residual_mean_gbp_mwh",
-        "v26_long_residual_mean_gbp_mwh",
-        "v26_short_history_rows",
-        "v26_long_history_rows",
-        "v26_history_latest_target_utc",
-        "v26_gate_reason",
-        "v26_correction_gbp_mwh",
-        "v26_prediction_gbp_mwh",
-        "v26_abs_error_gbp_mwh",
-    ]:
+    for col in ["v26_short_residual_mean_gbp_mwh", "v26_long_residual_mean_gbp_mwh", "v26_short_history_rows", "v26_long_history_rows", "v26_history_latest_target_utc", "v26_gate_reason", "v26_correction_gbp_mwh", "v26_prediction_gbp_mwh", "v26_abs_error_gbp_mwh"]:
         out[col] = v26[col].to_numpy()
-    for col in [
-        "v27_base_v26_correction_gbp_mwh",
-        "v27_direction_anchor_frozen_prediction_gbp_mwh",
-        "v27_frozen_direction_delta_gbp_mwh",
-        "v27_gate_reason",
-        "v27_correction_gbp_mwh",
-        "v27_prediction_gbp_mwh",
-        "v27_abs_error_gbp_mwh",
-    ]:
+    for col in ["v27_base_v26_correction_gbp_mwh", "v27_direction_anchor_frozen_prediction_gbp_mwh", "v27_frozen_direction_delta_gbp_mwh", "v27_gate_reason", "v27_correction_gbp_mwh", "v27_prediction_gbp_mwh", "v27_abs_error_gbp_mwh"]:
         out[col] = v27[col].to_numpy()
     return out
 
@@ -131,53 +193,31 @@ def apply_candidate_suite(base_rows: pd.DataFrame) -> pd.DataFrame:
 def _metrics(y: np.ndarray, p: np.ndarray) -> dict[str, float]:
     err = p - y
     ae = np.abs(err)
-    return {
-        "mae_gbp_mwh": float(ae.mean()),
-        "p95_abs_error_gbp_mwh": float(np.quantile(ae, 0.95)),
-        "signed_bias_gbp_mwh": float(err.mean()),
-    }
+    return {"mae_gbp_mwh": float(ae.mean()), "p95_abs_error_gbp_mwh": float(np.quantile(ae, 0.95)), "signed_bias_gbp_mwh": float(err.mean())}
 
 
 def summarise_score_rows(rows: pd.DataFrame) -> dict[str, Any]:
     if rows.empty:
         raise ValueError("cannot summarise empty historical score rows")
     y = rows["realised_price_gbp_mwh"].to_numpy(float)
-    cols = {
-        "causal_base": "frozen_prediction_gbp_mwh",
-        "v0.25": "adaptive_prediction_gbp_mwh",
-        "v0.26": "v26_prediction_gbp_mwh",
-        "v0.27": "v27_prediction_gbp_mwh",
-        "previous_day": "previous_settlement_day_reference_gbp_mwh",
-    }
+    cols = {"causal_base": "frozen_prediction_gbp_mwh", "v0.25": "adaptive_prediction_gbp_mwh", "v0.26": "v26_prediction_gbp_mwh", "v0.27": "v27_prediction_gbp_mwh", "previous_day": "previous_settlement_day_reference_gbp_mwh"}
     models = {name: _metrics(y, rows[col].to_numpy(float)) for name, col in cols.items()}
     base_abs = np.abs(y - rows[cols["causal_base"]].to_numpy(float))
     ref_abs = np.abs(y - rows[cols["previous_day"]].to_numpy(float))
     v27_abs = np.abs(y - rows[cols["v0.27"]].to_numpy(float))
-    models["v0.27"].update(
-        {
-            "improvement_vs_causal_base_pct": float(
-                100.0 * (models["causal_base"]["mae_gbp_mwh"] - models["v0.27"]["mae_gbp_mwh"])
-                / models["causal_base"]["mae_gbp_mwh"]
-            ),
-            "improvement_vs_previous_day_pct": float(
-                100.0 * (models["previous_day"]["mae_gbp_mwh"] - models["v0.27"]["mae_gbp_mwh"])
-                / models["previous_day"]["mae_gbp_mwh"]
-            ),
-            "win_rate_vs_causal_base": float((v27_abs < base_abs).mean()),
-            "win_rate_vs_previous_day": float((v27_abs < ref_abs).mean()),
-        }
-    )
+    models["v0.27"].update({
+        "improvement_vs_causal_base_pct": float(100.0 * (models["causal_base"]["mae_gbp_mwh"] - models["v0.27"]["mae_gbp_mwh"]) / models["causal_base"]["mae_gbp_mwh"]),
+        "improvement_vs_previous_day_pct": float(100.0 * (models["previous_day"]["mae_gbp_mwh"] - models["v0.27"]["mae_gbp_mwh"]) / models["previous_day"]["mae_gbp_mwh"]),
+        "win_rate_vs_causal_base": float((v27_abs < base_abs).mean()),
+        "win_rate_vs_previous_day": float((v27_abs < ref_abs).mean()),
+    })
     return {
         "rows": int(len(rows)),
         "start_utc": pd.to_datetime(rows["target_start_utc"], utc=True).min().isoformat(),
-        "end_exclusive_utc": (
-            pd.to_datetime(rows["target_start_utc"], utc=True).max() + pd.Timedelta(minutes=30)
-        ).isoformat(),
+        "end_exclusive_utc": (pd.to_datetime(rows["target_start_utc"], utc=True).max() + pd.Timedelta(minutes=30)).isoformat(),
         "models": models,
         "v27_correction_applied_rate": float((rows["v27_correction_gbp_mwh"].astype(float) != 0.0).mean()),
-        "v27_direction_veto_rate": float(
-            rows["v27_gate_reason"].eq("FROZEN_DIRECTION_VETO_FALLBACK_FROZEN").mean()
-        ),
+        "v27_direction_veto_rate": float(rows["v27_gate_reason"].eq("FROZEN_DIRECTION_VETO_FALLBACK_FROZEN").mean()),
         "evidence_class": EVIDENCE_CLASS,
     }
 
