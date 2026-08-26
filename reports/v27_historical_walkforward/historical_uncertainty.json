@@ -1,0 +1,189 @@
+{
+  "version": "0.27.0-historical-uncertainty-1",
+  "status": "HISTORICAL_UNCERTAINTY_ANALYSIS_COMPLETE",
+  "evidence_class": "HISTORICAL_ASOF_ROLLING_ORIGIN_NOT_LIVE_FORWARD",
+  "rows": 5516,
+  "start_utc": "2026-05-01T00:00:00+00:00",
+  "end_exclusive_utc": "2026-08-23T22:00:00+00:00",
+  "model_metrics": {
+    "causal_base": {
+      "mae_gbp_mwh": 18.719731911066614,
+      "p95_abs_error_gbp_mwh": 60.883966041193396
+    },
+    "v0.25": {
+      "mae_gbp_mwh": 20.38352279745121,
+      "p95_abs_error_gbp_mwh": 64.57049009499164
+    },
+    "v0.26": {
+      "mae_gbp_mwh": 18.380394170256366,
+      "p95_abs_error_gbp_mwh": 58.54103768841236
+    },
+    "v0.27": {
+      "mae_gbp_mwh": 18.578152729094757,
+      "p95_abs_error_gbp_mwh": 59.06511760569165
+    },
+    "previous_day": {
+      "mae_gbp_mwh": 25.169840382261587,
+      "p95_abs_error_gbp_mwh": 95.1175
+    }
+  },
+  "comparisons_vs_v27": {
+    "causal_base": {
+      "observed_mae_gain_gbp_mwh": 0.14157918197185637,
+      "observed_improvement_pct": 0.7563098801012128,
+      "bootstrap_by_block_length_rows": {
+        "48": {
+          "rows": 5516,
+          "block_length_rows": 48,
+          "block_length_hours": 24.0,
+          "n_resamples": 10000,
+          "seed": 20262013,
+          "observed_paired_mae_gain_gbp_mwh": 0.14157918197185787,
+          "ci95_lower_gbp_mwh": -0.1289888897587405,
+          "ci95_upper_gbp_mwh": 0.40296096008589366,
+          "bootstrap_probability_gain_gt_zero": 0.8464,
+          "interval_classification": "INTERVAL_INCLUDES_ZERO"
+        },
+        "336": {
+          "rows": 5516,
+          "block_length_rows": 336,
+          "block_length_hours": 168.0,
+          "n_resamples": 10000,
+          "seed": 20262301,
+          "observed_paired_mae_gain_gbp_mwh": 0.14157918197185787,
+          "ci95_lower_gbp_mwh": -0.0603059443716082,
+          "ci95_upper_gbp_mwh": 0.3414618754315689,
+          "bootstrap_probability_gain_gt_zero": 0.9178,
+          "interval_classification": "INTERVAL_INCLUDES_ZERO"
+        }
+      }
+    },
+    "v0.26": {
+      "observed_mae_gain_gbp_mwh": -0.197758558838391,
+      "observed_improvement_pct": -1.0759212071654538,
+      "bootstrap_by_block_length_rows": {
+        "48": {
+          "rows": 5516,
+          "block_length_rows": 48,
+          "block_length_hours": 24.0,
+          "n_resamples": 10000,
+          "seed": 20261190,
+          "observed_paired_mae_gain_gbp_mwh": -0.19775855883839055,
+          "ci95_lower_gbp_mwh": -0.44594791496867486,
+          "ci95_upper_gbp_mwh": -0.005125816532672312,
+          "bootstrap_probability_gain_gt_zero": 0.0224,
+          "interval_classification": "SUPPORTS_V27_HIGHER_MAE"
+        },
+        "336": {
+          "rows": 5516,
+          "block_length_rows": 336,
+          "block_length_hours": 168.0,
+          "n_resamples": 10000,
+          "seed": 20261478,
+          "observed_paired_mae_gain_gbp_mwh": -0.19775855883839055,
+          "ci95_lower_gbp_mwh": -0.4994149274485033,
+          "ci95_upper_gbp_mwh": 0.024399299072007392,
+          "bootstrap_probability_gain_gt_zero": 0.0418,
+          "interval_classification": "INTERVAL_INCLUDES_ZERO"
+        }
+      }
+    },
+    "v0.25": {
+      "observed_mae_gain_gbp_mwh": 1.8053700683564529,
+      "observed_improvement_pct": 8.857007134125999,
+      "bootstrap_by_block_length_rows": {
+        "48": {
+          "rows": 5516,
+          "block_length_rows": 48,
+          "block_length_hours": 24.0,
+          "n_resamples": 10000,
+          "seed": 20261189,
+          "observed_paired_mae_gain_gbp_mwh": 1.8053700683564535,
+          "ci95_lower_gbp_mwh": 1.0179862813127822,
+          "ci95_upper_gbp_mwh": 2.6789834506009536,
+          "bootstrap_probability_gain_gt_zero": 1.0,
+          "interval_classification": "SUPPORTS_V27_LOWER_MAE"
+        },
+        "336": {
+          "rows": 5516,
+          "block_length_rows": 336,
+          "block_length_hours": 168.0,
+          "n_resamples": 10000,
+          "seed": 20261477,
+          "observed_paired_mae_gain_gbp_mwh": 1.8053700683564535,
+          "ci95_lower_gbp_mwh": 0.8672708175957914,
+          "ci95_upper_gbp_mwh": 3.107555234263085,
+          "bootstrap_probability_gain_gt_zero": 1.0,
+          "interval_classification": "SUPPORTS_V27_LOWER_MAE"
+        }
+      }
+    },
+    "previous_day": {
+      "observed_mae_gain_gbp_mwh": 6.591687653166829,
+      "observed_improvement_pct": 26.188833751255384,
+      "bootstrap_by_block_length_rows": {
+        "48": {
+          "rows": 5516,
+          "block_length_rows": 48,
+          "block_length_hours": 24.0,
+          "n_resamples": 10000,
+          "seed": 20262180,
+          "observed_paired_mae_gain_gbp_mwh": 6.5916876531668285,
+          "ci95_lower_gbp_mwh": 4.388185796567473,
+          "ci95_upper_gbp_mwh": 8.651496845965463,
+          "bootstrap_probability_gain_gt_zero": 1.0,
+          "interval_classification": "SUPPORTS_V27_LOWER_MAE"
+        },
+        "336": {
+          "rows": 5516,
+          "block_length_rows": 336,
+          "block_length_hours": 168.0,
+          "n_resamples": 10000,
+          "seed": 20262468,
+          "observed_paired_mae_gain_gbp_mwh": 6.5916876531668285,
+          "ci95_lower_gbp_mwh": 3.033947374997166,
+          "ci95_upper_gbp_mwh": 10.247697677685169,
+          "bootstrap_probability_gain_gt_zero": 1.0,
+          "interval_classification": "SUPPORTS_V27_LOWER_MAE"
+        }
+      }
+    }
+  },
+  "weekly_consistency": {
+    "causal_base": {
+      "folds": 17,
+      "v27_better_folds": 12,
+      "v27_worse_folds": 5,
+      "ties": 0,
+      "mean_fold_mae_gain_gbp_mwh": 0.15326723960159547,
+      "median_fold_mae_gain_gbp_mwh": 0.12283874835260278
+    },
+    "v0.26": {
+      "folds": 17,
+      "v27_better_folds": 7,
+      "v27_worse_folds": 10,
+      "ties": 0,
+      "mean_fold_mae_gain_gbp_mwh": -0.17450737489759374,
+      "median_fold_mae_gain_gbp_mwh": -0.029265106548789888
+    },
+    "v0.25": {
+      "folds": 17,
+      "v27_better_folds": 15,
+      "v27_worse_folds": 2,
+      "ties": 0,
+      "mean_fold_mae_gain_gbp_mwh": 1.7875784792387144,
+      "median_fold_mae_gain_gbp_mwh": 0.7920701211266472
+    },
+    "previous_day": {
+      "folds": 17,
+      "v27_better_folds": 14,
+      "v27_worse_folds": 3,
+      "ties": 0,
+      "mean_fold_mae_gain_gbp_mwh": 6.681779879459475,
+      "median_fold_mae_gain_gbp_mwh": 7.187668440321229
+    }
+  },
+  "primary_block_length_rows": 48,
+  "sensitivity_block_length_rows": 336,
+  "claim_boundary": "Retrospective historical as-of rolling-origin robustness evidence only. The v0.27 structure was designed after these dates, so bootstrap intervals quantify temporal uncertainty in this backtest; they do not convert it into live-forward or untouched confirmatory evidence. No predictive rule is changed by this analysis."
+}
