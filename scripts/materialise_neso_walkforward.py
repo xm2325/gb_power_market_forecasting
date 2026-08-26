@@ -5,7 +5,7 @@ import argparse
 import json
 from pathlib import Path
 
-from scripts.materialise_v18_parquet import materialise_forecast
+from materialise_v18_parquet import materialise_forecast
 
 
 def main() -> None:
