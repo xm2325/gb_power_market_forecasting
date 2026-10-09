@@ -116,3 +116,31 @@ def test_duplicate_scoring_rejected():
     score = score_shadow(forecast, observed_price=100., scored_at=target + pd.Timedelta(hours=3))
     with pytest.raises(ValueError, match="duplicate"):
         summarise_scores([score, score])
+
+
+def test_extended_metrics_and_day_block_uncertainty():
+    frame, now, cutoff = _fixture()
+    forecast = predict_shadow(frame, decision=now, input_end_exclusive=cutoff)
+    target = pd.Timestamp(forecast["target_start_utc"])
+    initial = score_shadow(
+        forecast, observed_price=100.,
+        scored_at=target + pd.Timedelta(hours=3),
+    )
+    assert "signed_error_gbp_mwh" in initial
+    single = summarise_scores([initial])
+    assert single["all"]["p95_abs_error_gbp_mwh"]["previous_day"] >= 0
+    assert "signed_bias_gbp_mwh" in single["all"]
+    assert single["daily_block_uncertainty"]["consensus"] is None
+
+    # Deterministic synthetic unit-test scores, not a reported market result.
+    sample = []
+    for i in range(672):
+        row = dict(initial)
+        row["target_start_utc"] = (target + pd.Timedelta(minutes=30 * i)).isoformat()
+        sample.append(row)
+    summary = summarise_scores(sample)
+    assert summary["review_mature"] is True
+    assert summary["all"]["rows"] == 672
+    assert summary["daily_block_uncertainty"]["consensus"]["blocks"] >= 14
+    assert len(summary["daily_block_uncertainty"]["direction_veto"]["interval95_gbp_mwh"]) == 2
+    assert summary["automatic_promotion"] is False
