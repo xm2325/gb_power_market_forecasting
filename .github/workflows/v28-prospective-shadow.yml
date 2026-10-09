@@ -2,6 +2,12 @@ name: v28-prospective-shadow
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/gb_power_market/prospective_v28.py'
+      - 'scripts/run_v28_shadow_cycle.py'
+      - '.github/workflows/v28-prospective-shadow.yml'
   schedule:
     # Offset from the top of the hour to reduce GitHub Actions congestion.
     # Actual lead time is measured at prediction creation, not assumed to be 2h.
