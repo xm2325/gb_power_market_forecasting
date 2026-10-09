@@ -1,0 +1,70 @@
+{
+  "version": "0.24.0",
+  "status": "CONTINUOUS_FORWARD_MONITOR_SNAPSHOT",
+  "snapshot_date": "2026-08-21",
+  "workflow_run": {
+    "run_id": 32485905691,
+    "artifact_id": 9447877873,
+    "artifact_name": "v24-continuous-forward-32485905691",
+    "artifact_sha256": "b79f86af22ea62a7c7e3fcccc3f0403353d0350f523ac432ed60d959e9abe6eb"
+  },
+  "frozen_model_state": {
+    "sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+    "model_changed": false
+  },
+  "monitor_window": {
+    "start_utc": "2026-07-12T12:00:00+00:00",
+    "end_exclusive_utc": "2026-08-21T11:30:00+00:00",
+    "expected_rows_each_horizon": 1919,
+    "coverage_each_horizon": 1.0,
+    "future_neso_publications_each_horizon": 0
+  },
+  "source_snapshot": {
+    "neso_current_window_rows": 612906,
+    "neso_current_window_sha256": "54a2edb5a4f9b80ecf0ea6a59b0cd54d5aeabf49e97477150f929aeff337605d",
+    "neso_raw_clock_mismatch_rows": 0,
+    "elexon_reference_rows_with_warmup": 2477,
+    "elexon_warmup_start_settlement_date": "2026-07-01"
+  },
+  "segments": {
+    "30m": {
+      "locked_final_full": {"rows": 1623, "frozen_model_mae_gbp_mwh": 8.938988847249, "reference_mae_gbp_mwh": 24.048354898336, "improvement_pct": 62.829104589324, "interval_coverage": 0.894639556377, "model_win_rate": 0.69685767098, "evidence_role": "LOCKED_HISTORICAL_OOS"},
+      "august_1_to_latest": {"rows": 983, "frozen_model_mae_gbp_mwh": 8.831472295754, "reference_mae_gbp_mwh": 19.299877465468, "improvement_pct": 54.240785665319, "interval_coverage": 0.897253306205, "model_win_rate": 0.698880976602, "evidence_role": "MIXED_HISTORICAL_AND_FORWARD_MONITORING"},
+      "post_lock_to_latest": {"rows": 296, "frozen_model_mae_gbp_mwh": 7.586983910579, "reference_mae_gbp_mwh": 15.884694420794, "improvement_pct": 52.237142814361, "interval_coverage": 0.935810810811, "model_win_rate": 0.760135135135, "evidence_role": "POST_LOCK_FORWARD_MONITORING"},
+      "latest_24h": {"rows": 48, "frozen_model_mae_gbp_mwh": 7.003481962028, "reference_mae_gbp_mwh": 10.789166666667, "improvement_pct": 35.087832282119, "interval_coverage": 0.958333333333, "model_win_rate": 0.645833333333, "evidence_role": "ROLLING_MONITORING_ONLY"},
+      "latest_3d": {"rows": 144, "frozen_model_mae_gbp_mwh": 7.402111900668, "reference_mae_gbp_mwh": 14.26492742052, "improvement_pct": 48.10971214603, "interval_coverage": 0.9375, "model_win_rate": 0.729166666667, "evidence_role": "ROLLING_MONITORING_ONLY"},
+      "latest_7d": {"rows": 336, "frozen_model_mae_gbp_mwh": 7.757165297804, "reference_mae_gbp_mwh": 15.443153418318, "improvement_pct": 49.769551025748, "interval_coverage": 0.928571428571, "model_win_rate": 0.735119047619, "evidence_role": "ROLLING_MONITORING_ONLY"}
+    },
+    "2h": {
+      "locked_final_full": {"rows": 1623, "frozen_model_mae_gbp_mwh": 17.087308359193, "reference_mae_gbp_mwh": 24.048354898336, "improvement_pct": 28.946040461276, "interval_coverage": 0.894639556377, "model_win_rate": 0.536660505237, "evidence_role": "LOCKED_HISTORICAL_OOS"},
+      "august_1_to_latest": {"rows": 983, "frozen_model_mae_gbp_mwh": 17.51190629518, "reference_mae_gbp_mwh": 19.299877465468, "improvement_pct": 9.264158145496, "interval_coverage": 0.893184130214, "model_win_rate": 0.472024415056, "evidence_role": "MIXED_HISTORICAL_AND_FORWARD_MONITORING"},
+      "post_lock_to_latest": {"rows": 296, "frozen_model_mae_gbp_mwh": 16.875060555387, "reference_mae_gbp_mwh": 15.884694420794, "improvement_pct": -6.234719462384, "interval_coverage": 0.908783783784, "model_win_rate": 0.456081081081, "evidence_role": "POST_LOCK_FORWARD_MONITORING"},
+      "latest_24h": {"rows": 48, "frozen_model_mae_gbp_mwh": 12.638584848199, "reference_mae_gbp_mwh": 10.789166666667, "improvement_pct": -17.141436764032, "interval_coverage": 0.979166666667, "model_win_rate": 0.4375, "evidence_role": "ROLLING_MONITORING_ONLY"},
+      "latest_3d": {"rows": 144, "frozen_model_mae_gbp_mwh": 15.67883127385, "reference_mae_gbp_mwh": 14.26492742052, "improvement_pct": -9.911749367165, "interval_coverage": 0.944444444444, "model_win_rate": 0.458333333333, "evidence_role": "ROLLING_MONITORING_ONLY"},
+      "latest_7d": {"rows": 336, "frozen_model_mae_gbp_mwh": 17.175894791447, "reference_mae_gbp_mwh": 15.443153418318, "improvement_pct": -11.220126655438, "interval_coverage": 0.904761904762, "model_win_rate": 0.4375, "evidence_role": "ROLLING_MONITORING_ONLY"}
+    },
+    "6h": {
+      "locked_final_full": {"rows": 1623, "frozen_model_mae_gbp_mwh": 34.436948193933, "reference_mae_gbp_mwh": 24.048354898336, "improvement_pct": -43.198769061392, "interval_coverage": 0.858903265558, "model_win_rate": 0.274183610598, "evidence_role": "LOCKED_HISTORICAL_OOS"},
+      "august_1_to_latest": {"rows": 983, "frozen_model_mae_gbp_mwh": 38.303183888788, "reference_mae_gbp_mwh": 19.299877465468, "improvement_pct": -98.463352719839, "interval_coverage": 0.838250254323, "model_win_rate": 0.179043743642, "evidence_role": "MIXED_HISTORICAL_AND_FORWARD_MONITORING"},
+      "post_lock_to_latest": {"rows": 296, "frozen_model_mae_gbp_mwh": 43.923592768373, "reference_mae_gbp_mwh": 15.884694420794, "improvement_pct": -176.515188802594, "interval_coverage": 0.787162162162, "model_win_rate": 0.064189189189, "evidence_role": "POST_LOCK_FORWARD_MONITORING"},
+      "latest_24h": {"rows": 48, "frozen_model_mae_gbp_mwh": 32.944536631778, "reference_mae_gbp_mwh": 10.789166666667, "improvement_pct": -205.348296579386, "interval_coverage": 1.0, "model_win_rate": 0.104166666667, "evidence_role": "ROLLING_MONITORING_ONLY"},
+      "latest_3d": {"rows": 144, "frozen_model_mae_gbp_mwh": 40.071095949511, "reference_mae_gbp_mwh": 14.26492742052, "improvement_pct": -180.906413108482, "interval_coverage": 0.868055555556, "model_win_rate": 0.090277777778, "evidence_role": "ROLLING_MONITORING_ONLY"},
+      "latest_7d": {"rows": 336, "frozen_model_mae_gbp_mwh": 43.892006026086, "reference_mae_gbp_mwh": 15.443153418318, "improvement_pct": -184.216602899398, "interval_coverage": 0.78869047619, "model_win_rate": 0.0625, "evidence_role": "ROLLING_MONITORING_ONLY"}
+    },
+    "12h": {
+      "locked_final_full": {"rows": 1623, "frozen_model_mae_gbp_mwh": 50.973855673617, "reference_mae_gbp_mwh": 24.048354898336, "improvement_pct": -111.964002897941, "interval_coverage": 0.831176833025, "model_win_rate": 0.176833025262, "evidence_role": "LOCKED_HISTORICAL_OOS"},
+      "august_1_to_latest": {"rows": 983, "frozen_model_mae_gbp_mwh": 56.669663350797, "reference_mae_gbp_mwh": 19.299877465468, "improvement_pct": -193.627062929246, "interval_coverage": 0.737538148525, "model_win_rate": 0.100712105799, "evidence_role": "MIXED_HISTORICAL_AND_FORWARD_MONITORING"},
+      "post_lock_to_latest": {"rows": 296, "frozen_model_mae_gbp_mwh": 65.905647101295, "reference_mae_gbp_mwh": 15.884694420794, "improvement_pct": -314.900314450003, "interval_coverage": 0.564189189189, "model_win_rate": 0.003378378378, "evidence_role": "POST_LOCK_FORWARD_MONITORING"},
+      "latest_24h": {"rows": 48, "frozen_model_mae_gbp_mwh": 56.279929686138, "reference_mae_gbp_mwh": 10.789166666667, "improvement_pct": -421.633703741142, "interval_coverage": 0.8125, "model_win_rate": 0.0, "evidence_role": "ROLLING_MONITORING_ONLY"},
+      "latest_3d": {"rows": 144, "frozen_model_mae_gbp_mwh": 63.308606231053, "reference_mae_gbp_mwh": 14.26492742052, "improvement_pct": -343.806017126896, "interval_coverage": 0.618055555556, "model_win_rate": 0.006944444444, "evidence_role": "ROLLING_MONITORING_ONLY"},
+      "latest_7d": {"rows": 336, "frozen_model_mae_gbp_mwh": 65.687194455343, "reference_mae_gbp_mwh": 15.443153418318, "improvement_pct": -325.34832541019, "interval_coverage": 0.577380952381, "model_win_rate": 0.002976190476, "evidence_role": "ROLLING_MONITORING_ONLY"}
+    }
+  },
+  "interpretation": {
+    "30m": "Stable positive forward monitoring: post-lock and latest 7d both remain materially better than the previous-settlement-day reference.",
+    "2h": "Historical advantage weakened: August-to-latest remains positive overall, but post-lock and latest 7d are negative, indicating recent-regime instability.",
+    "6h": "Persistent negative result that worsens in recent/post-lock monitoring.",
+    "12h": "Persistent severe negative result with weak post-lock interval coverage and near-zero model win rate.",
+    "claim_boundary": "Monitoring values may be inspected continuously. They do not rewrite the locked v0.20 benchmark and are not realised trading P&L."
+  }
+}

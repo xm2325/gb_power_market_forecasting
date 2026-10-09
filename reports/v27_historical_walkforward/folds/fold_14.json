@@ -1,0 +1,323 @@
+{
+  "fold": 14,
+  "train_start_utc": "2026-01-08T00:00:00+00:00",
+  "selection_start_utc": "2026-06-30T00:00:00+00:00",
+  "calibration_start_utc": "2026-07-14T00:00:00+00:00",
+  "adaptation_warmup_start_utc": "2026-07-28T00:00:00+00:00",
+  "score_start_utc": "2026-07-31T00:00:00+00:00",
+  "score_end_exclusive_utc": "2026-08-07T00:00:00+00:00",
+  "evidence_class": "HISTORICAL_ASOF_ROLLING_ORIGIN_NOT_LIVE_FORWARD",
+  "base_selection": {
+    "reference_selection_mae_gbp_mwh": 34.58446107784431,
+    "by_family": {
+      "PRICE_HISTORY_ONLY": {
+        "features": [
+          "price_lag_last_completed",
+          "price_lag_2_completed",
+          "price_lag_1d_same_target",
+          "price_lag_7d_same_target",
+          "price_roll_3h_mean",
+          "price_roll_24h_median",
+          "hour_sin",
+          "hour_cos",
+          "dow_sin",
+          "dow_cos"
+        ],
+        "selected_alpha": 0.0,
+        "selection_mae_gbp_mwh": 16.251156495182872,
+        "improvement_vs_previous_settlement_day_pct": 53.010236422062455,
+        "tail_guard": {
+          "status": "PASS",
+          "reason": "PASS",
+          "large_move_mae_degradation_pct": -33.6666778312998,
+          "baseline": {
+            "large_move_threshold_gbp_mwh": 36.22999999999999,
+            "n_rows": 668,
+            "n_large_move_rows": 92,
+            "large_move_share": 0.1377245508982036,
+            "mae_gbp_mwh": 34.58446107784431,
+            "p95_abs_error_gbp_mwh": 113.8805,
+            "large_move_mae_gbp_mwh": 55.22619565217393,
+            "large_move_p95_abs_error_gbp_mwh": 120.22400000000002,
+            "large_move_direction_accuracy": 0.6304347826086957
+          },
+          "challenger": {
+            "large_move_threshold_gbp_mwh": 36.22999999999999,
+            "n_rows": 668,
+            "n_large_move_rows": 92,
+            "large_move_share": 0.1377245508982036,
+            "mae_gbp_mwh": 16.251156495182872,
+            "p95_abs_error_gbp_mwh": 48.00751491675415,
+            "large_move_mae_gbp_mwh": 36.63337028347323,
+            "large_move_p95_abs_error_gbp_mwh": 74.2167155497873,
+            "large_move_direction_accuracy": 0.8695652173913043
+          },
+          "rule": {
+            "large_move_quantile": 0.9,
+            "minimum_large_move_rows": 20,
+            "maximum_large_move_mae_degradation_pct": 5.0
+          }
+        },
+        "alpha_candidates": [
+          {
+            "alpha": 0.0,
+            "selection_mae_gbp_mwh": 16.251156495182872
+          },
+          {
+            "alpha": 1.0,
+            "selection_mae_gbp_mwh": 16.251759505976732
+          },
+          {
+            "alpha": 10.0,
+            "selection_mae_gbp_mwh": 16.261039304575178
+          },
+          {
+            "alpha": 100.0,
+            "selection_mae_gbp_mwh": 16.457699826584204
+          }
+        ]
+      },
+      "PRICE_PLUS_NESO_LEVELS": {
+        "features": [
+          "price_lag_last_completed",
+          "price_lag_2_completed",
+          "price_lag_1d_same_target",
+          "price_lag_7d_same_target",
+          "price_roll_3h_mean",
+          "price_roll_24h_median",
+          "hour_sin",
+          "hour_cos",
+          "dow_sin",
+          "dow_cos",
+          "neso_embedded_wind_forecast_mw",
+          "neso_embedded_solar_forecast_mw",
+          "neso_embedded_wind_capacity_mw",
+          "neso_embedded_solar_capacity_mw",
+          "neso_forecast_age_minutes"
+        ],
+        "selected_alpha": 0.0,
+        "selection_mae_gbp_mwh": 15.608511415738509,
+        "improvement_vs_previous_settlement_day_pct": 54.86842665957366,
+        "tail_guard": {
+          "status": "PASS",
+          "reason": "PASS",
+          "large_move_mae_degradation_pct": -42.43712535669965,
+          "baseline": {
+            "large_move_threshold_gbp_mwh": 36.22999999999999,
+            "n_rows": 668,
+            "n_large_move_rows": 92,
+            "large_move_share": 0.1377245508982036,
+            "mae_gbp_mwh": 34.58446107784431,
+            "p95_abs_error_gbp_mwh": 113.8805,
+            "large_move_mae_gbp_mwh": 55.22619565217393,
+            "large_move_p95_abs_error_gbp_mwh": 120.22400000000002,
+            "large_move_direction_accuracy": 0.6304347826086957
+          },
+          "challenger": {
+            "large_move_threshold_gbp_mwh": 36.22999999999999,
+            "n_rows": 668,
+            "n_large_move_rows": 92,
+            "large_move_share": 0.1377245508982036,
+            "mae_gbp_mwh": 15.608511415738509,
+            "p95_abs_error_gbp_mwh": 39.88700488680615,
+            "large_move_mae_gbp_mwh": 31.789785773524663,
+            "large_move_p95_abs_error_gbp_mwh": 70.57037486243009,
+            "large_move_direction_accuracy": 0.9021739130434783
+          },
+          "rule": {
+            "large_move_quantile": 0.9,
+            "minimum_large_move_rows": 20,
+            "maximum_large_move_mae_degradation_pct": 5.0
+          }
+        },
+        "alpha_candidates": [
+          {
+            "alpha": 0.0,
+            "selection_mae_gbp_mwh": 15.608511415738509
+          },
+          {
+            "alpha": 1.0,
+            "selection_mae_gbp_mwh": 15.60973996483746
+          },
+          {
+            "alpha": 10.0,
+            "selection_mae_gbp_mwh": 15.62081639961994
+          },
+          {
+            "alpha": 100.0,
+            "selection_mae_gbp_mwh": 15.754113275135735
+          }
+        ]
+      },
+      "PRICE_PLUS_NESO_LEVELS_AND_REVISIONS": {
+        "features": [
+          "price_lag_last_completed",
+          "price_lag_2_completed",
+          "price_lag_1d_same_target",
+          "price_lag_7d_same_target",
+          "price_roll_3h_mean",
+          "price_roll_24h_median",
+          "hour_sin",
+          "hour_cos",
+          "dow_sin",
+          "dow_cos",
+          "neso_embedded_wind_forecast_mw",
+          "neso_embedded_solar_forecast_mw",
+          "neso_embedded_wind_capacity_mw",
+          "neso_embedded_solar_capacity_mw",
+          "neso_forecast_age_minutes",
+          "neso_embedded_wind_revision_delta_mw",
+          "neso_embedded_wind_abs_revision_delta_mw",
+          "neso_embedded_solar_revision_delta_mw",
+          "neso_embedded_solar_abs_revision_delta_mw"
+        ],
+        "selected_alpha": 0.0,
+        "selection_mae_gbp_mwh": 15.605812014585181,
+        "improvement_vs_previous_settlement_day_pct": 54.87623190235957,
+        "tail_guard": {
+          "status": "PASS",
+          "reason": "PASS",
+          "large_move_mae_degradation_pct": -42.52407376551361,
+          "baseline": {
+            "large_move_threshold_gbp_mwh": 36.22999999999999,
+            "n_rows": 668,
+            "n_large_move_rows": 92,
+            "large_move_share": 0.1377245508982036,
+            "mae_gbp_mwh": 34.58446107784431,
+            "p95_abs_error_gbp_mwh": 113.8805,
+            "large_move_mae_gbp_mwh": 55.22619565217393,
+            "large_move_p95_abs_error_gbp_mwh": 120.22400000000002,
+            "large_move_direction_accuracy": 0.6304347826086957
+          },
+          "challenger": {
+            "large_move_threshold_gbp_mwh": 36.22999999999999,
+            "n_rows": 668,
+            "n_large_move_rows": 92,
+            "large_move_share": 0.1377245508982036,
+            "mae_gbp_mwh": 15.605812014585181,
+            "p95_abs_error_gbp_mwh": 39.56118036799481,
+            "large_move_mae_gbp_mwh": 31.741767475156617,
+            "large_move_p95_abs_error_gbp_mwh": 71.0866176059726,
+            "large_move_direction_accuracy": 0.8913043478260869
+          },
+          "rule": {
+            "large_move_quantile": 0.9,
+            "minimum_large_move_rows": 20,
+            "maximum_large_move_mae_degradation_pct": 5.0
+          }
+        },
+        "alpha_candidates": [
+          {
+            "alpha": 0.0,
+            "selection_mae_gbp_mwh": 15.605812014585181
+          },
+          {
+            "alpha": 1.0,
+            "selection_mae_gbp_mwh": 15.60642539698789
+          },
+          {
+            "alpha": 10.0,
+            "selection_mae_gbp_mwh": 15.612460498843319
+          },
+          {
+            "alpha": 100.0,
+            "selection_mae_gbp_mwh": 15.7403786750646
+          }
+        ]
+      }
+    },
+    "best_simple_family": "PRICE_PLUS_NESO_LEVELS",
+    "revision_margin_vs_best_simple_pct": 0.017294417650906457,
+    "selected_family": "PRICE_PLUS_NESO_LEVELS",
+    "promoted": true,
+    "deployed_source": "PRICE_PLUS_NESO_LEVELS",
+    "family_rule": {
+      "minimum_validation_rows": 100,
+      "minimum_improvement_vs_previous_day_pct": 5.0,
+      "minimum_margin_to_add_revision_pct": 0.5
+    },
+    "tail_rule": {
+      "large_move_quantile": 0.9,
+      "minimum_large_move_rows": 20,
+      "maximum_large_move_mae_degradation_pct": 5.0
+    }
+  },
+  "base_rows_common_support": {
+    "common_complete": 10124,
+    "train": 8296,
+    "selection": 668,
+    "calibration": 668,
+    "final": 480,
+    "expected_final": 480,
+    "final_coverage": 1.0
+  },
+  "base_purge": {
+    "train": {
+      "raw_rows": 8300,
+      "kept_rows": 8296,
+      "purged_rows": 4,
+      "next_first_decision_time_utc": "2026-06-29T22:00:00+00:00",
+      "rule": "target label available at target_start+30m <= next block first decision time"
+    },
+    "selection": {
+      "raw_rows": 672,
+      "kept_rows": 668,
+      "purged_rows": 4,
+      "next_first_decision_time_utc": "2026-07-13T22:00:00+00:00",
+      "rule": "target label available at target_start+30m <= next block first decision time"
+    },
+    "calibration": {
+      "raw_rows": 672,
+      "kept_rows": 668,
+      "purged_rows": 4,
+      "next_first_decision_time_utc": "2026-07-27T22:00:00+00:00",
+      "rule": "target label available at target_start+30m <= next block first decision time"
+    }
+  },
+  "information_audit": {
+    "future_neso_publications": 0
+  },
+  "deployed_family_score_rows": 336,
+  "score": {
+    "rows": 336,
+    "start_utc": "2026-07-31T00:00:00+00:00",
+    "end_exclusive_utc": "2026-08-07T00:00:00+00:00",
+    "models": {
+      "causal_base": {
+        "mae_gbp_mwh": 13.746914769075838,
+        "p95_abs_error_gbp_mwh": 37.47840245011762,
+        "signed_bias_gbp_mwh": -2.325380500007055
+      },
+      "v0.25": {
+        "mae_gbp_mwh": 13.349414172338976,
+        "p95_abs_error_gbp_mwh": 37.17298931108248,
+        "signed_bias_gbp_mwh": 0.9849703368917806
+      },
+      "v0.26": {
+        "mae_gbp_mwh": 13.194064481499598,
+        "p95_abs_error_gbp_mwh": 37.86749140074486,
+        "signed_bias_gbp_mwh": 0.0467960630257837
+      },
+      "v0.27": {
+        "mae_gbp_mwh": 13.548730369202579,
+        "p95_abs_error_gbp_mwh": 37.47840245011762,
+        "signed_bias_gbp_mwh": -1.1404640872949248,
+        "improvement_vs_causal_base_pct": 1.4416645713049883,
+        "improvement_vs_previous_day_pct": 34.662086249132514,
+        "win_rate_vs_causal_base": 0.1488095238095238,
+        "win_rate_vs_previous_day": 0.5535714285714286
+      },
+      "previous_day": {
+        "mae_gbp_mwh": 20.73639880952381,
+        "p95_abs_error_gbp_mwh": 82.9675,
+        "signed_bias_gbp_mwh": 2.348005952380953
+      }
+    },
+    "v27_correction_applied_rate": 0.2767857142857143,
+    "v27_direction_veto_rate": 0.41964285714285715,
+    "evidence_class": "HISTORICAL_ASOF_ROLLING_ORIGIN_NOT_LIVE_FORWARD"
+  },
+  "fold_input_max_target_utc": "2026-08-06T23:30:00+00:00",
+  "future_labels_passed_to_fold_runner": false,
+  "final_score_support_rule": "DEPLOYED_FAMILY_FEATURES_ONLY_AFTER_COMMON_SUPPORT_SELECTION"
+}

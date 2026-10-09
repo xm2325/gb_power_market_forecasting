@@ -1,0 +1,20 @@
+{
+  "schema": "gb-power-market-v27-pretarget-recovery-miss-v1",
+  "status": "PRETARGET_RECOVERY_1_WINDOW_MISSED",
+  "version": "0.27.0",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO",
+  "previous_recovery_lock_path": "reports/forward/v27/V0_27_PRETARGET_RECOVERY_LOCK.json",
+  "previous_recovery_lock_sha256": "0d43eb33217c15e3f0cfaf3836c824f2adb3c510bda8657c167b72247793f7c9",
+  "recovery_decision_time_utc": "2026-08-25T10:00:00+00:00",
+  "recovery_target_start_utc": "2026-08-25T12:00:00+00:00",
+  "miss_recorded_utc": "2026-08-25T12:47:06.253146+00:00",
+  "prediction_file_present": false,
+  "retrospective_prediction_reconstruction_allowed": false,
+  "original_forward_start_utc": "2026-08-25T02:30:00+00:00",
+  "original_forward_boundary_changed": false,
+  "predictive_source_git_blob_sha1": "3c361dbb0e1665bbbad2e1097b8580ce062a203f",
+  "model_or_rule_changed_after_miss": false,
+  "failed_live_run_id": 32833780952,
+  "failure_class": "DATETIME_REPRESENTATION_ADAPTER_BUG_AFTER_CAUSAL_INPUT_GATES",
+  "claim_boundary": "The 12:00 UTC recovery target is not reconstructed retrospectively. This miss record contains no performance claim and does not move the original v0.27 forward start."
+}

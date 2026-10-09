@@ -1,0 +1,28 @@
+{
+  "checked_date": "2026-08-21",
+  "forecast_legacy_2026_jan_jun": {
+    "resource_id": "d6375700-69c2-4c25-8bde-883a205d742e",
+    "rows_last_verified": 2329904,
+    "status": "archive; prior official metadata snapshot from 2026-08-20"
+  },
+  "forecast_current_2026_jun_dec": {
+    "resource_id": "31861619-0b86-47ba-bac2-d008a760af54",
+    "rows": 1014410,
+    "status": "live and still updated"
+  },
+  "historic_demand_2026": {
+    "resource_id": "8a4a771c-3929-4e56-93ad-cdf13219dea5",
+    "rows": 10030,
+    "status": "contains actual/forecast indicator and embedded wind/solar generation"
+  },
+  "demand_data_update": {
+    "resource_id": "177f6fa4-ae49-4182-81ea-0c6b35f26ca6",
+    "rows": 2544,
+    "status": "rolling previous-month-to-current-day data plus 7-day forecasts; actual rows are used to extend recent outturn"
+  },
+  "frozen_final_window": {
+    "start_target_end_utc": "2026-07-12T12:30:00Z",
+    "end_target_end_exclusive_utc": "2026-08-15T08:00:00Z",
+    "expected_half_hour_targets": 1623
+  }
+}

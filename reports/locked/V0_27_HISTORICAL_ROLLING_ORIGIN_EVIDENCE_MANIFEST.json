@@ -1,0 +1,162 @@
+{
+  "version": "0.27.0-historical-evidence-lock-1",
+  "status": "HISTORICAL_EVIDENCE_LOCKED_NOT_FORWARD_VALIDATION",
+  "evidence_class": "HISTORICAL_ASOF_ROLLING_ORIGIN_NOT_LIVE_FORWARD",
+  "claim_boundary": "Locked retrospective historical as-of rolling-origin robustness evidence. It is not live-forward evidence, not untouched confirmatory validation, and does not authorize retuning, promotion or an automatic model change.",
+  "scope": {
+    "rows": 5516,
+    "start_utc": "2026-05-01T00:00:00+00:00",
+    "end_exclusive_utc": "2026-08-23T22:00:00+00:00",
+    "horizon_minutes": 120,
+    "fold_days": 7,
+    "selection_days": 14,
+    "calibration_days": 14,
+    "adaptation_warmup_hours": 72
+  },
+  "source_runs": {
+    "historical_walkforward": {
+      "run_id": 32938613665,
+      "artifact_id": 9595918850,
+      "artifact_name": "v27-historical-walkforward-32938613665",
+      "artifact_zip_sha256": "5c79946e0bc25d5163408b1f3814120bdfcdbffec5439f3facbf04fd6c421d54",
+      "evidence_commit": "5d513685f2cea50083617483f9028453ad817b80"
+    },
+    "historical_uncertainty": {
+      "run_id": 32939596992,
+      "artifact_id": 9596046808,
+      "artifact_name": "v27-historical-uncertainty-32939596992",
+      "artifact_zip_sha256": "d54f59c460dcb5f627dc4b7100da854a0f77f817dc7e9faffc456c015cf078dc",
+      "evidence_commit": "e3435ef7de20ab08d822027fb50d7e095e663c63"
+    }
+  },
+  "predictive_source_blobs": {
+    "v0.25": "2ccb3d2a0762eec66d646e164262f8ac5b759d8e",
+    "v0.26": "399915c6cdd0d3b016bde73cb0ef92eb2697adf8",
+    "v0.27": "3c361dbb0e1665bbbad2e1097b8580ce062a203f"
+  },
+  "files": {
+    "reports/v27_historical_walkforward/historical_walkforward_rows.csv": {
+      "sha256": "b69574760fc616b20be8aef3c539bb3b95e96fcc8cccaddfa8a8b8cffe501dc8",
+      "git_blob_sha1": "6b899cb62ddc6313f1dab72bc39ec861fc59c24b",
+      "bytes": 3149615
+    },
+    "reports/v27_historical_walkforward/historical_walkforward_summary.json": {
+      "sha256": "e00d912cd6982cde9dc90eba76edc74c25003f325caa179bd20debe2fc20b8cd",
+      "git_blob_sha1": "bd28de31bb67369a70c132c725b7a67a04f821cf",
+      "bytes": 229798
+    },
+    "reports/v27_historical_walkforward/fold_summary.csv": {
+      "sha256": "dd3f4eddd56b408e1ee3f4efd59a7fbba80fd8d928ddc135e2e1f2d59de1b79b",
+      "git_blob_sha1": "1f8cf949e51f53ec3fdd6e4392e859dc4e0e4d74",
+      "bytes": 3628
+    },
+    "reports/v27_historical_walkforward/historical_uncertainty.json": {
+      "sha256": "0132b0307236baf112b0b1ad5ecf42455c5c74e6b71b23d49eb0aba590f81cee",
+      "git_blob_sha1": "c37ed7c85869024394dfc7eb9dddc14fdb969809",
+      "bytes": 6812
+    },
+    "docs/V0_27_HISTORICAL_ROLLING_ORIGIN.md": {
+      "sha256": "ed2f8b1506254b78a40eec48799685f9d266b4fa86341f4aeed49129b1ec0548",
+      "git_blob_sha1": "9b6c6fe829eb7db971f67f85678acf019d92e60d",
+      "bytes": 2135
+    }
+  },
+  "headline_metrics": {
+    "causal_base_mae_gbp_mwh": 18.719731911066614,
+    "v0.25_mae_gbp_mwh": 20.38352279745121,
+    "v0.26_mae_gbp_mwh": 18.380394170256366,
+    "v0.27_mae_gbp_mwh": 18.578152729094757,
+    "previous_day_mae_gbp_mwh": 25.169840382261587,
+    "v0.27_improvement_vs_causal_base_pct": 0.7563098801012128,
+    "v0.27_improvement_vs_v0.26_pct": -1.0759212071654538,
+    "v0.27_improvement_vs_v0.25_pct": 8.857007134125999,
+    "v0.27_improvement_vs_previous_day_pct": 26.188833751255384
+  },
+  "uncertainty": {
+    "primary_block": {
+      "rows": 5516,
+      "block_length_rows": 48,
+      "block_length_hours": 24.0,
+      "n_resamples": 10000,
+      "seed": 20262013,
+      "observed_paired_mae_gain_gbp_mwh": 0.14157918197185787,
+      "ci95_lower_gbp_mwh": -0.1289888897587405,
+      "ci95_upper_gbp_mwh": 0.40296096008589366,
+      "bootstrap_probability_gain_gt_zero": 0.8464,
+      "interval_classification": "INTERVAL_INCLUDES_ZERO"
+    },
+    "weekly_block_sensitivity": {
+      "rows": 5516,
+      "block_length_rows": 336,
+      "block_length_hours": 168.0,
+      "n_resamples": 10000,
+      "seed": 20262301,
+      "observed_paired_mae_gain_gbp_mwh": 0.14157918197185787,
+      "ci95_lower_gbp_mwh": -0.0603059443716082,
+      "ci95_upper_gbp_mwh": 0.3414618754315689,
+      "bootstrap_probability_gain_gt_zero": 0.9178,
+      "interval_classification": "INTERVAL_INCLUDES_ZERO"
+    },
+    "v0.27_vs_v0.26_primary_block": {
+      "rows": 5516,
+      "block_length_rows": 48,
+      "block_length_hours": 24.0,
+      "n_resamples": 10000,
+      "seed": 20261190,
+      "observed_paired_mae_gain_gbp_mwh": -0.19775855883839055,
+      "ci95_lower_gbp_mwh": -0.44594791496867486,
+      "ci95_upper_gbp_mwh": -0.005125816532672312,
+      "bootstrap_probability_gain_gt_zero": 0.0224,
+      "interval_classification": "SUPPORTS_V27_HIGHER_MAE"
+    },
+    "v0.27_vs_v0.26_weekly_block_sensitivity": {
+      "rows": 5516,
+      "block_length_rows": 336,
+      "block_length_hours": 168.0,
+      "n_resamples": 10000,
+      "seed": 20261478,
+      "observed_paired_mae_gain_gbp_mwh": -0.19775855883839055,
+      "ci95_lower_gbp_mwh": -0.4994149274485033,
+      "ci95_upper_gbp_mwh": 0.024399299072007392,
+      "bootstrap_probability_gain_gt_zero": 0.0418,
+      "interval_classification": "INTERVAL_INCLUDES_ZERO"
+    }
+  },
+  "weekly_consistency": {
+    "causal_base": {
+      "folds": 17,
+      "v27_better_folds": 12,
+      "v27_worse_folds": 5,
+      "ties": 0,
+      "mean_fold_mae_gain_gbp_mwh": 0.15326723960159547,
+      "median_fold_mae_gain_gbp_mwh": 0.12283874835260278
+    },
+    "v0.26": {
+      "folds": 17,
+      "v27_better_folds": 7,
+      "v27_worse_folds": 10,
+      "ties": 0,
+      "mean_fold_mae_gain_gbp_mwh": -0.17450737489759374,
+      "median_fold_mae_gain_gbp_mwh": -0.029265106548789888
+    },
+    "v0.25": {
+      "folds": 17,
+      "v27_better_folds": 15,
+      "v27_worse_folds": 2,
+      "ties": 0,
+      "mean_fold_mae_gain_gbp_mwh": 1.7875784792387144,
+      "median_fold_mae_gain_gbp_mwh": 0.7920701211266472
+    },
+    "previous_day": {
+      "folds": 17,
+      "v27_better_folds": 14,
+      "v27_worse_folds": 3,
+      "ties": 0,
+      "mean_fold_mae_gain_gbp_mwh": 6.681779879459475,
+      "median_fold_mae_gain_gbp_mwh": 7.187668440321229
+    }
+  },
+  "automatic_promotion": false,
+  "automatic_model_change": false,
+  "retuning_authorized": false
+}

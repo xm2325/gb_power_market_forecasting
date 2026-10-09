@@ -1,0 +1,101 @@
+name: lock-v27-forward-implementation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lock-v27-forward-implementation
+  cancel-in-progress: false
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/real-data-v0.20
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install current locked software
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Verify PASS evidence and pre-registered forward governance
+        run: |
+          pytest -q \
+            tests/test_v27_candidate_lock.py \
+            tests/test_lock_v27_development_validation.py \
+            tests/test_v27_forward_governance.py \
+            tests/test_v27_implementation_lock_builder.py
+
+      - name: Create zero-outcome v0.27 implementation lock and deterministic boundary
+        run: python scripts/create_v27_forward_implementation_lock.py
+
+      - name: Promote software metadata to 0.27.0 only after lock creation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          version = Path('VERSION')
+          if version.read_text(encoding='utf-8') != '0.26.0\n':
+              raise SystemExit('VERSION is not exactly the expected pre-promotion 0.26.0')
+          pyproject = Path('pyproject.toml')
+          text = pyproject.read_text(encoding='utf-8')
+          old = 'version = "0.26.0"'
+          if text.count(old) != 1:
+              raise SystemExit('pyproject version metadata is not exactly the expected pre-promotion 0.26.0')
+          version.write_text('0.27.0\n', encoding='utf-8')
+          pyproject.write_text(text.replace(old, 'version = "0.27.0"'), encoding='utf-8')
+          PY
+
+      - name: Verify implementation lock, boundary and version consistency
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from gb_power_market.v27_forward_governance import verify_forward_launch_preconditions
+
+          lock = json.loads(Path('reports/locked/V0_27_IMPLEMENTATION_LOCK.json').read_text())
+          if lock['schema'] != 'gb-power-market-v27-forward-implementation-lock-v1':
+              raise SystemExit('unexpected v0.27 implementation-lock schema')
+          if lock['status'] != 'FRESH_FORWARD_CANDIDATE_LOCKED_NOT_YET_EVALUATED':
+              raise SystemExit('unexpected v0.27 implementation-lock status')
+          if lock['version'] != '0.27.0' or lock['forward_evidence_rows_at_lock'] != 0:
+              raise SystemExit('v0.27 implementation lock must start with zero forward evidence rows')
+          if lock['automatic_forward_launch'] is not False:
+              raise SystemExit('implementation lock must never auto-launch forward evidence')
+          checked = verify_forward_launch_preconditions(
+              eligibility_path=Path('reports/monitoring/V0_27_FORWARD_ELIGIBILITY.json'),
+              implementation_lock_timestamp_utc=lock['implementation_lock_timestamp_utc'],
+              proposed_forward_start_utc=lock['forward_start_utc'],
+          )
+          if checked['first_forward_decision_time_utc'] != lock['first_forward_decision_time_utc']:
+              raise SystemExit('stored first decision does not reproduce pre-registered boundary rule')
+          print(json.dumps(lock, indent=2))
+          PY
+          pytest -q tests/test_version_metadata.py
+
+      - name: Commit, rebase and push implementation lock
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/locked/V0_27_IMPLEMENTATION_LOCK.json VERSION pyproject.toml
+          git diff --cached --stat
+          git commit -m "Lock v0.27 fresh forward implementation"
+          git fetch origin feat/real-data-v0.20
+          git rebase origin/feat/real-data-v0.20
+          pytest -q \
+            tests/test_v27_candidate_lock.py \
+            tests/test_v27_forward_governance.py \
+            tests/test_v27_implementation_lock_builder.py \
+            tests/test_version_metadata.py
+          git push origin HEAD:feat/real-data-v0.20

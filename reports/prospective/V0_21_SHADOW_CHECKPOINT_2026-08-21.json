@@ -1,0 +1,113 @@
+{
+  "version": "0.21.0",
+  "status": "LOCKED_SHADOW_CHECKPOINT_NOT_CLAIMABLE",
+  "checkpoint_date": "2026-08-21",
+  "workflow_run": {
+    "run_id": 32473442425,
+    "artifact_id": 9443427062,
+    "artifact_name": "v21-prospective-shadow-32473442425",
+    "artifact_sha256": "403219ea5178ca48ff06c0630992a958e8121a797fbb379772a973a12f740c29"
+  },
+  "frozen_model_state": {
+    "sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+    "source_v020_evidence_id_sha256": "7c5f78b98c8ed877ab4c5cefa8a40b3068abb74cb2062ecf677f319d74a14661",
+    "model_changed_since_v020": false
+  },
+  "prospective_window": {
+    "start_utc": "2026-08-15T07:30:00+00:00",
+    "end_exclusive_utc": "2026-08-20T23:00:00+00:00",
+    "expected_half_hours": 271,
+    "minimum_rows_for_new_evidence": 672,
+    "claim_gate_met": false,
+    "reason": "Only 271 post-lock half-hours are available; predeclared gate requires 672 (14 days)."
+  },
+  "source_snapshot": {
+    "neso_current_window_rows": 108352,
+    "neso_current_window_sha256": "4fdc7cae27c363ad8afe28e5a541f947b53499e99f4a95726878550b232ce667",
+    "neso_current_window_start_settlement_date": "2026-08-14",
+    "neso_current_window_end_settlement_date_exclusive": "2026-08-21",
+    "neso_materialised_rows": 108352,
+    "neso_raw_clock_mismatch_rows": 0,
+    "elexon_expected_settlement_periods": 624,
+    "elexon_market_reference_coverage": 1.0,
+    "elexon_system_price_coverage": 1.0,
+    "elexon_joint_price_coverage": 1.0
+  },
+  "horizons": {
+    "30m": {
+      "status": "SHADOW_ONLY",
+      "rows": 271,
+      "coverage": 1.0,
+      "future_neso_publications": 0,
+      "selected_family": "PRICE_HISTORY_ONLY",
+      "alpha": 10.0,
+      "reference_mae_gbp_mwh": 16.508928223449807,
+      "frozen_model_mae_gbp_mwh": 7.4905977993235595,
+      "improvement_vs_reference_pct": 54.626989118023566,
+      "p95_abs_error_gbp_mwh": 20.29336116229986,
+      "interval_coverage": 0.9372693726937269,
+      "action_rate": 0.0,
+      "daily_block_bootstrap_status": "INSUFFICIENT_DAYS",
+      "complete_utc_days_for_bootstrap": 4
+    },
+    "2h": {
+      "status": "SHADOW_ONLY",
+      "rows": 271,
+      "coverage": 1.0,
+      "future_neso_publications": 0,
+      "selected_family": "PRICE_PLUS_NESO_LEVELS",
+      "alpha": 1.0,
+      "reference_mae_gbp_mwh": 16.508928223449807,
+      "frozen_model_mae_gbp_mwh": 17.01328527997727,
+      "improvement_vs_reference_pct": -3.0550563289206103,
+      "p95_abs_error_gbp_mwh": 38.287205195672385,
+      "interval_coverage": 0.9040590405904059,
+      "action_rate": 0.033210332103321034,
+      "daily_block_bootstrap_status": "INSUFFICIENT_DAYS",
+      "complete_utc_days_for_bootstrap": 4
+    },
+    "6h": {
+      "status": "SHADOW_ONLY",
+      "rows": 271,
+      "coverage": 1.0,
+      "future_neso_publications": 0,
+      "selected_family": "PRICE_PLUS_NESO_LEVELS",
+      "alpha": 100.0,
+      "reference_mae_gbp_mwh": 16.508928223449807,
+      "frozen_model_mae_gbp_mwh": 44.91445989782691,
+      "improvement_vs_reference_pct": -172.0616341043205,
+      "p95_abs_error_gbp_mwh": 68.99260450823058,
+      "interval_coverage": 0.7675276752767528,
+      "action_rate": 0.36900369003690037,
+      "daily_block_bootstrap_status": "INSUFFICIENT_DAYS",
+      "complete_utc_days_for_bootstrap": 4
+    },
+    "12h": {
+      "status": "SHADOW_ONLY",
+      "rows": 271,
+      "coverage": 1.0,
+      "future_neso_publications": 0,
+      "selected_family": "PRICE_PLUS_NESO_LEVELS",
+      "alpha": 100.0,
+      "reference_mae_gbp_mwh": 16.508928223449807,
+      "frozen_model_mae_gbp_mwh": 66.84268831686104,
+      "improvement_vs_reference_pct": -304.88811515889665,
+      "p95_abs_error_gbp_mwh": 88.63562626820578,
+      "interval_coverage": 0.5387453874538746,
+      "action_rate": 0.4870848708487085,
+      "daily_block_bootstrap_status": "INSUFFICIENT_DAYS",
+      "complete_utc_days_for_bootstrap": 4
+    }
+  },
+  "interpretation": {
+    "30m": "The unchanged 30m price-history model remains clearly better than the previous-settlement-day reference in this early shadow window.",
+    "2h": "The unchanged 2h price+NESO-level model is slightly worse than the reference in this small early shadow window; do not over-interpret before the predeclared sample gate.",
+    "6h": "The unchanged 6h model remains materially worse and has weak interval coverage; this is consistent with the locked long-horizon generalisation concern.",
+    "12h": "The unchanged 12h model remains materially worse with very weak interval coverage; preserve as a failure signal, not a tuning target on this checkpoint."
+  },
+  "development_boundary": {
+    "unchanged_frozen_model_may_continue_accumulating_this_window": true,
+    "if_any_model_rule_is_changed_after_inspecting_this_checkpoint_new_candidate_start_not_before_utc": "2026-08-20T23:00:00+00:00"
+  },
+  "claim_boundary": "This checkpoint is real post-lock data but SHADOW_ONLY. Its numerical results are not a new CV/application headline and are not realised trading P&L."
+}

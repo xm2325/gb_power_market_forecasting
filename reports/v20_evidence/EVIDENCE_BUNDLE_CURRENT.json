@@ -1,0 +1,102 @@
+{
+  "evidence_id_sha256": "1ceb81354e72cbcc2748498116229063d4bb55ebad16bb04b90b1798580faa0a",
+  "evidence_policy": {
+    "blocked_rule": "BLOCKED_EVIDENCE values are not usable numerically in CV, cover letter or interview claims.",
+    "cv_numeric_rule": "Only REAL_CLAIMABLE_POSITIVE horizons may supply new positive numerical CV claims.",
+    "interview_rule": "REAL_NEGATIVE_RESULT and REAL_FALLBACK_RESULT are numerically discussable as real held-out evidence, but must not be reframed as positive model wins.",
+    "pnl_rule": "No public-data metric is Volcore trading P&L."
+  },
+  "generated_at_utc": "2026-08-21T07:43:00+00:00",
+  "global_blockers": [
+    "Elexon coverage audit is missing or not PASS_REAL",
+    "missing provenance source: neso_download_manifest",
+    "missing provenance source: neso_materialise_manifest",
+    "missing provenance source: elexon_download_manifest",
+    "missing real_price_benchmark_all.json"
+  ],
+  "horizons": {
+    "12h": {
+      "claim_class": "BLOCKED_EVIDENCE",
+      "neso_physical_claim_gate": null,
+      "neso_physical_end_to_end_coverage": null,
+      "numerical_use": "DO_NOT_USE",
+      "reason": "missing horizon result"
+    },
+    "2h": {
+      "claim_class": "BLOCKED_EVIDENCE",
+      "neso_physical_claim_gate": null,
+      "neso_physical_end_to_end_coverage": null,
+      "numerical_use": "DO_NOT_USE",
+      "reason": "missing horizon result"
+    },
+    "30m": {
+      "claim_class": "BLOCKED_EVIDENCE",
+      "neso_physical_claim_gate": null,
+      "neso_physical_end_to_end_coverage": null,
+      "numerical_use": "DO_NOT_USE",
+      "reason": "missing horizon result"
+    },
+    "6h": {
+      "claim_class": "BLOCKED_EVIDENCE",
+      "neso_physical_claim_gate": null,
+      "neso_physical_end_to_end_coverage": null,
+      "numerical_use": "DO_NOT_USE",
+      "reason": "missing horizon result"
+    }
+  },
+  "sources": [
+    {
+      "bytes": null,
+      "exists": false,
+      "logical_name": "real_price_benchmark",
+      "path": "reports/v19_real_market/real_price_benchmark_all.json",
+      "sha256": null
+    },
+    {
+      "bytes": null,
+      "exists": false,
+      "logical_name": "elexon_coverage_audit",
+      "path": "reports/v19_real_market/elexon_coverage_audit.json",
+      "sha256": null
+    },
+    {
+      "bytes": null,
+      "exists": false,
+      "logical_name": "neso_physical_benchmark",
+      "path": "reports/v19_real_market/neso_physical_benchmark/real_neso_asof_benchmark.json",
+      "sha256": null
+    },
+    {
+      "bytes": null,
+      "exists": false,
+      "logical_name": "neso_download_manifest",
+      "path": "reports/v19_real_market/neso_download_manifest.json",
+      "sha256": null
+    },
+    {
+      "bytes": null,
+      "exists": false,
+      "logical_name": "neso_materialise_manifest",
+      "path": "reports/v19_real_market/neso_materialise_manifest.json",
+      "sha256": null
+    },
+    {
+      "bytes": null,
+      "exists": false,
+      "logical_name": "elexon_download_manifest",
+      "path": "reports/v19_real_market/elexon_download_manifest.json",
+      "sha256": null
+    }
+  ],
+  "summary": {
+    "blocked_horizons": [
+      "30m",
+      "2h",
+      "6h",
+      "12h"
+    ],
+    "cv_eligible_positive_horizons": [],
+    "real_negative_or_fallback_horizons": []
+  },
+  "version": "0.20.0"
+}

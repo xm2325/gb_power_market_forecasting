@@ -1,0 +1,15 @@
+{
+  "schema": "gb-power-market-v27-forward-eligibility-v1",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO",
+  "status": "ELIGIBLE_TO_CREATE_FRESH_V27_FORWARD_LOCK",
+  "validation_passed": true,
+  "automatic_forward_launch": false,
+  "validation_start_utc": "2026-08-23T22:00:00+00:00",
+  "validation_end_exclusive_utc": "2026-08-24T22:00:00+00:00",
+  "validation_rows": 48,
+  "source_run_id": 32791725016,
+  "artifact_id": 9543377326,
+  "artifact_sha256": "d4fa2e1cf23169ff3d0b686d9475b3b6fb265cbd478feefd6d16f4f8ea80dd2a",
+  "required_action": "Create a separately versioned 0.27.0 implementation lock and choose a forward boundary strictly after 2026-08-24T22:00:00Z. Do not reuse validation labels as forward evidence.",
+  "claim_boundary": "This is independent development validation, not fresh v0.27 forward evidence and not a production/PnL claim."
+}

@@ -1,0 +1,137 @@
+name: validate-v27-development
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-v27-development
+  cancel-in-progress: false
+
+jobs:
+  sealed-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/real-data-v0.20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Verify candidate lock before any validation-label network access
+        run: |
+          pytest -q \
+            tests/test_v27_candidate_lock.py \
+            tests/test_v27_direction_candidate.py \
+            tests/test_v27_validation_maturity.py \
+            tests/test_download_elexon_mid_exact_window.py \
+            tests/test_v26_implementation_lock.py
+
+      - name: Fail closed until the full sealed validation block is mature
+        run: python scripts/check_v27_validation_maturity.py
+
+      - name: Download bounded NESO vintages needed for causal replay
+        run: |
+          python scripts/download_neso_v21_window.py \
+            --start-date 2026-07-12 \
+            --end-date-exclusive 2026-08-25 \
+            --out data/external/v27/neso_validation_window.csv \
+            --manifest reports/v27_validation/neso_window_manifest.json
+
+      - name: Materialise NESO vintages
+        run: |
+          python scripts/materialise_v21_current.py \
+            --input data/external/v27/neso_validation_window.csv \
+            --out data/processed/v27/forecast_current.parquet \
+            --manifest reports/v27_validation/neso_materialise_manifest.json
+
+      - name: Download Elexon MID with exact sealed end boundary
+        run: |
+          python scripts/download_elexon_mid_exact_window.py \
+            --start-utc 2026-07-01T00:00:00Z \
+            --end-exclusive-utc 2026-08-24T22:00:00Z \
+            --out-dir data/external/v27/elexon_mid \
+            --manifest reports/v27_validation/elexon_mid_exact_manifest.json
+
+      - name: Materialise exact-boundary Elexon market reference
+        run: |
+          python scripts/materialise_elexon_v22_mid.py \
+            --bundle-dir data/external/v27/elexon_mid \
+            --out data/processed/v27/reference_market.parquet \
+            --manifest reports/v27_validation/elexon_mid_materialise_manifest.json
+
+      - name: Replay unchanged frozen model only through validation end
+        run: |
+          python scripts/run_v24_continuous_forward_monitor.py \
+            --elexon-reference data/processed/v27/reference_market.parquet \
+            --neso-current data/processed/v27/forecast_current.parquet \
+            --model-state reports/locked/V0_21_FROZEN_MODEL_STATE.json \
+            --start-utc 2026-07-12T12:00:00Z \
+            --end-exclusive-utc 2026-08-24T22:00:00Z \
+            --out-dir reports/v24_for_v27
+
+      - name: Evaluate the single locked candidate on the sealed 48-row block
+        run: |
+          python scripts/run_v27_development_validation.py \
+            --v24-rows reports/v24_for_v27/forward_rows_2h.csv \
+            --candidate-lock reports/locked/V0_27_CANDIDATE_LOCK.json \
+            --out-dir reports/v27_validation
+
+      - name: Enforce evidence classification and record execution provenance
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          summary_path = Path('reports/v27_validation/v27_validation_summary.json')
+          payload = json.loads(summary_path.read_text())
+          validation = payload['validation']
+          if validation['rows'] != 48 or validation['gate_evaluated'] is not True:
+              raise SystemExit('v0.27 sealed validation was not evaluated on exactly 48 rows')
+          if validation['automatic_forward_launch'] is not False:
+              raise SystemExit('v0.27 validation must never auto-launch forward evidence')
+          if payload['evidence_class'] != 'INDEPENDENT_DEVELOPMENT_VALIDATION_NOT_FORWARD_EVIDENCE':
+              raise SystemExit('v0.27 evidence classification changed')
+
+          lock_path = Path('reports/locked/V0_27_CANDIDATE_LOCK.json')
+          provenance = {
+              'schema': 'gb-power-market-v27-development-validation-provenance-v1',
+              'workflow_run_id': int(os.environ['GITHUB_RUN_ID']),
+              'execution_commit_sha': os.environ['GITHUB_SHA'],
+              'candidate_lock_path': str(lock_path),
+              'candidate_lock_sha256': hashlib.sha256(lock_path.read_bytes()).hexdigest(),
+              'validation_start_utc': validation['validation_start_utc'],
+              'validation_end_exclusive_utc': validation['validation_end_exclusive_utc'],
+              'rows': validation['rows'],
+              'all_validation_gates_passed': validation['all_validation_gates_passed'],
+              'forward_launch_allowed_by_metrics': validation['forward_launch_allowed'],
+              'automatic_forward_launch': False,
+          }
+          Path('reports/v27_validation/v27_validation_provenance.json').write_text(
+              json.dumps(provenance, indent=2), encoding='utf-8'
+          )
+          print(json.dumps({'validation': validation, 'provenance': provenance}, indent=2))
+          PY
+
+      - name: Upload immutable validation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v27-development-validation-${{ github.run_id }}
+          path: |
+            reports/v27_validation/
+            reports/v24_for_v27/forward_monitor_2h.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6

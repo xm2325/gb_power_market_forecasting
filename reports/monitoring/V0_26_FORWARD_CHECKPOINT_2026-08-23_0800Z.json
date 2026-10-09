@@ -1,0 +1,147 @@
+{
+  "version": "0.26.0",
+  "candidate_spec": {
+    "version": "0.26.0",
+    "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL",
+    "forward_start_utc": "2026-08-22T20:30:00+00:00",
+    "rule": {
+      "horizon_minutes": 120,
+      "outcome_delay_minutes": 30,
+      "short_lookback_hours": 6,
+      "long_lookback_hours": 48,
+      "minimum_short_history_rows": 8,
+      "minimum_long_history_rows": 24
+    },
+    "selection_contract": "No parameter search is performed. The 48h residual window is inherited from v0.25 and the 6h window is inherited from the pre-registered v0.25 monitoring policy.",
+    "information_contract": "Both residual windows contain only outcomes available by the current 2h decision time. If recent and long-run residual means disagree in sign, the candidate falls back to the unchanged frozen model.",
+    "evidence_contract": "All observations before 2026-08-22T20:30:00Z are development diagnostics. Only later targets form the versioned v0.26 forward segment."
+  },
+  "development_diagnostics": {
+    "status": "PREVIOUSLY_OBSERVED_ROWS_NOT_NEW_EVIDENCE",
+    "v25_forward_window_reused_for_v26_development": {
+      "rows": 66,
+      "start_utc": "2026-08-21T11:30:00+00:00",
+      "end_exclusive_utc": "2026-08-22T20:30:00+00:00",
+      "candidate_mae_gbp_mwh": 19.721554716671292,
+      "frozen_mae_gbp_mwh": 20.08204904287828,
+      "v25_mae_gbp_mwh": 21.91787591727037,
+      "reference_mae_gbp_mwh": 39.54545454545455,
+      "candidate_improvement_vs_frozen_pct": 1.7951072892874371,
+      "candidate_improvement_vs_v25_pct": 10.020684526589855,
+      "candidate_improvement_vs_reference_pct": 50.12940186588869,
+      "candidate_win_rate_vs_frozen": 0.36363636363636365,
+      "candidate_win_rate_vs_v25": 0.5757575757575758,
+      "candidate_win_rate_vs_reference": 0.7575757575757576,
+      "candidate_signed_bias_gbp_mwh": 9.562563962772932,
+      "frozen_signed_bias_gbp_mwh": 7.046262645848768,
+      "v25_signed_bias_gbp_mwh": 12.674256840018012,
+      "candidate_p95_abs_error_gbp_mwh": 54.86445692795816,
+      "frozen_p95_abs_error_gbp_mwh": 52.28690127393121,
+      "v25_p95_abs_error_gbp_mwh": 56.06620832583796,
+      "reference_p95_abs_error_gbp_mwh": 120.44750000000002,
+      "mean_correction_gbp_mwh": 2.5163013169241637,
+      "fallback_rate": 0.3333333333333333,
+      "candidate_interval_coverage": 0.7727272727272727,
+      "frozen_interval_coverage": 0.7878787878787878
+    }
+  },
+  "forward_segment": {
+    "rows": 23,
+    "start_utc": "2026-08-22T20:30:00+00:00",
+    "end_exclusive_utc": "2026-08-23T08:00:00+00:00",
+    "candidate_mae_gbp_mwh": 7.623135614191591,
+    "frozen_mae_gbp_mwh": 7.56887527993035,
+    "v25_mae_gbp_mwh": 9.219006570448574,
+    "reference_mae_gbp_mwh": 18.798695652173908,
+    "candidate_improvement_vs_frozen_pct": -0.7168876782144628,
+    "candidate_improvement_vs_v25_pct": 17.31066079692935,
+    "candidate_improvement_vs_reference_pct": 59.44859284261011,
+    "candidate_win_rate_vs_frozen": 0.0,
+    "candidate_win_rate_vs_v25": 0.8695652173913043,
+    "candidate_win_rate_vs_reference": 0.782608695652174,
+    "candidate_signed_bias_gbp_mwh": -5.315881155970939,
+    "frozen_signed_bias_gbp_mwh": -5.261620821709697,
+    "v25_signed_bias_gbp_mwh": -7.616747633677209,
+    "candidate_p95_abs_error_gbp_mwh": 17.36993097869653,
+    "frozen_p95_abs_error_gbp_mwh": 17.36993097869653,
+    "v25_p95_abs_error_gbp_mwh": 20.077230385986297,
+    "reference_p95_abs_error_gbp_mwh": 38.630999999999986,
+    "mean_correction_gbp_mwh": -0.05426033426124145,
+    "fallback_rate": 0.9565217391304348,
+    "candidate_interval_coverage": 1.0,
+    "frozen_interval_coverage": 1.0
+  },
+  "monitor": {
+    "maturity_stage": "EARLY_ONLY",
+    "rows_observed": 23,
+    "alert_min_rows": 48,
+    "alert_status": "INSUFFICIENT_SAMPLE_FOR_ALERTS",
+    "alerts": [],
+    "rolling": {
+      "last_6h": {
+        "rows": 12,
+        "start_utc": "2026-08-23T02:00:00+00:00",
+        "end_exclusive_utc": "2026-08-23T08:00:00+00:00",
+        "candidate_mae_gbp_mwh": 6.818222861932095,
+        "frozen_mae_gbp_mwh": 6.818222861932095,
+        "v25_mae_gbp_mwh": 8.644525282699398,
+        "reference_mae_gbp_mwh": 28.096666666666664,
+        "candidate_improvement_vs_frozen_pct": 0.0,
+        "candidate_improvement_vs_v25_pct": 21.1266941913207,
+        "candidate_improvement_vs_reference_pct": 75.73298305161195,
+        "candidate_win_rate_vs_frozen": 0.0,
+        "candidate_win_rate_vs_v25": 0.9166666666666666,
+        "candidate_win_rate_vs_reference": 1.0,
+        "candidate_signed_bias_gbp_mwh": -5.19482100908431,
+        "frozen_signed_bias_gbp_mwh": -5.19482100908431,
+        "v25_signed_bias_gbp_mwh": -7.530946533217585,
+        "candidate_p95_abs_error_gbp_mwh": 10.841331975847261,
+        "frozen_p95_abs_error_gbp_mwh": 10.841331975847261,
+        "v25_p95_abs_error_gbp_mwh": 13.291497883819371,
+        "reference_p95_abs_error_gbp_mwh": 41.74899999999999,
+        "mean_correction_gbp_mwh": 0.0,
+        "fallback_rate": 1.0,
+        "candidate_interval_coverage": 1.0,
+        "frozen_interval_coverage": 1.0
+      },
+      "last_24h": {
+        "rows": 23,
+        "status": "INSUFFICIENT_ROWS_NEED_48"
+      },
+      "last_3d": {
+        "rows": 23,
+        "status": "INSUFFICIENT_ROWS_NEED_144"
+      },
+      "last_7d": {
+        "rows": 23,
+        "status": "INSUFFICIENT_ROWS_NEED_336"
+      }
+    }
+  },
+  "ledger_integrity": {
+    "status": "LOCKED_PREFIX_REPRODUCED",
+    "locked_rows": 2,
+    "current_rows": 23,
+    "locked_chain_tip_sha256": "49cc9148d1756ff1fce3bdcac5f8f9405850cf516b0c701215e81121a7677f9d",
+    "current_chain_tip_sha256": "487f1e33478f9c07a25b088b1297d8aa170db9959642e108388bebd613765ca2",
+    "new_rows_after_locked_prefix": 21,
+    "locked_registry_sequence": 1,
+    "locked_registry_ledger_path": "reports/monitoring/V0_26_FORWARD_LEDGER_FIRST2.csv",
+    "genesis_anchor": {
+      "status": "LOCKED_PREFIX_REPRODUCED",
+      "locked_rows": 2,
+      "current_rows": 23,
+      "locked_chain_tip_sha256": "49cc9148d1756ff1fce3bdcac5f8f9405850cf516b0c701215e81121a7677f9d",
+      "current_chain_tip_sha256": "487f1e33478f9c07a25b088b1297d8aa170db9959642e108388bebd613765ca2",
+      "new_rows_after_locked_prefix": 21
+    },
+    "first_forward_artifact_sha256": "c26eccc3be5491bba50b2a583ebd3f7d169f7f10406974a080df6a4db663f6fb"
+  },
+  "promotion_readiness": {
+    "minimum_forward_rows": 336,
+    "rows_observed": 23,
+    "status": "NOT_ELIGIBLE",
+    "automatic_promotion": false
+  },
+  "claim_boundary": "Rows before 2026-08-22T20:30:00Z are development diagnostics. Only later targets are v0.26 versioned forward evidence. No v0.25 row is relabelled as fresh v0.26 evidence."
+}

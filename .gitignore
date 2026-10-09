@@ -1,0 +1,24 @@
+# Large official archives are hydrated at run time and kept as workflow artifacts.
+data/external/neso_2026_archive/*.csv
+data/external/neso_2026_archive/*.part
+reports/v17_full_archive/sample_rehearsal/figures/
+__pycache__/
+.pytest_cache/
+# v0.18 network snapshots and compact materialisations
+data/external/neso_2026_bundle/
+data/processed/v18_neso/
+reports/v18_real_archive/*.parquet
+# v0.19 real Elexon market snapshots and compact materialisations
+data/external/elexon_v19/
+data/processed/v19_elexon/
+reports/v19_real_market/*.parquet
+
+# Local environments / built artifacts
+.venv/
+dist/
+build/
+*.egg-info/
+
+# Real network data remain hydrated artifacts, not Git blobs
+data/external/
+data/processed/

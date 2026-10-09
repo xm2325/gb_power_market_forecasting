@@ -1,0 +1,27 @@
+{
+  "version": "0.22.1-audit",
+  "status": "INVALIDATED_FOR_CONFIRMATORY_USE",
+  "audit_date": "2026-08-21",
+  "workflow_run_id": 32477240056,
+  "artifact_id": 9444746108,
+  "artifact_sha256": "2d3999cba65c53e8a6a64bb3d161f8480988edefbb86147b97c88ca7549f3e89",
+  "what_passed": {
+    "metric_serialisation_blind": true,
+    "recursive_metric_keys_in_confirmatory_json": false,
+    "future_neso_publications": 0,
+    "coverage_so_far": 1.0
+  },
+  "what_failed": {
+    "sealed_label_access": false,
+    "reason": "The pre-gate Actions artifact uploaded data/processed/v22/, including reference_market.parquet containing realised Market Index Price labels.",
+    "last_price_bearing_target_start_utc_in_artifact": "2026-08-21T11:00:00+00:00"
+  },
+  "consequence": "v0.22 remains useful as an engineering/no-metric-leak smoke test but is not a clean confirmatory evidence window.",
+  "replacement": {
+    "version": "0.23.0",
+    "sealed_start_utc": "2026-08-21T11:30:00+00:00",
+    "fixed_end_exclusive_utc": "2026-09-04T11:30:00+00:00",
+    "exact_half_hours": 672,
+    "pre_reveal_artifact_policy": "sanitised reports/manifests only; no price-bearing raw or processed market files"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "version": "0.25.0",
+  "status": "EARLY_VERSIONED_FORWARD_MONITORING",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_48H_RESIDUAL_MEAN",
+  "frozen_at_forward_boundary_utc": "2026-08-21T11:30:00Z",
+  "rule": {
+    "horizon_minutes": 120,
+    "outcome_delay_minutes": 30,
+    "lookback_hours": 48,
+    "minimum_history_rows": 24,
+    "correction": "mean(realised - frozen_prediction) over causally available residuals"
+  },
+  "development_diagnostics_not_new_independent_evidence": {
+    "locked_v20_window": {
+      "rows": 1623,
+      "frozen_mae_gbp_mwh": 17.087308359192786,
+      "adaptive_mae_gbp_mwh": 15.474635987446353,
+      "reference_mae_gbp_mwh": 24.048354898336413,
+      "adaptive_improvement_vs_reference_pct": 35.651997598734546
+    },
+    "post_lock_to_candidate_freeze": {
+      "rows": 296,
+      "frozen_mae_gbp_mwh": 16.875060555387023,
+      "adaptive_mae_gbp_mwh": 10.69839187629661,
+      "reference_mae_gbp_mwh": 15.884694420793574,
+      "adaptive_improvement_vs_reference_pct": 32.64968407392167,
+      "mean_bias_correction_gbp_mwh": 16.315781394427024
+    }
+  },
+  "first_new_forward_segment": {
+    "start_utc": "2026-08-21T11:30:00Z",
+    "end_exclusive_utc": "2026-08-21T14:30:00Z",
+    "rows": 6,
+    "frozen_v20_mae_gbp_mwh": 13.18522396221401,
+    "adaptive_v25_mae_gbp_mwh": 3.859476437369542,
+    "previous_settlement_day_reference_mae_gbp_mwh": 9.226666666666668,
+    "adaptive_improvement_vs_reference_pct": 58.17041433486769,
+    "adaptive_improvement_vs_frozen_pct": 70.72877602663432,
+    "adaptive_win_rate_vs_reference": 0.8333333333333334,
+    "mean_bias_correction_gbp_mwh": 9.762844040063113,
+    "evidence_strength": "EARLY_ONLY_6_HALF_HOURS_NO_HEADLINE_CLAIM"
+  },
+  "information_contract": "For target t, a residual from target s is eligible only when s + 30 minutes <= decision_time(t). The current target and the most recent 150 minutes of targets cannot enter their own 2h correction.",
+  "versioning_contract": "If the 48h correction rule, lookback, minimum history or frozen base model is changed after inspecting this segment, the changed candidate must receive a new version and a new forward start. These six rows remain attached to v0.25.",
+  "source_snapshot": {
+    "neso_current_rows": 612960,
+    "neso_current_sha256": "21544d8c2ed42b17a52ddcc3f0bdee64cc7decc86765c0b6eae1bdf5abae4393",
+    "neso_raw_clock_mismatch_rows": 0,
+    "elexon_materialised_rows": 2482
+  },
+  "workflow_run": {
+    "run_id": 32500771812,
+    "artifact_id": 9453438684,
+    "artifact_name": "v25-adaptive-2h-32500771812",
+    "artifact_sha256": "64d30a6e18a2c3fa2243fa28ceb800afec1abc66f7dc0816515d96ff9faf885c"
+  },
+  "claim_boundary": "The six new rows are genuine versioned forward observations but are far too few for a new numerical headline claim. Development diagnostics on earlier rows remain explicitly post-hoc."
+}

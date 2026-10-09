@@ -1,0 +1,80 @@
+{
+  "version": "0.26.0",
+  "status": "EARLY_ONLY_2_ROWS_NO_HEADLINE_CLAIM",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL",
+  "forward_start_utc": "2026-08-22T20:30:00Z",
+  "snapshot_end_exclusive_utc": "2026-08-22T21:30:00Z",
+  "development_diagnostics": {
+    "status": "PREVIOUSLY_OBSERVED_ROWS_NOT_NEW_EVIDENCE",
+    "rows": 66,
+    "candidate_mae_gbp_mwh": 19.721554716671292,
+    "frozen_mae_gbp_mwh": 20.082049042878275,
+    "v25_mae_gbp_mwh": 21.91787591727037,
+    "reference_mae_gbp_mwh": 39.54545454545455,
+    "candidate_improvement_vs_frozen_pct": 1.7951072892874196,
+    "candidate_improvement_vs_v25_pct": 10.020684526589855,
+    "candidate_improvement_vs_reference_pct": 50.12940186588869,
+    "fallback_rate": 0.3333333333333333,
+    "candidate_signed_bias_gbp_mwh": 9.562563962772934,
+    "frozen_signed_bias_gbp_mwh": 7.046262645848768,
+    "candidate_p95_abs_error_gbp_mwh": 54.86445692795816,
+    "frozen_p95_abs_error_gbp_mwh": 52.28690127393121,
+    "candidate_interval_coverage": 0.7727272727272727,
+    "frozen_interval_coverage": 0.7878787878787878,
+    "interpretation": "The consensus gate mitigates v0.25 overshoot on previously observed rows and slightly lowers mean MAE versus frozen, but tail error, absolute bias and interval coverage remain non-better than frozen. These rows motivated the design and are not fresh evidence."
+  },
+  "fresh_forward": {
+    "rows": 2,
+    "start_utc": "2026-08-22T20:30:00Z",
+    "end_exclusive_utc": "2026-08-22T21:30:00Z",
+    "candidate_mae_gbp_mwh": 4.778694772502334,
+    "frozen_mae_gbp_mwh": 4.154700928498059,
+    "v25_mae_gbp_mwh": 4.095337119245116,
+    "reference_mae_gbp_mwh": 8.159999999999997,
+    "candidate_improvement_vs_frozen_pct": -15.018983429689396,
+    "candidate_improvement_vs_v25_pct": -16.686236892341107,
+    "candidate_improvement_vs_reference_pct": 41.437564062471374,
+    "candidate_win_rate_vs_frozen": 0.0,
+    "candidate_win_rate_vs_v25": 0.5,
+    "candidate_win_rate_vs_reference": 0.5,
+    "candidate_signed_bias_gbp_mwh": 2.077264038109533,
+    "frozen_signed_bias_gbp_mwh": 2.701257882113808,
+    "v25_signed_bias_gbp_mwh": 0.8400978906053496,
+    "candidate_p95_abs_error_gbp_mwh": 6.648232406800913,
+    "frozen_p95_abs_error_gbp_mwh": 6.585833022400486,
+    "v25_p95_abs_error_gbp_mwh": 4.85142522078993,
+    "reference_p95_abs_error_gbp_mwh": 12.678000000000006,
+    "mean_correction_gbp_mwh": -0.6239938440042767,
+    "fallback_rate": 0.5,
+    "candidate_interval_coverage": 1.0,
+    "frozen_interval_coverage": 1.0
+  },
+  "ledger": {
+    "status": "FIRST_VERSIONED_FORWARD_LEDGER",
+    "rows": 2,
+    "chain_tip_sha256": "49cc9148d1756ff1fce3bdcac5f8f9405850cf516b0c701215e81121a7677f9d"
+  },
+  "source": {
+    "workflow_run_id": 32604734019,
+    "artifact_id": 9483846187,
+    "artifact_name": "v26-consensus-2h-32604734019",
+    "artifact_sha256": "c26eccc3be5491bba50b2a583ebd3f7d169f7f10406974a080df6a4db663f6fb",
+    "safe_scoring_end_exclusive_utc": "2026-08-22T21:30:00Z",
+    "neso_rows": 628448,
+    "elexon_materialised_rows": 2544,
+    "tests_before_new_labels": 140
+  },
+  "monitor": {
+    "maturity_stage": "EARLY_ONLY",
+    "alert_min_rows": 48,
+    "alert_status": "INSUFFICIENT_SAMPLE_FOR_ALERTS",
+    "alerts": []
+  },
+  "promotion_readiness": {
+    "minimum_forward_rows": 336,
+    "rows_observed": 2,
+    "status": "NOT_ELIGIBLE",
+    "automatic_promotion": false
+  },
+  "claim_boundary": "Two fresh rows are too early for any accuracy headline. The candidate currently trails both frozen and v0.25 on mean MAE while beating the previous-day reference. The v0.26 rule is not changed in response to these two observations."
+}

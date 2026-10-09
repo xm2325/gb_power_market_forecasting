@@ -1,0 +1,50 @@
+{
+  "schema": "gb-power-market-v26-gate-diagnostic-v1",
+  "version": "0.26.0",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_CLIPPED_RESIDUAL",
+  "status": "POST_LOCK_DESCRIPTIVE_DIAGNOSTIC",
+  "monitoring_only": true,
+  "locked_snapshot_sequence": 2,
+  "forward_start_utc": "2026-08-22T20:30:00Z",
+  "end_exclusive_utc": "2026-08-23T08:00:00Z",
+  "rows": 23,
+  "source": {
+    "workflow_run_id": 32632409230,
+    "artifact_id": 9491420056,
+    "artifact_sha256": "06d21cd67b40d3143ba472f412e2e2e3f403691d43f01ba71b810b96bddda249",
+    "locked_checkpoint": "reports/monitoring/V0_26_FORWARD_CHECKPOINT_2026-08-23_0800Z.json",
+    "locked_ledger": "reports/monitoring/V0_26_FORWARD_LEDGER_2026-08-23_0800Z.csv"
+  },
+  "gate": {
+    "correction_applied_rows": 1,
+    "fallback_rows": 22,
+    "correction_applied_rate": 0.043478260869565216,
+    "fallback_rate": 0.9565217391304348,
+    "gate_reason_counts": {
+      "CONSENSUS_CLIPPED_CORRECTION": 1,
+      "REGIME_DISAGREEMENT_FALLBACK_FROZEN": 22
+    },
+    "longest_regime_disagreement_streak_rows": 22,
+    "current_regime_disagreement_streak_rows": 22,
+    "mean_abs_correction_when_applied_gbp_mwh": 1.2479876880085534,
+    "applied_rows_candidate_better_than_frozen": 0,
+    "applied_rows_candidate_worse_than_frozen": 1,
+    "applied_rows_candidate_tied_with_frozen": 0
+  },
+  "fallback_effect_vs_v25": {
+    "fallback_rows_v25_worse_than_frozen": 19,
+    "fallback_rows_v25_better_than_frozen": 3,
+    "fallback_rows_v25_tied_with_frozen": 0,
+    "fallback_total_abs_error_avoided_vs_v25_gbp_mwh": 36.151223499663686,
+    "fallback_mean_abs_error_avoided_vs_v25_gbp_mwh": 1.6432374318028948,
+    "overall_total_abs_error_avoided_vs_v25_gbp_mwh": 36.70503199391065,
+    "overall_mean_abs_error_avoided_vs_v25_gbp_mwh": 1.5958709562569848
+  },
+  "integrity": {
+    "prediction_reconstruction_max_abs_diff_gbp_mwh": 0.0,
+    "predictive_source_changed": false,
+    "frozen_model_state_changed": false
+  },
+  "interpretation": "The first 23 fresh v0.26 rows contain one applied correction followed by 22 consecutive regime-disagreement fallbacks. On those 22 fallback rows, v0.25 had larger absolute error than frozen on 19 rows. The fallback mechanism therefore avoided 36.151 GBP/MWh of aggregate absolute error versus continuing the v0.25 correction. This is a descriptive diagnostic of the already-frozen rule, not evidence for retuning or a new promotion criterion.",
+  "claim_boundary": "This report was derived after snapshot sequence 2 was locked. It does not alter the append-only registry, candidate definition, alert thresholds, promotion gate, or forward boundary."
+}

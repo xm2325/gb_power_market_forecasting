@@ -1,0 +1,92 @@
+name: v27-historical-walkforward
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v27-historical-walkforward
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/real-data-v0.20
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+      - name: Verify historical protocol and unchanged adaptation sources before network access
+        run: |
+          pytest -q tests/test_historical_walkforward_v27.py tests/test_v27_historical_helper_entrypoints.py tests/test_v27_candidate_lock.py tests/test_version_metadata.py
+          test "$(git hash-object src/gb_power_market/adaptive_bias_v25.py)" = "2ccb3d2a0762eec66d646e164262f8ac5b759d8e"
+          test "$(git hash-object src/gb_power_market/adaptive_consensus_v26.py)" = "399915c6cdd0d3b016bde73cb0ef92eb2697adf8"
+          test "$(git hash-object src/gb_power_market/adaptive_direction_v27_candidate.py)" = "3c361dbb0e1665bbbad2e1097b8580ce062a203f"
+      - name: Download immutable Jan-Jun legacy NESO forecast archive
+        run: |
+          python scripts/download_neso_legacy_walkforward.py --out data/external/v27_historical/neso_embedded_archive_2026_jan_jun.csv --manifest reports/v27_historical_walkforward/neso_legacy_download_manifest.json
+      - name: Download bounded current-regime NESO vintages
+        run: |
+          python scripts/download_neso_v21_window.py --start-date 2026-06-01 --end-date-exclusive 2026-08-24 --out data/external/v27_historical/neso_current_2026_jun_aug.csv --manifest reports/v27_historical_walkforward/neso_current_download_manifest.json
+      - name: Materialise stitched NESO sources
+        run: |
+          python scripts/materialise_neso_walkforward.py --legacy data/external/v27_historical/neso_embedded_archive_2026_jan_jun.csv --current data/external/v27_historical/neso_current_2026_jun_aug.csv --out-dir data/processed/v27_historical_neso --manifest reports/v27_historical_walkforward/neso_materialise_manifest.json
+      - name: Download Elexon history with price-feature warm-up
+        run: |
+          python scripts/download_elexon_v19_bundle.py --start-date 2026-01-01 --end-date-exclusive 2026-08-24 --out-dir data/external/v27_historical_elexon --manifest reports/v27_historical_walkforward/elexon_download_manifest.json
+      - name: Materialise real Elexon market reference
+        run: |
+          python scripts/materialise_elexon_v19.py --bundle-dir data/external/v27_historical_elexon --out-dir data/processed/v27_historical_elexon --report-dir reports/v27_historical_walkforward/elexon --start-date 2026-01-01 --end-date-exclusive 2026-08-24
+      - name: Run May-to-August leakage-safe rolling-origin evaluation
+        run: |
+          python scripts/run_v27_historical_walkforward_v2.py --neso-dir data/processed/v27_historical_neso --elexon-reference data/processed/v27_historical_elexon/reference_market.parquet --score-start-utc 2026-05-01T00:00:00Z --score-end-exclusive-utc 2026-08-23T22:00:00Z --fold-days 7 --out-dir reports/v27_historical_walkforward
+      - name: Enforce historical evidence class, exact coverage and no future fold input
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+          s = json.loads(Path('reports/v27_historical_walkforward/historical_walkforward_summary.json').read_text())
+          rows = pd.read_csv('reports/v27_historical_walkforward/historical_walkforward_rows.csv')
+          expected_class = 'HISTORICAL_ASOF_ROLLING_ORIGIN_NOT_LIVE_FORWARD'
+          if s['status'] != 'HISTORICAL_ASOF_ROLLING_ORIGIN_COMPLETE': raise SystemExit('historical walk-forward did not complete')
+          if s['config']['evidence_class'] != expected_class or s['overall']['evidence_class'] != expected_class: raise SystemExit('historical evidence was mislabeled')
+          if s['config']['score_start_utc'] != '2026-05-01T00:00:00Z' or s['config']['score_end_exclusive_utc'] != '2026-08-23T22:00:00Z': raise SystemExit('historical score window changed')
+          if len(rows) != 5516 or s['overall']['rows'] != 5516: raise SystemExit(f"unexpected scored row count: csv={len(rows)} summary={s['overall']['rows']}")
+          target = pd.to_datetime(rows['target_start_utc'], utc=True)
+          expected = pd.date_range('2026-05-01T00:00:00Z', '2026-08-23T22:00:00Z', freq='30min', inclusive='left')
+          if not target.reset_index(drop=True).equals(pd.Series(expected, name='target_start_utc')): raise SystemExit('historical score targets are not exactly contiguous')
+          if any(f['future_labels_passed_to_fold_runner'] for f in s['folds']): raise SystemExit('a fold admits future labels into its base runner')
+          if rows['evidence_class'].nunique() != 1 or rows['evidence_class'].iloc[0] != expected_class: raise SystemExit('row-level evidence class changed')
+          if s.get('final_score_support_rule') != 'DEPLOYED_FAMILY_FEATURES_ONLY_AFTER_COMMON_SUPPORT_SELECTION': raise SystemExit('deployed-family score support rule changed')
+          print(json.dumps({'overall': s['overall'], 'monthly': s['monthly']}, indent=2))
+          PY
+      - name: Commit historical evidence
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/v27_historical_walkforward
+          git commit -m "Add May-Aug v0.27 historical walk-forward evidence"
+          git fetch origin feat/real-data-v0.20
+          git rebase origin/feat/real-data-v0.20
+          pytest -q tests/test_historical_walkforward_v27.py tests/test_v27_candidate_lock.py
+          git push origin HEAD:feat/real-data-v0.20
+      - name: Upload full historical artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v27-historical-walkforward-${{ github.run_id }}
+          path: reports/v27_historical_walkforward/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6

@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gb-power-market-forecasting"
+version = "0.27.0"
+description = "Leakage-safe forecasting of GB electricity market prices using real Elexon data and as-of NESO forecast vintages"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26", "pandas>=2.1", "requests>=2.31", "tabulate>=0.9"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+live = ["duckdb>=1.1", "pyarrow>=16", "matplotlib>=3.8", "pytz>=2024.1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "src"]

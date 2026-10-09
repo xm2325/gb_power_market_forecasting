@@ -1,0 +1,162 @@
+name: real-market-evidence
+
+on:
+  workflow_dispatch:
+    inputs:
+      neso_download_mode:
+        description: NESO archive download mode
+        required: true
+        default: auto
+        type: choice
+        options: [auto, dump, paged]
+      upload_raw_snapshots:
+        description: Upload large raw NESO/Elexon snapshots
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: real-market-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Contract, DST and leakage tests
+        run: pytest -q
+
+      - name: Download real NESO forecast archive and outturn
+        id: neso_download
+        continue-on-error: true
+        run: |
+          python scripts/download_neso_v18_bundle.py \
+            --mode "${{ inputs.neso_download_mode || 'auto' }}" \
+            --out-dir data/external/neso_2026_bundle \
+            --manifest reports/v19_real_market/neso_download_manifest.json
+
+      - name: Materialise NESO Parquet
+        id: neso_materialise
+        if: always()
+        continue-on-error: true
+        run: |
+          python scripts/materialise_v18_parquet.py \
+            --bundle-dir data/external/neso_2026_bundle \
+            --out-dir data/processed/v18_neso \
+            --manifest reports/v19_real_market/neso_materialise_manifest.json
+
+      - name: Evaluate real NESO physical forecasts
+        id: neso_benchmark
+        if: always()
+        continue-on-error: true
+        run: |
+          python scripts/run_v18_real_neso_benchmark.py \
+            --data-dir data/processed/v18_neso \
+            --out-dir reports/v19_real_market/neso_physical_benchmark
+
+      - name: Download real Elexon MID and system prices
+        id: elexon_download
+        if: always()
+        continue-on-error: true
+        run: |
+          python scripts/download_elexon_v19_bundle.py \
+            --start-date 2026-01-01 \
+            --end-date-exclusive 2026-08-16 \
+            --out-dir data/external/elexon_v19 \
+            --manifest reports/v19_real_market/elexon_download_manifest.json
+
+      - name: Materialise and audit Elexon market data
+        id: elexon_materialise
+        if: always()
+        continue-on-error: true
+        run: |
+          python scripts/materialise_elexon_v19.py \
+            --bundle-dir data/external/elexon_v19 \
+            --out-dir data/processed/v19_elexon \
+            --report-dir reports/v19_real_market \
+            --start-date 2026-01-01 \
+            --end-date-exclusive 2026-08-16
+
+      - name: Run fixed-window real price benchmark
+        id: price_benchmark
+        if: always()
+        continue-on-error: true
+        run: |
+          python scripts/run_v19_real_price_benchmark.py \
+            --neso-dir data/processed/v18_neso \
+            --elexon-dir data/processed/v19_elexon \
+            --out-dir reports/v19_real_market
+
+      - name: Build evidence ledger
+        id: evidence
+        if: always()
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python scripts/build_v20_evidence_bundle.py \
+            --report-dir reports/v19_real_market \
+            --out-dir reports/v20_evidence \
+            --github-step-summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Record workflow outcomes
+        if: always()
+        run: |
+          mkdir -p reports/v20_evidence
+          cat > reports/v20_evidence/GITHUB_RUN_STATUS.json <<JSON
+          {
+            "run_id": "${GITHUB_RUN_ID}",
+            "run_attempt": "${GITHUB_RUN_ATTEMPT}",
+            "commit": "${GITHUB_SHA}",
+            "neso_download": "${{ steps.neso_download.outcome }}",
+            "neso_materialise": "${{ steps.neso_materialise.outcome }}",
+            "neso_benchmark": "${{ steps.neso_benchmark.outcome }}",
+            "elexon_download": "${{ steps.elexon_download.outcome }}",
+            "elexon_materialise": "${{ steps.elexon_materialise.outcome }}",
+            "price_benchmark": "${{ steps.price_benchmark.outcome }}",
+            "evidence": "${{ steps.evidence.outcome }}"
+          }
+          JSON
+
+      - name: Upload evidence and processed data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gb-power-market-real-evidence-${{ github.run_id }}
+          path: |
+            reports/v19_real_market/
+            reports/v20_evidence/
+            data/processed/v18_neso/
+            data/processed/v19_elexon/
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6
+
+      - name: Upload raw network snapshots when requested
+        if: ${{ always() && inputs.upload_raw_snapshots }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: gb-power-market-real-raw-${{ github.run_id }}
+          path: |
+            data/external/neso_2026_bundle/
+            data/external/elexon_v19/
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 9
+
+      - name: Final claim-integrity gate
+        if: always()
+        run: python scripts/check_v19_real_market_claim_gate.py

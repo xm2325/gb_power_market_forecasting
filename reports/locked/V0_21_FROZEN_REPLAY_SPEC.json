@@ -1,0 +1,58 @@
+{
+  "version": "0.21.0",
+  "status": "FROZEN_REPLAY_SPEC",
+  "source_benchmark_version": "0.20.0",
+  "source_workflow_run_id": 32469293682,
+  "source_artifact_id": 9442153815,
+  "source_artifact_sha256": "152434ff0ff2198991eaf5a2c2c49b66a3a7da73f78e4d04ac39be7e6916c0b3",
+  "source_evidence_id_sha256": "7c5f78b98c8ed877ab4c5cefa8a40b3068abb74cb2062ecf677f319d74a14661",
+  "training_boundary": {
+    "train_start_utc": "2026-01-08T00:00:00Z",
+    "selection_start_utc": "2026-05-15T00:00:00Z",
+    "calibration_start_utc": "2026-06-15T00:00:00Z",
+    "locked_final_start_utc": "2026-07-12T12:00:00Z",
+    "prospective_start_utc": "2026-08-15T07:30:00Z",
+    "rule": "Point model is fitted only on purged train+selection rows. Calibration is used only for conformal residuals. The locked final window is never used to fit the frozen replay model."
+  },
+  "horizons": {
+    "30m": {
+      "horizon_minutes": 30,
+      "selected_family": "PRICE_HISTORY_ONLY",
+      "alpha": 10.0,
+      "conformal_absolute_residual_quantile_gbp_mwh": 18.394793226990146,
+      "locked_result_class": "REAL_CLAIMABLE_POSITIVE",
+      "locked_final_mae_gbp_mwh": 8.93898884724872
+    },
+    "2h": {
+      "horizon_minutes": 120,
+      "selected_family": "PRICE_PLUS_NESO_LEVELS",
+      "alpha": 1.0,
+      "conformal_absolute_residual_quantile_gbp_mwh": 34.72370292926122,
+      "locked_result_class": "REAL_CLAIMABLE_POSITIVE",
+      "locked_final_mae_gbp_mwh": 17.087308359192516
+    },
+    "6h": {
+      "horizon_minutes": 360,
+      "selected_family": "PRICE_PLUS_NESO_LEVELS",
+      "alpha": 100.0,
+      "conformal_absolute_residual_quantile_gbp_mwh": 54.59276356546225,
+      "locked_result_class": "REAL_NEGATIVE_RESULT",
+      "locked_final_mae_gbp_mwh": 34.43694819393296
+    },
+    "12h": {
+      "horizon_minutes": 720,
+      "selected_family": "PRICE_PLUS_NESO_LEVELS",
+      "alpha": 100.0,
+      "conformal_absolute_residual_quantile_gbp_mwh": 68.09639079762047,
+      "locked_result_class": "REAL_NEGATIVE_RESULT",
+      "locked_final_mae_gbp_mwh": 50.97385567361787
+    }
+  },
+  "prospective_claim_gate": {
+    "minimum_rows": 672,
+    "minimum_target_coverage": 0.95,
+    "future_neso_publications_allowed": 0,
+    "minimum_complete_utc_days_for_block_bootstrap": 7,
+    "note": "672 half-hours is 14 complete days. Before this gate is met, outputs are shadow diagnostics only and must not be used as a new CV headline."
+  }
+}

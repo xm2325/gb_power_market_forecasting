@@ -1,0 +1,145 @@
+name: lock-v27-development-result
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful validate-v27-development workflow run ID
+        required: true
+        type: string
+      artifact_id:
+        description: GitHub artifact ID recorded for that run
+        required: true
+        type: string
+      artifact_sha256:
+        description: SHA-256 of the downloaded artifact ZIP
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: lock-v27-development-result
+  cancel-in-progress: false
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/real-data-v0.20
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Verify frozen candidate and lock contract before artifact access
+        run: |
+          pytest -q \
+            tests/test_v27_candidate_lock.py \
+            tests/test_v27_direction_candidate.py \
+            tests/test_lock_v27_development_validation.py \
+            tests/test_v27_validation_workflow_contract.py \
+            tests/test_update_readme_v27_validation_status.py
+
+      - name: Verify source run and artifact identity with GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXPECTED_RUN_ID: ${{ inputs.run_id }}
+          EXPECTED_ARTIFACT_ID: ${{ inputs.artifact_id }}
+          EXPECTED_ARTIFACT_SHA256: ${{ inputs.artifact_sha256 }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${EXPECTED_RUN_ID}" > _v27_run.json
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${EXPECTED_RUN_ID}/artifacts" > _v27_artifacts.json
+          python - <<'PY'
+          import json
+          import os
+          import re
+
+          run = json.load(open('_v27_run.json', encoding='utf-8'))
+          artifacts = json.load(open('_v27_artifacts.json', encoding='utf-8'))['artifacts']
+          expected_run = int(os.environ['EXPECTED_RUN_ID'])
+          expected_id = int(os.environ['EXPECTED_ARTIFACT_ID'])
+          expected_sha = os.environ['EXPECTED_ARTIFACT_SHA256'].lower()
+          if not re.fullmatch(r'[0-9a-f]{64}', expected_sha):
+              raise SystemExit('artifact_sha256 input must be exactly 64 lowercase/uppercase hex digits')
+          if int(run['id']) != expected_run:
+              raise SystemExit('GitHub run identity mismatch')
+          if run.get('name') != 'validate-v27-development':
+              raise SystemExit(f"unexpected source workflow name: {run.get('name')}")
+          if run.get('conclusion') != 'success':
+              raise SystemExit(f"source validation run is not successful: {run.get('conclusion')}")
+          expected_name = f'v27-development-validation-{expected_run}'
+          matches = [a for a in artifacts if a.get('name') == expected_name]
+          if len(matches) != 1:
+              raise SystemExit(f'expected exactly one artifact named {expected_name}, found {len(matches)}')
+          artifact = matches[0]
+          if int(artifact['id']) != expected_id:
+              raise SystemExit('artifact ID does not match the source run artifact')
+          if artifact.get('expired') is True:
+              raise SystemExit('source validation artifact is expired')
+          digest = str(artifact.get('digest') or '')
+          if digest and digest.lower() != f'sha256:{expected_sha}':
+              raise SystemExit(f'artifact digest mismatch: GitHub={digest}, expected=sha256:{expected_sha}')
+          if not digest:
+              raise SystemExit('GitHub artifact metadata did not provide a digest; refusing unverified lock')
+          print({'run_id': expected_run, 'artifact_id': expected_id, 'artifact_digest': digest})
+          PY
+
+      - name: Download exact successful sealed-validation artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: v27-development-validation-${{ inputs.run_id }}
+          path: _v27_validation_artifact
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ inputs.run_id }}
+
+      - name: Lock immutable development-validation result
+        run: |
+          python scripts/lock_v27_development_validation.py \
+            --artifact-dir _v27_validation_artifact/v27_validation \
+            --run-id "${{ inputs.run_id }}" \
+            --artifact-id "${{ inputs.artifact_id }}" \
+            --artifact-sha256 "${{ inputs.artifact_sha256 }}"
+
+      - name: Refresh README from locked evidence state
+        run: |
+          python scripts/update_readme_v26_status.py
+          python scripts/update_readme_v27_validation_status.py
+
+      - name: Verify locked result, eligibility state and README
+        run: |
+          pytest -q \
+            tests/test_v27_candidate_lock.py \
+            tests/test_lock_v27_development_validation.py \
+            tests/test_v27_validation_workflow_contract.py \
+            tests/test_update_readme_v26_status.py \
+            tests/test_update_readme_v27_validation_status.py
+
+      - name: Commit, rebase and push immutable validation result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/monitoring docs README.md
+          git diff --cached --stat
+          git commit -m "Lock v0.27 sealed development validation result"
+          git fetch origin feat/real-data-v0.20
+          git rebase origin/feat/real-data-v0.20
+          python scripts/update_readme_v26_status.py
+          python scripts/update_readme_v27_validation_status.py
+          git diff --exit-code README.md
+          pytest -q \
+            tests/test_update_readme_v26_status.py \
+            tests/test_update_readme_v27_validation_status.py \
+            tests/test_v27_candidate_lock.py
+          git push origin HEAD:feat/real-data-v0.20

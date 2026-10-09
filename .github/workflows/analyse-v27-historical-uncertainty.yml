@@ -1,0 +1,80 @@
+name: analyse-v27-historical-uncertainty
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: analyse-v27-historical-uncertainty
+  cancel-in-progress: false
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/real-data-v0.20
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+      - name: Verify committed evidence and unchanged predictive sources
+        run: |
+          pytest -q tests/test_v27_historical_uncertainty.py tests/test_v27_candidate_lock.py tests/test_version_metadata.py
+          test "$(git hash-object src/gb_power_market/adaptive_bias_v25.py)" = "2ccb3d2a0762eec66d646e164262f8ac5b759d8e"
+          test "$(git hash-object src/gb_power_market/adaptive_consensus_v26.py)" = "399915c6cdd0d3b016bde73cb0ef92eb2697adf8"
+          test "$(git hash-object src/gb_power_market/adaptive_direction_v27_candidate.py)" = "3c361dbb0e1665bbbad2e1097b8580ce062a203f"
+      - name: Run deterministic paired time-block bootstrap
+        run: |
+          python scripts/analyse_v27_historical_uncertainty.py \
+            --rows reports/v27_historical_walkforward/historical_walkforward_rows.csv \
+            --folds reports/v27_historical_walkforward/fold_summary.csv \
+            --out-json reports/v27_historical_walkforward/historical_uncertainty.json \
+            --out-md docs/V0_27_HISTORICAL_ROLLING_ORIGIN.md \
+            --resamples 10000 \
+            --seed 20260826
+      - name: Enforce claim boundary and expected comparisons
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('reports/v27_historical_walkforward/historical_uncertainty.json')
+          x = json.loads(p.read_text())
+          if x['status'] != 'HISTORICAL_UNCERTAINTY_ANALYSIS_COMPLETE': raise SystemExit('uncertainty analysis incomplete')
+          if x['evidence_class'] != 'HISTORICAL_ASOF_ROLLING_ORIGIN_NOT_LIVE_FORWARD': raise SystemExit('evidence class changed')
+          if x['rows'] != 5516: raise SystemExit('historical row count changed')
+          if x['weekly_consistency']['causal_base']['v27_better_folds'] != 12: raise SystemExit('weekly base consistency changed')
+          if x['weekly_consistency']['v0.26']['v27_better_folds'] != 7: raise SystemExit('weekly v0.26 consistency changed')
+          if x['comparisons_vs_v27']['causal_base']['observed_mae_gain_gbp_mwh'] <= 0: raise SystemExit('v0.27/base observed ordering changed')
+          if x['comparisons_vs_v27']['v0.26']['observed_mae_gain_gbp_mwh'] >= 0: raise SystemExit('v0.27/v0.26 observed ordering changed')
+          if 'live-forward' not in x['claim_boundary'].lower(): raise SystemExit('claim boundary missing')
+          print(json.dumps(x['comparisons_vs_v27'], indent=2))
+          PY
+      - name: Commit uncertainty evidence
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/v27_historical_walkforward/historical_uncertainty.json docs/V0_27_HISTORICAL_ROLLING_ORIGIN.md
+          git commit -m "Add uncertainty analysis for v0.27 historical evidence"
+          git fetch origin feat/real-data-v0.20
+          git rebase origin/feat/real-data-v0.20
+          pytest -q tests/test_v27_historical_uncertainty.py tests/test_v27_candidate_lock.py
+          git push origin HEAD:feat/real-data-v0.20
+      - name: Upload uncertainty artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v27-historical-uncertainty-${{ github.run_id }}
+          path: |
+            reports/v27_historical_walkforward/historical_uncertainty.json
+            docs/V0_27_HISTORICAL_ROLLING_ORIGIN.md
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,118 @@
+name: continuous-forward-v24
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: continuous-forward-v24-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  forward-monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,live]'
+
+      - name: Test
+        run: pytest -q
+
+      - name: Set safe market-data boundary
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          from datetime import datetime, timedelta, timezone
+          now = datetime.now(timezone.utc)
+          safe = now - timedelta(minutes=90)
+          safe = safe.replace(minute=(safe.minute // 30) * 30, second=0, microsecond=0)
+          source_end = safe.date() + timedelta(days=1)
+          print(f"AVAILABLE_END_UTC={safe.isoformat().replace('+00:00', 'Z')}")
+          print(f"SOURCE_END_DATE={source_end.isoformat()}")
+          # The frozen feature set contains price_lag_7d_same_target. Download
+          # more than seven warm-up days before the 12 July scoring boundary so
+          # coverage is assessed on the scoring grid, not on feature warm-up.
+          print("ELEXON_START_DATE=2026-07-01")
+          print("NESO_START_DATE=2026-07-12")
+          PY
+
+      - name: Download current-regime NESO vintages
+        run: |
+          python scripts/download_neso_v21_window.py \
+            --start-date "$NESO_START_DATE" \
+            --end-date-exclusive "$SOURCE_END_DATE" \
+            --out data/external/v24/neso_current_window.csv \
+            --manifest reports/v24_forward/neso_window_manifest.json
+
+      - name: Materialise NESO vintages
+        run: |
+          python scripts/materialise_v21_current.py \
+            --input data/external/v24/neso_current_window.csv \
+            --out data/processed/v24/forecast_current.parquet \
+            --manifest reports/v24_forward/neso_materialise_manifest.json
+
+      - name: Download Elexon MID history and current day
+        run: |
+          python scripts/download_elexon_v22_mid.py \
+            --start-date "$ELEXON_START_DATE" \
+            --end-date-exclusive "$SOURCE_END_DATE" \
+            --out-dir data/external/v24/elexon_mid \
+            --manifest reports/v24_forward/elexon_mid_manifest.json
+
+      - name: Materialise Elexon market reference
+        run: |
+          python scripts/materialise_elexon_v22_mid.py \
+            --bundle-dir data/external/v24/elexon_mid \
+            --out data/processed/v24/reference_market.parquet \
+            --manifest reports/v24_forward/elexon_mid_materialise_manifest.json
+
+      - name: Run frozen-model continuous forward monitor
+        run: |
+          python scripts/run_v24_continuous_forward_monitor.py \
+            --elexon-reference data/processed/v24/reference_market.parquet \
+            --neso-current data/processed/v24/forecast_current.parquet \
+            --model-state reports/locked/V0_21_FROZEN_MODEL_STATE.json \
+            --start-utc 2026-07-12T12:00:00Z \
+            --end-exclusive-utc "$AVAILABLE_END_UTC" \
+            --out-dir reports/v24_forward
+
+      - name: Enforce information and coverage gates
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('reports/v24_forward/forward_monitor_all.json').read_text())
+          for horizon, result in p['horizons'].items():
+              audit = result['audit']
+              if audit['coverage'] < 0.95:
+                  raise SystemExit(f"{horizon}: coverage below 95%: {audit['coverage']}")
+              if audit['future_neso_publications'] != 0:
+                  raise SystemExit(f"{horizon}: future NESO publications: {audit['future_neso_publications']}")
+              post = result['segments']['post_lock_to_latest']
+              print(horizon, {
+                  'coverage': audit['coverage'],
+                  'post_lock_rows': post['rows'],
+                  'post_lock_model_mae': post.get('frozen_model_mae_gbp_mwh'),
+                  'post_lock_reference_mae': post.get('reference_mae_gbp_mwh'),
+                  'post_lock_improvement_pct': post.get('improvement_pct'),
+              })
+          PY
+
+      - name: Upload continuous forward monitoring artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v24-continuous-forward-${{ github.run_id }}
+          path: reports/v24_forward/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6

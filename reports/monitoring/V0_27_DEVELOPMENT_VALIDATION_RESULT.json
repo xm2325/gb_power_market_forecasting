@@ -1,0 +1,105 @@
+{
+  "schema": "gb-power-market-v27-development-validation-v1",
+  "candidate_lock": {
+    "schema": "gb-power-market-v27-development-candidate-lock-v1",
+    "status": "DEVELOPMENT_CANDIDATE_FROZEN_NOT_FORWARD_LAUNCHED",
+    "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO",
+    "candidate_source": {
+      "path": "src/gb_power_market/adaptive_direction_v27_candidate.py",
+      "git_blob_sha1": "3c361dbb0e1665bbbad2e1097b8580ce062a203f"
+    },
+    "base_v26_dependency": {
+      "path": "src/gb_power_market/adaptive_consensus_v26.py",
+      "git_blob_sha1": "399915c6cdd0d3b016bde73cb0ef92eb2697adf8"
+    },
+    "frozen_model_state": {
+      "path": "reports/locked/V0_21_FROZEN_MODEL_STATE.json",
+      "sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918"
+    },
+    "governing_protocol": {
+      "path": "reports/locked/V0_27_DEVELOPMENT_PROTOCOL.json",
+      "git_blob_sha1": "b04ea42455f93341ec9351e3a53368d22677f29a"
+    },
+    "discovery_evidence_boundary": {
+      "end_exclusive_utc": "2026-08-23T22:00:00Z",
+      "locked_v26_snapshot_sequence": 3,
+      "role": "FAILURE_DISCOVERY_ONLY"
+    },
+    "independent_validation_block": {
+      "start_utc": "2026-08-23T22:00:00Z",
+      "end_exclusive_utc": "2026-08-24T22:00:00Z",
+      "rows": 48,
+      "duration_hours": 24,
+      "status": "SEALED_NOT_YET_READ_BY_VALIDATION_WORKFLOW"
+    },
+    "new_structure": {
+      "type": "SIGN_ONLY_FROZEN_DIRECTION_VETO",
+      "parameter_search": false,
+      "magnitude_threshold_gbp_mwh": 0.0,
+      "direction_anchor": "latest residual-history target causally available by decision time",
+      "apply_condition": "sign(v26 proposed correction) == sign(current frozen prediction - anchor frozen prediction)",
+      "veto_action": "fallback exactly to unchanged frozen prediction"
+    },
+    "validation_gate": {
+      "candidate_mae_strictly_better_than_frozen": true,
+      "candidate_p95_abs_error_non_worse_than_frozen": true,
+      "candidate_absolute_signed_bias_non_worse_than_frozen": true,
+      "candidate_mae_strictly_better_than_previous_day_reference": true,
+      "all_required": true
+    },
+    "contract": "This is the single candidate permitted on the sealed 24-hour development-validation block. The candidate source, its v0.26 dependency, frozen model state, validation window and gates are fixed before the validation workflow reads any target labels from that block. A failed gate ends this candidate on this block. A passed gate only permits creation of a separately versioned 0.27.0 forward candidate with a later unseen forward boundary; it is not itself fresh forward evidence."
+  },
+  "candidate_spec": {
+    "status": "DEVELOPMENT_CANDIDATE_FROZEN_NOT_FORWARD_LAUNCHED",
+    "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO",
+    "discovery_end_utc": "2026-08-23T22:00:00+00:00",
+    "validation_start_utc": "2026-08-23T22:00:00+00:00",
+    "validation_end_exclusive_utc": "2026-08-24T22:00:00+00:00",
+    "base_v26_rule": {
+      "horizon_minutes": 120,
+      "outcome_delay_minutes": 30,
+      "short_lookback_hours": 6,
+      "long_lookback_hours": 48,
+      "minimum_short_history_rows": 8,
+      "minimum_long_history_rows": 24
+    },
+    "new_structure": {
+      "type": "SIGN_ONLY_FROZEN_DIRECTION_VETO",
+      "magnitude_threshold_gbp_mwh": 0.0,
+      "parameter_search": false,
+      "direction_anchor": "latest residual-history target whose outcome is available by decision time",
+      "apply_condition": "sign(v26 proposed correction) == sign(current frozen prediction - anchor frozen prediction)",
+      "otherwise": "fallback exactly to unchanged frozen prediction"
+    },
+    "information_contract": "The veto uses only frozen predictions and the same latest causally available residual-history anchor already used by v0.26. No target outcome after the current decision time is consulted.",
+    "evidence_contract": "Rows through 2026-08-23T22:00:00Z are failure-discovery data only. The exact later 24h block [2026-08-23T22:00:00Z, 2026-08-24T22:00:00Z) is the only validation block for this candidate. No parameter change is permitted after any row from that block is inspected."
+  },
+  "validation": {
+    "status": "VALIDATION_BLOCK_EVALUATED",
+    "rows": 48,
+    "required_rows": 48,
+    "validation_start_utc": "2026-08-23T22:00:00+00:00",
+    "validation_end_exclusive_utc": "2026-08-24T22:00:00+00:00",
+    "candidate_mae_gbp_mwh": 15.188728134653099,
+    "frozen_mae_gbp_mwh": 15.542457900050687,
+    "reference_mae_gbp_mwh": 32.7875,
+    "candidate_p95_abs_error_gbp_mwh": 33.84967683106487,
+    "frozen_p95_abs_error_gbp_mwh": 38.60353940655759,
+    "candidate_signed_bias_gbp_mwh": -12.253368444314972,
+    "frozen_signed_bias_gbp_mwh": -13.629692926220608,
+    "candidate_win_rate_vs_frozen": 0.125,
+    "direction_veto_rate": 0.20833333333333334,
+    "gates": {
+      "candidate_mae_strictly_better_than_frozen": true,
+      "candidate_p95_abs_error_non_worse_than_frozen": true,
+      "candidate_absolute_signed_bias_non_worse_than_frozen": true,
+      "candidate_mae_strictly_better_than_previous_day_reference": true
+    },
+    "all_validation_gates_passed": true,
+    "gate_evaluated": true,
+    "forward_launch_allowed": true,
+    "automatic_forward_launch": false
+  },
+  "evidence_class": "INDEPENDENT_DEVELOPMENT_VALIDATION_NOT_FORWARD_EVIDENCE",
+  "post_evaluation_contract": "These 48 labels become development data immediately after this evaluation. A failed gate rejects this candidate on this block. A passed gate only permits a new versioned forward experiment beginning strictly after the validation end; it is not itself a performance claim."
+}

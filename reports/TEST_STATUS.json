@@ -1,0 +1,28 @@
+{
+  "version": "0.20.0",
+  "pytest": {
+    "status": "PASS",
+    "passed": 76
+  },
+  "compileall": {
+    "status": "PASS"
+  },
+  "workflow_yaml": {
+    "status": "PASS"
+  },
+  "current_evidence_run": {
+    "status": "BLOCKED_EVIDENCE_AS_EXPECTED",
+    "cv_eligible_positive_horizons": [],
+    "blocked_horizons": [
+      "30m",
+      "2h",
+      "6h",
+      "12h"
+    ],
+    "reason": "network-run Elexon/NESO manifests and benchmark outputs are not present in the local container"
+  },
+  "artifact_ingest_security": {
+    "path_traversal_test": "PASS"
+  },
+  "evidence_fingerprint_test": "PASS"
+}

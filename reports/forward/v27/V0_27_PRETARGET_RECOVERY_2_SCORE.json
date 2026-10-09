@@ -1,0 +1,30 @@
+{
+  "schema": "gb-power-market-v27-precommitted-outcome-score-v1",
+  "status": "ONE_PRECOMMITTED_FORWARD_OUTCOME_SCORED",
+  "version": "0.27.0",
+  "candidate": "2H_FROZEN_PLUS_CAUSAL_6H_48H_CONSENSUS_WITH_FROZEN_DIRECTION_VETO",
+  "target_start_utc": "2026-08-25T15:00:00+00:00",
+  "decision_time_utc": "2026-08-25T13:00:00+00:00",
+  "prediction_freeze_completed_utc": "2026-08-25T13:01:19.290770+00:00",
+  "realised_price_gbp_mwh": 133.73,
+  "v27_prediction_gbp_mwh": 97.5134306446891,
+  "frozen_prediction_gbp_mwh": 92.9233301428951,
+  "previous_settlement_day_reference_gbp_mwh": 118.32,
+  "v27_absolute_error_gbp_mwh": 36.216569355310895,
+  "frozen_absolute_error_gbp_mwh": 40.80666985710489,
+  "reference_absolute_error_gbp_mwh": 15.409999999999997,
+  "v27_minus_frozen_absolute_error_gbp_mwh": -4.590100501793998,
+  "v27_minus_reference_absolute_error_gbp_mwh": 20.8065693553109,
+  "evidence_class": "SINGLE_PRECOMMITTED_FORWARD_OUTCOME_DESCRIPTIVE_ONLY",
+  "promotion_eligible": false,
+  "automatic_model_change": false,
+  "claim_boundary": "This is one genuinely precommitted forward outcome. It is descriptive evidence only: one row cannot establish superiority, trigger promotion, tune v0.27 or change the frozen comparison model.",
+  "prediction_path": "reports/forward/v27/V0_27_PRETARGET_RECOVERY_2_PREDICTION.json",
+  "prediction_sha256": "a94aa1c3f410c196bee4ab8276dd3f166b78a921ee7ada0cee0ba8c6633a6822",
+  "scoring_completed_utc": "2026-08-25T16:30:03.093838+00:00",
+  "maturity_preflight": {
+    "now_utc": "2026-08-25T16:30:03.068887+00:00",
+    "target_start_utc": "2026-08-25T15:00:00+00:00",
+    "safe_scoring_boundary_utc": "2026-08-25T16:30:00+00:00"
+  }
+}
