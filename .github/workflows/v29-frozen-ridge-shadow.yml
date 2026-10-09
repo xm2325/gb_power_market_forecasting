@@ -1,0 +1,137 @@
+name: v29-frozen-ridge-shadow
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17,47 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'src/gb_power_market/frozen_shadow_v29.py'
+      - 'scripts/run_v29_frozen_shadow_cycle.py'
+      - '.github/workflows/v29-frozen-ridge-shadow.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v29-frozen-ridge-shadow-main
+  cancel-in-progress: false
+
+jobs:
+  shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install -e '.[dev,live]'
+      - name: Check new time-boundary and regression tests
+        run: |
+          pytest -q tests/test_frozen_shadow_v29.py
+          python -m compileall -q src/gb_power_market/frozen_shadow_v29.py scripts/run_v29_frozen_shadow_cycle.py
+      - name: Set network query boundaries before retrieval
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          import pandas as pd
+          from gb_power_market.prospective_v28 import market_end_for_decision
+          now = pd.Timestamp.now(tz="UTC")
+          end = market_end_for_decision(now, delay_minutes=90)
+          start = end - pd.Timedelta(days=12)
+          neso_start = (now - pd.Timedelta(days=3)).date().isoformat()
+          neso_end = (now + pd.Timedelta(days=3)).date().isoformat()
+          print("V29_PRICE_START=" + start.isoformat())
+          print("V29_PRICE_END=" + end.isoformat())
+          print("V29_NESO_START=" + neso_start)
+          print("V29_NESO_END=" + neso_end)
+          PY
+      - name: Download conservative real Elexon price history
+        run: |
+          python scripts/download_elexon_mid_exact_window.py \
+            --start-utc "$V29_PRICE_START" \
+            --end-exclusive-utc "$V29_PRICE_END" \
+            --out-dir data/external/v29/elexon_mid \
+            --manifest data/external/v29/elexon_manifest.json
+      - name: Materialise Elexon reference
+        run: |
+          python scripts/materialise_elexon_v22_mid.py \
+            --bundle-dir data/external/v29/elexon_mid \
+            --out data/processed/v29/reference_market.parquet \
+            --manifest data/external/v29/elexon_materialise_manifest.json
+      - name: Download bounded NESO embedded-forecast vintages
+        run: |
+          python scripts/download_neso_v21_window.py \
+            --start-date "$V29_NESO_START" \
+            --end-date-exclusive "$V29_NESO_END" \
+            --out data/external/v29/neso_current.csv \
+            --manifest data/external/v29/neso_manifest.json
+      - name: Materialise as-of NESO forecast source
+        run: |
+          python scripts/materialise_v21_current.py \
+            --input data/external/v29/neso_current.csv \
+            --out data/processed/v29/forecast_current.parquet \
+            --manifest data/external/v29/neso_materialise_manifest.json
+      - name: Independently score older pretarget predictions and freeze future target
+        run: |
+          python scripts/run_v29_frozen_shadow_cycle.py \
+            --reference-market data/processed/v29/reference_market.parquet \
+            --neso-current data/processed/v29/forecast_current.parquet \
+            --input-end-exclusive-utc "$V29_PRICE_END" \
+            --elexon-manifest data/external/v29/elexon_manifest.json \
+            --neso-manifest data/external/v29/neso_manifest.json \
+            --out-dir reports/forward/v29
+      - name: Reject post-target or label-bearing prediction before Git commit
+        run: |
+          python - <<'PY'
+          import json
+          import pandas as pd
+          from pathlib import Path
+          run = json.loads(Path(".v29_run_state.json").read_text())
+          path = run.get("new_prediction_path")
+          if path:
+              prediction = json.loads(Path(path).read_text())
+              if pd.Timestamp.now(tz="UTC") >= pd.Timestamp(prediction["target_start_utc"]):
+                  raise SystemExit("V29_TARGET_ALREADY_STARTED")
+              if prediction["target_outcome_accessed"] is not False:
+                  raise SystemExit("V29_TARGET_LABEL_ACCESS")
+              if any(x in prediction for x in ("realised_price_gbp_mwh", "absolute_error_gbp_mwh")):
+                  raise SystemExit("V29_TARGET_LABEL_CONTAMINATION")
+          PY
+      - name: Append immutable evidence to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/forward/v29
+          if git diff --cached --quiet; then
+            echo "No new evidence"
+          else
+            git commit -m "[skip ci] Append v0.29 frozen-ridge shadow evidence"
+            for retry in 1 2 3; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then
+                exit 0
+              fi
+              echo "Concurrent main branch update; retry $retry"
+            done
+            exit 1
+          fi
+      - name: Preserve diagnostic manifests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v29-shadow-${{ github.run_id }}
+          path: |
+            .v29_run_state.json
+            data/external/v29/elexon_manifest.json
+            data/external/v29/neso_manifest.json
+            data/external/v29/neso_materialise_manifest.json
+          retention-days: 14
+          if-no-files-found: ignore
