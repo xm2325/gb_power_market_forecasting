@@ -245,6 +245,10 @@ def score_shadow(
         "score_time_utc": iso(now),
         "realised_price_gbp_mwh": float(observed_price),
         "absolute_error_gbp_mwh": errors,
+        "signed_error_gbp_mwh": {
+            method: float(forecasts[method]) - observed_price for method in METHODS
+        },
+        "effective_lead_minutes": float(prediction["effective_lead_minutes"]),
         "paired_gain_vs_previous_day_gbp_mwh": {
             method: errors["previous_day"] - errors[method]
             for method in METHODS if method != "previous_day"
@@ -253,11 +257,44 @@ def score_shadow(
     }
 
 
+def _paired_daily_bootstrap(
+    scores: list[dict[str, Any]], method: str, *, n_resamples: int = 2000
+) -> dict[str, Any] | None:
+    """Paired day-block uncertainty, not an untouched confirmatory experiment."""
+    if len(scores) < 672:
+        return None
+    day_gains: dict[str, list[float]] = {}
+    for score in scores:
+        date = utc(score["target_start_utc"]).date().isoformat()
+        day_gains.setdefault(date, []).append(
+            score["paired_gain_vs_previous_day_gbp_mwh"][method]
+        )
+    if len(day_gains) < 14:
+        return None
+    gains_sum = np.array([sum(values) for values in day_gains.values()], dtype=float)
+    gains_count = np.array([len(values) for values in day_gains.values()], dtype=float)
+    rng = np.random.default_rng(202628)
+    sampled_days = rng.integers(0, len(gains_sum), size=(n_resamples, len(gains_sum)))
+    draws = gains_sum[sampled_days].sum(axis=1) / gains_count[sampled_days].sum(axis=1)
+    lower, upper = np.quantile(draws, [0.025, 0.975])
+    return {
+        "method": "paired_UTC_day_block_bootstrap",
+        "blocks": len(gains_sum),
+        "resamples": n_resamples,
+        "seed": 202628,
+        "paired_gain_positive_means_challenger_better": True,
+        "interval95_gbp_mwh": [float(lower), float(upper)],
+        "includes_zero": bool(lower <= 0 <= upper),
+        "evidence_class": "DESCRIPTIVE_PROSPECTIVE_UNCERTAINTY",
+    }
+
+
 def summarise_scores(scores: list[dict[str, Any]]) -> dict[str, Any]:
     ordered = sorted(scores, key=lambda x: x["target_start_utc"])
     targets = [x["target_start_utc"] for x in ordered]
     if len(targets) != len(set(targets)):
         raise ValueError("duplicate scored target")
+
     def summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         return {
             "rows": len(rows),
@@ -265,7 +302,28 @@ def summarise_scores(scores: list[dict[str, Any]]) -> dict[str, Any]:
                 method: float(np.mean([x["absolute_error_gbp_mwh"][method] for x in rows]))
                 if rows else None for method in METHODS
             },
+            "p95_abs_error_gbp_mwh": {
+                method: float(np.quantile([x["absolute_error_gbp_mwh"][method] for x in rows], 0.95))
+                if rows else None for method in METHODS
+            },
+            "signed_bias_gbp_mwh": {
+                method: float(np.mean([x["signed_error_gbp_mwh"][method] for x in rows]))
+                if rows else None for method in METHODS
+            },
+            "mean_paired_gain_vs_previous_day_gbp_mwh": {
+                method: float(np.mean([
+                    x["paired_gain_vs_previous_day_gbp_mwh"][method] for x in rows
+                ])) if rows else None for method in METHODS if method != "previous_day"
+            },
+            "win_rate_vs_previous_day": {
+                method: float(np.mean([
+                    x["absolute_error_gbp_mwh"][method] <
+                    x["absolute_error_gbp_mwh"]["previous_day"]
+                    for x in rows
+                ])) if rows else None for method in METHODS if method != "previous_day"
+            },
         }
+
     all_result = summary(ordered)
     last48 = summary(ordered[-48:])
     alerts = []
@@ -283,6 +341,10 @@ def summarise_scores(scores: list[dict[str, Any]]) -> dict[str, Any]:
         "latest_target_utc": targets[-1] if targets else None,
         "review_maturity_rows": MIN_FORWARD_ROWS_FOR_REVIEW,
         "review_mature": len(ordered) >= MIN_FORWARD_ROWS_FOR_REVIEW,
+        "daily_block_uncertainty": {
+            method: _paired_daily_bootstrap(ordered, method)
+            for method in METHODS if method != "previous_day"
+        },
         "alerts": alerts,
         "automatic_promotion": False,
         "claim_boundary": "Prospective scores only if prediction Git commit preceded target. This report is not a trading-PnL claim.",
