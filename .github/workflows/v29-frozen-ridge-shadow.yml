@@ -9,6 +9,8 @@ on:
     paths:
       - 'src/gb_power_market/frozen_shadow_v29.py'
       - 'scripts/run_v29_frozen_shadow_cycle.py'
+      - 'src/gb_power_market/paired_monitor_v29.py'
+      - 'scripts/run_v29_paired_comparison.py'
       - '.github/workflows/v29-frozen-ridge-shadow.yml'
 
 permissions:
@@ -35,7 +37,7 @@ jobs:
           python -m pip install -e '.[dev,live]'
       - name: Check new time-boundary and regression tests
         run: |
-          pytest -q tests/test_frozen_shadow_v29.py
+          pytest -q tests/test_frozen_shadow_v29.py tests/test_paired_monitor_v29.py
           python -m compileall -q src/gb_power_market/frozen_shadow_v29.py scripts/run_v29_frozen_shadow_cycle.py
       - name: Set network query boundaries before retrieval
         run: |
@@ -104,6 +106,11 @@ jobs:
               if any(x in prediction for x in ("realised_price_gbp_mwh", "absolute_error_gbp_mwh")):
                   raise SystemExit("V29_TARGET_LABEL_CONTAMINATION")
           PY
+      - name: Compare real pretarget-scored v0.28 and v0.29 matching targets
+        run: |
+          python scripts/run_v29_paired_comparison.py \
+            --v28-root reports/forward/v28 \
+            --v29-root reports/forward/v29
       - name: Append immutable evidence to main
         run: |
           git config user.name "github-actions[bot]"
