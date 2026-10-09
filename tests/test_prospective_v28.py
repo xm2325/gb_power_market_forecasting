@@ -56,7 +56,12 @@ def test_future_label_mutation_cannot_change_prediction():
     frame, now, cutoff = _fixture()
     a = predict_shadow(frame, decision=now, input_end_exclusive=cutoff)
     extra = frame.iloc[-1:].copy()
-    extra["target_start_utc"] = pd.Timestamp(a["target_start_utc"])
+    future = pd.Timestamp(a["target_start_utc"])
+    extra["target_start_utc"] = future
+    future_keys = expected_settlement_keys("2026-08-13", "2026-08-15")
+    actual_key = future_keys[pd.to_datetime(future_keys["target_start_utc"], utc=True) == future].iloc[0]
+    extra["settlement_date"] = actual_key["settlement_date"]
+    extra["settlement_period"] = actual_key["settlement_period"]
     extra["reference_market_price_gbp_mwh"] = 100000.0
     with pytest.raises(ValueError, match="cutoff"):
         predict_shadow(pd.concat([frame, extra]), decision=now, input_end_exclusive=cutoff)
