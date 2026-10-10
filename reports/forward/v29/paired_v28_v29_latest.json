@@ -1,7 +1,7 @@
 {
   "automatic_promotion": false,
   "claim_boundary": "Descriptive matched-target forecasting evidence only. Forecast issue instants differ and inputs may differ even when previous-day baselines match; not an identical-information-set causal model comparison, trading return, or automatic deployment claim.",
-  "common_target_candidates": 6,
+  "common_target_candidates": 7,
   "evidence_class": "GITHUB_LIVE_MATCHED_TARGETS_WITH_NONIDENTICAL_ISSUE_TIMES",
   "first_matched_target_utc": "2026-10-10T02:00:00+00:00",
   "last_matched_target_utc": "2026-10-10T07:00:00+00:00",
@@ -31,7 +31,12 @@
     "v29_ridge_delay_safe": 46.687778744941326,
     "v29_ridge_direction_veto": 46.687778744941326
   },
-  "rejected_pairs": [],
+  "rejected_pairs": [
+    {
+      "reason": "ISSUE_TIMES_TOO_FAR_APART",
+      "target": "2026-10-10T08:00:00+00:00"
+    }
+  ],
   "review_mature": false,
   "schema": "gb-power-v29-paired-stream-comparison-v1",
   "signed_bias_gbp_mwh": {
@@ -43,6 +48,6 @@
     "v29_ridge_direction_veto": -30.08470031033049
   },
   "status": "MATCHED_SCORES_AVAILABLE",
-  "v28_scored_targets": 12,
-  "v29_scored_targets": 7
+  "v28_scored_targets": 13,
+  "v29_scored_targets": 8
 }
