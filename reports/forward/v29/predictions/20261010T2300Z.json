@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 23,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 9,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "f4e59b95d78679b27e3cfe1bcbef43eefa05d026",
+  "decision_time_utc": "2026-10-10T20:30:59.934317+00:00",
+  "effective_lead_minutes": 149.00109471666667,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 44.76,
+    "ridge_consensus": 123.7091647072827,
+    "ridge_delay_safe": 123.7091647072827,
+    "ridge_direction_veto": 123.7091647072827
+  },
+  "freeze_completed_utc": "2026-10-10T20:31:00.188184+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "38084002807",
+  "input_end_exclusive_utc": "2026-10-10T19:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 39.04890528333333,
+  "neso_selected_publication_utc": "2026-10-10T19:51:57+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "30a961f39f0df8c214fdc2a3c2e5a3e883fc002d71c1e0ab83ccbad53b081990",
+    "elexon_snapshot_sha256": "c6017062ebd666ddbac04a9fe9d4461eccf10c97ae5b94f9d0bf5a179122b3f7",
+    "neso_manifest_sha256": "78fb15bf4c73343780e134fbdb953a90757626c96afecf09af1444f9a4076b58",
+    "neso_snapshot_sha256": "63496d097c1e8eb4fe008e71a1a4222b466a6492a17fb9869a24628528fed274"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-10T23:00:00+00:00"
+}
