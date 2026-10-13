@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 62,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "2ac630af81dd0980cbb520832c0317b4b12622f6",
+  "decision_time_utc": "2026-10-13T19:52:29.063949+00:00",
+  "effective_lead_minutes": 127.51560085,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 120.00000000000001,
+    "ridge_consensus": 133.1593481206496,
+    "ridge_delay_safe": 133.1593481206496,
+    "ridge_direction_veto": 133.1593481206496
+  },
+  "freeze_completed_utc": "2026-10-13T19:52:29.376550+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "38458210370",
+  "input_end_exclusive_utc": "2026-10-13T18:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 59.95106581666666,
+  "neso_selected_publication_utc": "2026-10-13T18:52:32+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "442ef56cc5bdf19e222a9e4687ead63fc35d664cc920499b882e8c7f6b858547",
+    "elexon_snapshot_sha256": "7cbdd435b8642efe6b53fcf54fe0677e5c0114e1fb255ca5af57fe06f0517ad8",
+    "neso_manifest_sha256": "f9e26423218c2343394fa246abada031b245539c698163a903cf69f77f631153",
+    "neso_snapshot_sha256": "781f0d3b7aa293bf5cfd177048b970729a7fdab2fcc8fc9b04a4a6111602e418"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-13T22:00:00+00:00"
+}
