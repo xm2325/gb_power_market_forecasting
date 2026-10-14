@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 61,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "fc3859672c926fdfa946a036817990b0a7cf9743",
+  "decision_time_utc": "2026-10-14T15:32:27.592306+00:00",
+  "effective_lead_minutes": 147.54012823333332,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 174.07,
+    "ridge_consensus": 111.65890591557103,
+    "ridge_delay_safe": 111.65890591557103,
+    "ridge_direction_veto": 111.65890591557103
+  },
+  "freeze_completed_utc": "2026-10-14T15:32:28.019018+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "38590116079",
+  "input_end_exclusive_utc": "2026-10-14T14:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 39.776538433333336,
+  "neso_selected_publication_utc": "2026-10-14T14:52:41+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "a31078a52ce5d6f271d93db801044e3d6373ba20d9e96665560e802b31d41958",
+    "elexon_snapshot_sha256": "7be1e6786b33b3d08047b3538f61ac5fa17f5d84a40366424228a3627a106a0f",
+    "neso_manifest_sha256": "4a5654514706efdc90e7201d720c3a2c066f8906fbbf3793867856bb3f76459e",
+    "neso_snapshot_sha256": "071daf33c2426992007cb9d24167f5b85eaf267ff649fa93e292c736bcb19d03"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-14T18:00:00+00:00"
+}
