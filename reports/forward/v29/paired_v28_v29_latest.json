@@ -1,7 +1,7 @@
 {
   "automatic_promotion": false,
   "claim_boundary": "Descriptive matched-target forecasting evidence only. Forecast issue instants differ and inputs may differ even when previous-day baselines match; not an identical-information-set causal model comparison, trading return, or automatic deployment claim.",
-  "common_target_candidates": 131,
+  "common_target_candidates": 132,
   "evidence_class": "GITHUB_LIVE_MATCHED_TARGETS_WITH_NONIDENTICAL_ISSUE_TIMES",
   "first_matched_target_utc": "2026-10-10T02:00:00+00:00",
   "last_matched_target_utc": "2026-10-14T11:00:00+00:00",
@@ -159,6 +159,10 @@
     {
       "reason": "ISSUE_TIMES_TOO_FAR_APART",
       "target": "2026-10-14T08:00:00+00:00"
+    },
+    {
+      "reason": "ISSUE_TIMES_TOO_FAR_APART",
+      "target": "2026-10-14T12:00:00+00:00"
     }
   ],
   "review_mature": false,
@@ -172,6 +176,6 @@
     "v29_ridge_direction_veto": -25.490828291966647
   },
   "status": "MATCHED_SCORES_AVAILABLE",
-  "v28_scored_targets": 173,
-  "v29_scored_targets": 141
+  "v28_scored_targets": 174,
+  "v29_scored_targets": 142
 }
