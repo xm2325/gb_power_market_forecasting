@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 64,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "af5bd2f048f71f77a9172d87ffcc815194bb5379",
+  "decision_time_utc": "2026-10-15T08:38:43.408659+00:00",
+  "effective_lead_minutes": 141.27652235,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 84.35,
+    "ridge_consensus": 158.5813487573826,
+    "ridge_delay_safe": 158.5813487573826,
+    "ridge_direction_veto": 158.5813487573826
+  },
+  "freeze_completed_utc": "2026-10-15T08:38:43.779864+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "38707029597",
+  "input_end_exclusive_utc": "2026-10-15T07:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 45.49014431666667,
+  "neso_selected_publication_utc": "2026-10-15T07:53:14+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "9083154d475e5881c09b767ec96751dcb8924a97e048aa9b3dd0bdbdf0eeaeb6",
+    "elexon_snapshot_sha256": "9ff1b1768292972abb89fbf54582a041cae3fb53d7d27eebf6bac48a2bdee8d3",
+    "neso_manifest_sha256": "f483c377595f87c6522189f94fa96b310a8e49f21fb841461cd40313cab2a466",
+    "neso_snapshot_sha256": "39e09696f064bedc6eb357d0a8dc432e73ba4ef07e5b1b9fc1a3ad53d4012c1e"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-15T11:00:00+00:00"
+}
