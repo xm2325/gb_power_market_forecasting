@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 63,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "aaaae71e48b92584dc60df97cdfccd1fd614b2ff",
+  "decision_time_utc": "2026-10-15T12:41:54.254519+00:00",
+  "effective_lead_minutes": 138.09575801666668,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 188.02,
+    "ridge_consensus": 137.04422140630717,
+    "ridge_delay_safe": 137.04422140630717,
+    "ridge_direction_veto": 137.04422140630717
+  },
+  "freeze_completed_utc": "2026-10-15T12:41:54.628506+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "38736552147",
+  "input_end_exclusive_utc": "2026-10-15T11:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 49.587575316666666,
+  "neso_selected_publication_utc": "2026-10-15T11:52:19+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "23e230b12b778b60fb9d5f4d7cb04fd78f75e6bde7301ecf9bf047182f805a98",
+    "elexon_snapshot_sha256": "8c6d10c546e73c746495ca20df166b63045478ee354a8a9936c77999e31ba2a6",
+    "neso_manifest_sha256": "19d5f84d752e3c891865935cd3ff8e6ce15762b4336dd8a9f92df40b3357375b",
+    "neso_snapshot_sha256": "8ffc1aeb81b13b81787b186306f5e89ec401028d9e352be3f89640775f87b0b4"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-15T15:00:00+00:00"
+}
