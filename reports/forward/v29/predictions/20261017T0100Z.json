@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": -50.040019629545455,
+    "consensus_adjustment": 40.71230936926558,
+    "long_mean": 44.50643506445985,
+    "long_n": 66,
+    "reason": "FROZEN_RIDGE_DIRECTION_VETO",
+    "short_mean": 40.71230936926558,
+    "short_n": 8,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "14d105d0c2dadde28a8bf37e8ab6f9ea5ea5b821",
+  "decision_time_utc": "2026-10-16T22:51:46.269727+00:00",
+  "effective_lead_minutes": 128.22883788333334,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 183.71,
+    "ridge_consensus": 161.45177009940494,
+    "ridge_delay_safe": 120.73946073013936,
+    "ridge_direction_veto": 120.73946073013936
+  },
+  "freeze_completed_utc": "2026-10-16T22:51:46.764537+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "38978172893",
+  "input_end_exclusive_utc": "2026-10-16T21:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 58.521162116666666,
+  "neso_selected_publication_utc": "2026-10-16T21:53:15+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "db8216ad9f5035fd743214063336edffd5811d023b912c8dbabf6c1ae0f63ec1",
+    "elexon_snapshot_sha256": "508b9395924139c08b17d37f81ac1e01e15c7e831f68edd86dfffa8935330571",
+    "neso_manifest_sha256": "849bb294f820edfbf0064483c05a5a6a857cee7058f3ffe9d6988649c207089d",
+    "neso_snapshot_sha256": "c8d539a5d15e95dabc14db3fb96675b6d9ded2a373dd0dbaea5210dea1da7b7d"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-17T01:00:00+00:00"
+}
