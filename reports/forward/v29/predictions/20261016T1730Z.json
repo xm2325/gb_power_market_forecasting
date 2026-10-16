@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 65,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "b40b1914fcd1b57e0ffe65ba48c4a41cdf0f5050",
+  "decision_time_utc": "2026-10-16T15:28:26.728420+00:00",
+  "effective_lead_minutes": 121.55452633333333,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 234.44,
+    "ridge_consensus": 148.96160907875037,
+    "ridge_delay_safe": 148.96160907875037,
+    "ridge_direction_veto": 148.96160907875037
+  },
+  "freeze_completed_utc": "2026-10-16T15:28:27.067981+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "38924127814",
+  "input_end_exclusive_utc": "2026-10-16T13:30:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 36.478806999999996,
+  "neso_selected_publication_utc": "2026-10-16T14:51:58+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "e13a56300a2e9ad4fa7c741e87dc33101769d4b4069891f2e1d11b983c74eb14",
+    "elexon_snapshot_sha256": "7c0ed9fed2348f19ab740ad091b7f51fa713714e9802e4c2530c1fc70a42e0f4",
+    "neso_manifest_sha256": "1d3a0512fc2df06d5f354f15f4fddc85ffb296353bc73b1d6c2a4e530663aa1b",
+    "neso_snapshot_sha256": "c323e9ce493674ae1d24ff1bfd7221d0ae4e6d8a22e3ce05b2ea13336d959213"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-16T17:30:00+00:00"
+}
