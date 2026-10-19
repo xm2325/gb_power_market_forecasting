@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 77,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 6,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "650f54bbd1b22bbeed393366387858a82b6ef78e",
+  "decision_time_utc": "2026-10-19T13:02:28.019708+00:00",
+  "effective_lead_minutes": 147.53300486666666,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 188.97000000000003,
+    "ridge_consensus": 137.4118205516171,
+    "ridge_delay_safe": 137.4118205516171,
+    "ridge_direction_veto": 137.4118205516171
+  },
+  "freeze_completed_utc": "2026-10-19T13:02:28.598972+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "39256696239",
+  "input_end_exclusive_utc": "2026-10-19T11:30:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 69.3836618,
+  "neso_selected_publication_utc": "2026-10-19T11:53:05+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "456c59fd9a5a6b2e201a34b9ecc2df3ee4a95c125b1b46b317185a818c4da27d",
+    "elexon_snapshot_sha256": "6555a20001d95aa3b6685f93dc0f3cdf71c5adb3840db12d0298cb0ae1459bce",
+    "neso_manifest_sha256": "3f313f4eb9b76e6aa4cf6a3d93a76b5c5a9b0110ba9b268a13065317984e4d31",
+    "neso_snapshot_sha256": "be982d73ad057614c25b1c094a3b92ccd9cf0e866370a4a50f0124f54cf7d6b4"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-19T15:30:00+00:00"
+}
