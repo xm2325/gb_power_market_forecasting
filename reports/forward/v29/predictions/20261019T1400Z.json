@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 77,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "8705dca5e7ddf219f47bd4e2baef4bd93cd437e7",
+  "decision_time_utc": "2026-10-19T11:30:06.294259+00:00",
+  "effective_lead_minutes": 149.89509568333332,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 170.46,
+    "ridge_consensus": 143.96948461752942,
+    "ridge_delay_safe": 143.96948461752942,
+    "ridge_direction_veto": 143.96948461752942
+  },
+  "freeze_completed_utc": "2026-10-19T11:30:06.987653+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "39244979579",
+  "input_end_exclusive_utc": "2026-10-19T09:30:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 37.804904316666665,
+  "neso_selected_publication_utc": "2026-10-19T10:52:18+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "05e79722f769636c65714ae9d498120a28a0636269300afe95e2292c4a562352",
+    "elexon_snapshot_sha256": "417f09332d60d29ad8be8f6d1e8fbc6c9deeac1a313216292b4752bad60c8084",
+    "neso_manifest_sha256": "b71b5e7ec96f74491a4269a02edad7c1cfed532c60b650c2c8453d65a1b7f3b4",
+    "neso_snapshot_sha256": "8cbeafccdc5a82f803623fa1449fa213010fb079d7604de5ae65fd1199845e49"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-19T14:00:00+00:00"
+}
