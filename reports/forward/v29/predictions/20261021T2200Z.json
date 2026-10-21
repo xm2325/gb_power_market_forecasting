@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 65,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "5bfbde6cb62d5ab836e2369200c05db7a6a4b904",
+  "decision_time_utc": "2026-10-21T19:52:37.757362+00:00",
+  "effective_lead_minutes": 127.37071063333333,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 150.50000000000003,
+    "ridge_consensus": 132.192741224843,
+    "ridge_delay_safe": 132.192741224843,
+    "ridge_direction_veto": 132.192741224843
+  },
+  "freeze_completed_utc": "2026-10-21T19:52:38.350386+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "39665339022",
+  "input_end_exclusive_utc": "2026-10-21T18:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 60.34595603333333,
+  "neso_selected_publication_utc": "2026-10-21T18:52:17+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "0b7bfdb0346006b46e65252fa3366bb8506d0bd05f16f6ed286edcd1fb3ad857",
+    "elexon_snapshot_sha256": "e9049213cb7e64e301608e3ca1762ec86ba86f39bf5967096944b67842eabc5d",
+    "neso_manifest_sha256": "562982635062827e44871da1b6edb7d3ba6f35fe045c4d06697cb54038051f5f",
+    "neso_snapshot_sha256": "c2190087b50181715b151c3bfec78b96f717a1cae42a60b6c29ceb201b5663f1"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-21T22:00:00+00:00"
+}
