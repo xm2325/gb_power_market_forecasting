@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 65,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "65be15318398e75594268428b015232415aeef20",
+  "decision_time_utc": "2026-10-21T13:31:29.772402+00:00",
+  "effective_lead_minutes": 148.50379329999998,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 198.19,
+    "ridge_consensus": 142.91420588285638,
+    "ridge_delay_safe": 142.91420588285638,
+    "ridge_direction_veto": 142.91420588285638
+  },
+  "freeze_completed_utc": "2026-10-21T13:31:30.517418+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "39608647560",
+  "input_end_exclusive_utc": "2026-10-21T12:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 39.129540033333335,
+  "neso_selected_publication_utc": "2026-10-21T12:52:22+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "92176239edd087c55347c05e1431534c824af935d2e5e308cb23553c4fd0b8cf",
+    "elexon_snapshot_sha256": "d8daa2ad95aad8fceb3861151a98428e641458915b91b2cee49d91888731d7e6",
+    "neso_manifest_sha256": "2a0cd747462acdc6291d5c54c1586a3603622cab8fcd83e81ff82e6c21f3b8fc",
+    "neso_snapshot_sha256": "1038a208c6b0f3d34c6036f8506b29efbaa0858dc8fd0e6a8b776d7689808afd"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-21T16:00:00+00:00"
+}
