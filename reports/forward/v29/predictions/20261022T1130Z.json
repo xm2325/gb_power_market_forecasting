@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 64,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 6,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "edaa875ed5bb14cf807ff4a958c35b4cca39c806",
+  "decision_time_utc": "2026-10-22T09:00:10.212070+00:00",
+  "effective_lead_minutes": 149.82979883333334,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 168.94,
+    "ridge_consensus": 141.61747940536148,
+    "ridge_delay_safe": 141.61747940536148,
+    "ridge_direction_veto": 141.61747940536148
+  },
+  "freeze_completed_utc": "2026-10-22T09:00:11.071677+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "39751614553",
+  "input_end_exclusive_utc": "2026-10-22T07:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 68.28686783333333,
+  "neso_selected_publication_utc": "2026-10-22T07:51:53+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "0070b0b2d8df6eb70fba39fda422dffd2922581e83e3bf4e582bdafc37f2fb64",
+    "elexon_snapshot_sha256": "0ae62fdb443506dd37188eb00437e771b52f2119b18d9ba11d6aab37de10eaad",
+    "neso_manifest_sha256": "6957363cad4347c175bc10efe0d1583ab67f11d584179b020159a001b5c664b9",
+    "neso_snapshot_sha256": "345fc901661178b10e8a79e8b6bc6c39825ff235de5f1b93713df4c40ce67653"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-22T11:30:00+00:00"
+}
