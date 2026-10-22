@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 65,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "fb9ea8a9453714f051fc33ad9718b0f2191cb165",
+  "decision_time_utc": "2026-10-22T12:42:24.874279+00:00",
+  "effective_lead_minutes": 137.58542868333333,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 208.5,
+    "ridge_consensus": 106.14445875169946,
+    "ridge_delay_safe": 106.14445875169946,
+    "ridge_direction_veto": 106.14445875169946
+  },
+  "freeze_completed_utc": "2026-10-22T12:42:25.891797+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "39780465867",
+  "input_end_exclusive_utc": "2026-10-22T11:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 49.281237983333334,
+  "neso_selected_publication_utc": "2026-10-22T11:53:08+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "d5230793e83283eaf1924db15e8a445dbd569ba12c711fa9a5f280e4165fe43e",
+    "elexon_snapshot_sha256": "4cd1a5e9454b034a8ca0109c0d9e5687e4b3244754649109d77c9ae62226e6ba",
+    "neso_manifest_sha256": "4e7a980fc0effc458b7c48ba5f8e2eaa93f7f939167954a60dd054266529d981",
+    "neso_snapshot_sha256": "7bfd11ad6cd0bac84fc51a401c753d76e36f690b8b9e58924831131dde855bf1"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-22T15:00:00+00:00"
+}
