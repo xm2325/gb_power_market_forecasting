@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 63,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "1d539322ae8f14d3d8f64f756839733aa5c79911",
+  "decision_time_utc": "2026-10-23T22:28:21.372027+00:00",
+  "effective_lead_minutes": 121.64379955,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 109.37,
+    "ridge_consensus": 53.93968458244025,
+    "ridge_delay_safe": 53.93968458244025,
+    "ridge_direction_veto": 53.93968458244025
+  },
+  "freeze_completed_utc": "2026-10-23T22:28:22.662507+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "40033751655",
+  "input_end_exclusive_utc": "2026-10-23T20:30:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 34.90620045,
+  "neso_selected_publication_utc": "2026-10-23T21:53:27+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "f44c97d6dc8425b2ec0703f513fe89ee62d100d8f80e8a00fcdf37f7b500d9b6",
+    "elexon_snapshot_sha256": "4d709052f881cd175c726d333d59bb19dd38c5a5dbfb11bb8e114bb09439936b",
+    "neso_manifest_sha256": "f660751e267056617378da72edfd7ccde80f304c7b1ae0e250c163cb228ab545",
+    "neso_snapshot_sha256": "a9ea9df59be8b9c8f3399d17e28164d9143fcb5fb5508f40e27ff533fb3e54c4"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-24T00:30:00+00:00"
+}
