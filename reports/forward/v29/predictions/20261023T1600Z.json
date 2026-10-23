@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 64,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "71f47de88bd7c8873077d2c032f7340e22e67644",
+  "decision_time_utc": "2026-10-23T13:31:19.532034+00:00",
+  "effective_lead_minutes": 148.6744661,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 213.64,
+    "ridge_consensus": 150.81505826997227,
+    "ridge_delay_safe": 150.81505826997227,
+    "ridge_direction_veto": 150.81505826997227
+  },
+  "freeze_completed_utc": "2026-10-23T13:31:20.112920+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "39961774363",
+  "input_end_exclusive_utc": "2026-10-23T12:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 38.24220056666666,
+  "neso_selected_publication_utc": "2026-10-23T12:53:05+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "59dcd86580c575323c2a28ee38d22e9828ecd0f0f47042c4633a8b99dde0d03b",
+    "elexon_snapshot_sha256": "0a84a67789f8cb0c4d84c7ae87e473ea318f782b7d09f468de5a8827a4e324e3",
+    "neso_manifest_sha256": "fdb4e7845b24f3b05b9b399c431eb90ce28174b3095bf6c8a6b84836016af67b",
+    "neso_snapshot_sha256": "68dfd886e89b4353e6fd28dc1543dc0fef4531570e3a4de0608112e14b15b0f9"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-23T16:00:00+00:00"
+}
