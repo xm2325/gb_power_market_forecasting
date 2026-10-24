@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": 22.13477139300938,
+    "long_n": 63,
+    "reason": "DISAGREEMENT_FALLBACK_RIDGE",
+    "short_mean": -32.837093477265434,
+    "short_n": 10,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "adb61f29cf8667104a803b081132fea1394455c8",
+  "decision_time_utc": "2026-10-24T03:34:08.008680+00:00",
+  "effective_lead_minutes": 145.86652199999997,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 181.36,
+    "ridge_consensus": 75.45254581918746,
+    "ridge_delay_safe": 75.45254581918746,
+    "ridge_direction_veto": 75.45254581918746
+  },
+  "freeze_completed_utc": "2026-10-24T03:34:09.148337+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "40058787751",
+  "input_end_exclusive_utc": "2026-10-24T02:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 41.76681133333333,
+  "neso_selected_publication_utc": "2026-10-24T02:52:22+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "bc5c281f0ff4c492b88ecf1f2b173f73dfb81f0796b30e2d06d6a3da3c494728",
+    "elexon_snapshot_sha256": "d57d7984a20acb8f3e6994a4d4fbad51789663e784176e3501f9d1dae17a632e",
+    "neso_manifest_sha256": "10d1861ceb5adbf555d836d105f3fdd981a404f27792549c8c39bba2d889ae3d",
+    "neso_snapshot_sha256": "ff58b857aee77300782c1bd804999b1792b796fc354e272c0b70ec9011398763"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-24T06:00:00+00:00"
+}
