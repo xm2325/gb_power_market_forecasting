@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": 13.032581244220191,
+    "long_n": 69,
+    "reason": "DISAGREEMENT_FALLBACK_RIDGE",
+    "short_mean": -18.48508258450823,
+    "short_n": 11,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "6a1f374396ecef3e486ced22f0314867f8d9cd9f",
+  "decision_time_utc": "2026-10-25T02:38:39.198678+00:00",
+  "effective_lead_minutes": 141.3466887,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 53.59,
+    "ridge_consensus": 0.5408944376599436,
+    "ridge_delay_safe": 0.5408944376599436,
+    "ridge_direction_veto": 0.5408944376599436
+  },
+  "freeze_completed_utc": "2026-10-25T02:38:40.346210+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "40155180313",
+  "input_end_exclusive_utc": "2026-10-25T01:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 45.6033113,
+  "neso_selected_publication_utc": "2026-10-25T01:53:03+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "8fe07d1c62fbd022d9f03a2500248c352ab6d5a58f8b98fd092d7c631f2946ef",
+    "elexon_snapshot_sha256": "d71a723b675cf3b373781fadf50a97f646ddb9fd2f25fe8b72bdfc90701e3c47",
+    "neso_manifest_sha256": "f88dc5db328138eb23cc89eabb7ddb9624919c17673022b46210991a77297fa1",
+    "neso_snapshot_sha256": "edd865bae3118d6f32b995a2faa501da9ef21ed0e16261e05e86de6873c8c13d"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-25T05:00:00+00:00"
+}
