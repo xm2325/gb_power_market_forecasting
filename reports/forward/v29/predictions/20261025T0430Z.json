@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": 13.135424815348664,
+    "long_n": 69,
+    "reason": "DISAGREEMENT_FALLBACK_RIDGE",
+    "short_mean": -13.937157683919777,
+    "short_n": 11,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "09ea8d9ce853be8e6411c40e3c39beaae2988aee",
+  "decision_time_utc": "2026-10-25T02:01:35.038922+00:00",
+  "effective_lead_minutes": 148.41601796666666,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 45.31,
+    "ridge_consensus": -9.578805511821855,
+    "ridge_delay_safe": -9.578805511821855,
+    "ridge_direction_veto": -9.578805511821855
+  },
+  "freeze_completed_utc": "2026-10-25T02:01:36.172989+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "40152827967",
+  "input_end_exclusive_utc": "2026-10-25T00:30:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 70.0006487,
+  "neso_selected_publication_utc": "2026-10-25T00:51:35+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "e7270ae0cbd9da611f6034fd8eebb01342bc8bfab10861280c3aa1d285c4a176",
+    "elexon_snapshot_sha256": "b7cb4db4f3e310c05be97c92633cb455d4e27b48176eff7ff3f09ce911c914b2",
+    "neso_manifest_sha256": "a872630b3ad53cb738869c6719f4b3d9dadba80685f69d0681346815df769b07",
+    "neso_snapshot_sha256": "2604cb8789a1a6a0623be4d706d72dbedf22d6cd68af61506b02d2bb52d16fff"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-25T04:30:00+00:00"
+}
