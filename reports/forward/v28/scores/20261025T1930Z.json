@@ -1,0 +1,32 @@
+{
+  "absolute_error_gbp_mwh": {
+    "consensus": 100.75,
+    "direction_veto": 100.75,
+    "previous_day": 90.11
+  },
+  "automatic_promotion": false,
+  "effective_lead_minutes": 130.36771713333331,
+  "evidence_class": "SCORED_GENUINE_PRETARGET_SHADOW",
+  "paired_gain_vs_previous_day_gbp_mwh": {
+    "consensus": -10.64,
+    "direction_veto": -10.64
+  },
+  "prediction_path": "reports/forward/v28/predictions/20261025T1930Z.json",
+  "prediction_sha256": "e03d47b113348c9d56c242c93a80515f290b98f2f57a497245b35470fa91cb93",
+  "realised_price_gbp_mwh": 169.56,
+  "schema": "gb-power-v28-shadow-1",
+  "score_time_utc": "2026-10-25T21:43:56.146324+00:00",
+  "signed_error_gbp_mwh": {
+    "consensus": -100.75,
+    "direction_veto": -100.75,
+    "previous_day": -90.11
+  },
+  "source": {
+    "download_manifest_sha256": "10d75b118219d8efb301026247009c54a590728e140980f927ce3722941f50a2",
+    "price_input_end_exclusive_utc": "2026-10-25T20:00:00+00:00",
+    "reference_parquet_sha256": "ebc1a50a54f372963a9641381ba4d0dc6f118d68c5ebd5e77d0f12116765d046",
+    "source_snapshot_observed_before_prediction": true,
+    "source_snapshot_reconstruction_not_used": true
+  },
+  "target_start_utc": "2026-10-25T19:30:00+00:00"
+}
