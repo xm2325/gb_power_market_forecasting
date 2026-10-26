@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": null,
+    "consensus_adjustment": 0.0,
+    "long_mean": null,
+    "long_n": 76,
+    "reason": "WAIT_FOR_GENUINE_PRETARGET_SCORES",
+    "short_mean": null,
+    "short_n": 7,
+    "veto_adjustment": 0.0
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "463a9205e38d7d60c85eaaebe917b3b1baa371ba",
+  "decision_time_utc": "2026-10-26T10:04:33.143538+00:00",
+  "effective_lead_minutes": 145.4476077,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 21.3,
+    "ridge_consensus": 139.3082296831719,
+    "ridge_delay_safe": 139.3082296831719,
+    "ridge_direction_veto": 139.3082296831719
+  },
+  "freeze_completed_utc": "2026-10-26T10:04:34.140014+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "40304278775",
+  "input_end_exclusive_utc": "2026-10-26T08:30:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 71.88572563333334,
+  "neso_selected_publication_utc": "2026-10-26T08:52:40+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "bbd8253c5d5c0e6ab6e375674d63d2df30f5d5f457afa6650f560f2db7b9bdd8",
+    "elexon_snapshot_sha256": "78f71f673e0ae23c204d09e443636678db8c9d42af7e56bd33f2facd4105df9e",
+    "neso_manifest_sha256": "f67e4d52f7c3be1fddb3790410cac9b597877b92d95f4aaf8542f0a28476ec8a",
+    "neso_snapshot_sha256": "ff9310dea5bcfe861d3f3a2831a05069b6b6da11dde34265c001a28356006aee"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-10-26T12:30:00+00:00"
+}
