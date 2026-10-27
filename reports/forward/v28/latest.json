@@ -5,40 +5,40 @@
   ],
   "all": {
     "mae_gbp_mwh": {
-      "consensus": 44.424512966218195,
-      "direction_veto": 43.860843133935,
-      "previous_day": 43.846852646638055
+      "consensus": 44.56535676933155,
+      "direction_veto": 43.85937139888811,
+      "previous_day": 43.84542082738944
     },
     "mean_paired_gain_vs_previous_day_gbp_mwh": {
-      "consensus": -0.57766031958015,
-      "direction_veto": -0.013990487296949253
+      "consensus": -0.7199359419421091,
+      "direction_veto": -0.013950571498669797
     },
     "p95_abs_error_gbp_mwh": {
-      "consensus": 127.36878125000004,
-      "direction_veto": 129.48645833333347,
-      "previous_day": 132.3670000000001
+      "consensus": 127.22197916666667,
+      "direction_veto": 128.91000000000003,
+      "previous_day": 131.94
     },
-    "rows": 699,
+    "rows": 701,
     "signed_bias_gbp_mwh": {
-      "consensus": -4.476416274135291,
-      "direction_veto": -4.729333841277815,
-      "previous_day": -4.728483547925608
+      "consensus": -4.196054841234913,
+      "direction_veto": -4.592174543585154,
+      "previous_day": -4.591326676176889
     },
     "win_rate_vs_previous_day": {
-      "consensus": 0.2317596566523605,
-      "direction_veto": 0.12875536480686695
+      "consensus": 0.23109843081312412,
+      "direction_veto": 0.12838801711840228
     }
   },
   "automatic_promotion": false,
   "claim_boundary": "Prospective scores only if prediction Git commit preceded target. This report is not a trading-PnL claim.",
   "daily_block_uncertainty": {
     "consensus": {
-      "blocks": 17,
+      "blocks": 18,
       "evidence_class": "DESCRIPTIVE_PROSPECTIVE_UNCERTAINTY",
       "includes_zero": true,
       "interval95_gbp_mwh": [
-        -2.9239751793479756,
-        1.7560080547112822
+        -3.0541283350741524,
+        1.635706443973921
       ],
       "method": "paired_UTC_day_block_bootstrap",
       "paired_gain_positive_means_challenger_better": true,
@@ -46,12 +46,12 @@
       "seed": 202628
     },
     "direction_veto": {
-      "blocks": 17,
+      "blocks": 18,
       "evidence_class": "DESCRIPTIVE_PROSPECTIVE_UNCERTAINTY",
       "includes_zero": true,
       "interval95_gbp_mwh": [
-        -1.462176552837929,
-        1.424545475367985
+        -1.4410257604274905,
+        1.4697971405849817
       ],
       "method": "paired_UTC_day_block_bootstrap",
       "paired_gain_positive_means_challenger_better": true,
@@ -63,12 +63,12 @@
   "first_target_utc": "2026-10-10T00:00:00+00:00",
   "last_48_scored": {
     "mae_gbp_mwh": {
-      "consensus": 100.81873005319149,
-      "direction_veto": 94.53669437056737,
-      "previous_day": 91.93958333333335
+      "consensus": 103.25118905141845,
+      "direction_veto": 95.79731937056738,
+      "previous_day": 93.20020833333335
     },
     "mean_paired_gain_vs_previous_day_gbp_mwh": {
-      "consensus": -8.879146719858156,
+      "consensus": -10.050980718085107,
       "direction_veto": -2.5971110372340425
     },
     "p95_abs_error_gbp_mwh": {
@@ -78,16 +78,16 @@
     },
     "rows": 48,
     "signed_bias_gbp_mwh": {
-      "consensus": -73.64976728723404,
-      "direction_veto": -75.52336546985815,
-      "previous_day": -81.45083333333334
+      "consensus": -68.2663707890071,
+      "direction_veto": -73.17190713652482,
+      "previous_day": -79.099375
     },
     "win_rate_vs_previous_day": {
       "consensus": 0.10416666666666667,
       "direction_veto": 0.10416666666666667
     }
   },
-  "latest_target_utc": "2026-10-26T23:30:00+00:00",
+  "latest_target_utc": "2026-10-27T00:30:00+00:00",
   "review_mature": true,
   "review_maturity_rows": 336,
   "schema": "gb-power-v28-shadow-1"
