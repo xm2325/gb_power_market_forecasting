@@ -1,0 +1,43 @@
+{
+  "adjustment": {
+    "anchor_delta": 18.739449156123584,
+    "consensus_adjustment": 43.08903649522147,
+    "long_mean": 43.231198885330954,
+    "long_n": 92,
+    "reason": "SAME_SIGN_RESIDUALS",
+    "short_mean": 43.08903649522147,
+    "short_n": 12,
+    "veto_adjustment": 43.08903649522147
+  },
+  "assumed_price_availability_delay_after_period_end_minutes": 90,
+  "claim_boundary": "Original 2h frozen coefficients with conservative delayed price features; not an exact replay of v0.20/v0.27. Forward labels not used to issue this forecast.",
+  "code_commit_sha": "82d78fee47f0470fe7b5aacdcd2265995a99b649",
+  "decision_time_utc": "2026-11-04T17:51:45.432900+00:00",
+  "effective_lead_minutes": 128.242785,
+  "evidence_class": "LIVE_FORWARD_FROZEN_WEIGHTS_DELAY_SAFE_FEATURES",
+  "forecast_gbp_mwh": {
+    "previous_day": 207.36,
+    "ridge_consensus": 220.54132060467867,
+    "ridge_delay_safe": 177.4522841094572,
+    "ridge_direction_veto": 220.54132060467867
+  },
+  "freeze_completed_utc": "2026-11-04T17:51:47.960097+00:00",
+  "frozen_v20_model_state_sha256": "e9952aa88ca56b85f4d595bfe918cdc589ac0048d717d3fb3d9210361eb18918",
+  "github_run_id": "41881063735",
+  "input_end_exclusive_utc": "2026-11-04T16:00:00+00:00",
+  "model_weights_changed": false,
+  "neso_forecast_age_minutes": 52.89054833333333,
+  "neso_selected_publication_utc": "2026-11-04T16:58:52+00:00",
+  "nominal_model_horizon_minutes": 120,
+  "price_feature_semantics_changed_for_availability": true,
+  "promotion_eligible": false,
+  "schema": "gb-power-v29-frozen-ridge-shadow-v1",
+  "source": {
+    "elexon_manifest_sha256": "438358cfc1c1bf7fdc93b5c03c03935be67e3c356ac8ae9d769e8be80ade21f7",
+    "elexon_snapshot_sha256": "5f9829bf04e412c32e39accade41a69cc04610c5d1fbf66e80b448d85e39b524",
+    "neso_manifest_sha256": "f0d078ee656a60b7fa3087c17d9b9306b35f35a5ce25f627da9c0a25628e8930",
+    "neso_snapshot_sha256": "4fa1e2b63549c57026a6625954f332afe50068815458f04745a3c1396c189a2a"
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-11-04T20:00:00+00:00"
+}
