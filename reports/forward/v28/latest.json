@@ -5,28 +5,28 @@
   ],
   "all": {
     "mae_gbp_mwh": {
-      "consensus": 36.91582555819425,
-      "direction_veto": 36.81738346321055,
-      "previous_day": 36.95580685586303
+      "consensus": 36.90095320409786,
+      "direction_veto": 36.802590052253684,
+      "previous_day": 36.94090243977974
     },
     "mean_paired_gain_vs_previous_day_gbp_mwh": {
-      "consensus": 0.03998129766878895,
-      "direction_veto": 0.1384233926524896
+      "consensus": 0.039949235681885346,
+      "direction_veto": 0.1383123875260642
     },
     "p95_abs_error_gbp_mwh": {
-      "consensus": 109.51009308510638,
-      "direction_veto": 117.38840425531914,
-      "previous_day": 119.87000000000002
+      "consensus": 109.48027836879436,
+      "direction_veto": 117.27208510638307,
+      "previous_day": 119.85600000000002
     },
-    "rows": 1246,
+    "rows": 1247,
     "signed_bias_gbp_mwh": {
-      "consensus": -2.359281434969092,
-      "direction_veto": -3.6201053907416947,
-      "previous_day": -4.522929373996791
+      "consensus": -2.342658113850432,
+      "direction_veto": -3.6024709838525673,
+      "previous_day": -4.50457097032879
     },
     "win_rate_vs_previous_day": {
-      "consensus": 0.2929373996789727,
-      "direction_veto": 0.16131621187800962
+      "consensus": 0.29270248596631915,
+      "direction_veto": 0.161186848436247
     }
   },
   "automatic_promotion": false,
@@ -38,7 +38,7 @@
       "includes_zero": true,
       "interval95_gbp_mwh": [
         -1.8258976769883744,
-        2.127576348462504
+        2.1258473091223533
       ],
       "method": "paired_UTC_day_block_bootstrap",
       "paired_gain_positive_means_challenger_better": true,
@@ -50,8 +50,8 @@
       "evidence_class": "DESCRIPTIVE_PROSPECTIVE_UNCERTAINTY",
       "includes_zero": true,
       "interval95_gbp_mwh": [
-        -0.893991705493128,
-        1.2382173214522578
+        -0.8932887704964274,
+        1.2372462233197106
       ],
       "method": "paired_UTC_day_block_bootstrap",
       "paired_gain_positive_means_challenger_better": true,
@@ -63,12 +63,12 @@
   "first_target_utc": "2026-10-10T00:00:00+00:00",
   "last_48_scored": {
     "mae_gbp_mwh": {
-      "consensus": 31.978865017361105,
-      "direction_veto": 31.730555555555554,
-      "previous_day": 30.313333333333333
+      "consensus": 32.18689236111111,
+      "direction_veto": 31.97993055555556,
+      "previous_day": 30.562708333333333
     },
     "mean_paired_gain_vs_previous_day_gbp_mwh": {
-      "consensus": -1.6655316840277727,
+      "consensus": -1.6241840277777733,
       "direction_veto": -1.4172222222222224
     },
     "p95_abs_error_gbp_mwh": {
@@ -78,16 +78,16 @@
     },
     "rows": 48,
     "signed_bias_gbp_mwh": {
-      "consensus": 31.844394531249993,
-      "direction_veto": 26.67430555555556,
-      "previous_day": 25.25708333333333
+      "consensus": 32.052421875,
+      "direction_veto": 27.19034722222222,
+      "previous_day": 25.773124999999997
     },
     "win_rate_vs_previous_day": {
       "consensus": 0.14583333333333334,
       "direction_veto": 0.0
     }
   },
-  "latest_target_utc": "2026-11-07T19:00:00+00:00",
+  "latest_target_utc": "2026-11-07T19:30:00+00:00",
   "review_mature": true,
   "review_maturity_rows": 336,
   "schema": "gb-power-v28-shadow-1"
