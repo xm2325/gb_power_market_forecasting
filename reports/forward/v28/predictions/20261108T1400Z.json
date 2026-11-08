@@ -1,0 +1,40 @@
+{
+  "assumed_min_post_period_delay_minutes": 90,
+  "automatic_promotion": false,
+  "code_commit_sha": "0bb95c7272d85c6bdeeb66d1f657b93806e5ec1c",
+  "decision_time_utc": "2026-11-08T11:44:35.076734+00:00",
+  "diagnostic": {
+    "consensus_correction_gbp_mwh": -5.551666666666667,
+    "consensus_reason": "SAME_SIGN_CLIPPED_CORRECTION",
+    "direction_anchor_delta_gbp_mwh": 34.74000000000001,
+    "direction_veto_correction_gbp_mwh": 0.0,
+    "long_history_rows": 96,
+    "long_residual_mean_gbp_mwh": -9.558541666666665,
+    "short_history_rows": 12,
+    "short_residual_mean_gbp_mwh": -5.551666666666667,
+    "veto_reason": "BASE_DIRECTION_VETO"
+  },
+  "effective_lead_minutes": 135.41538776666667,
+  "evidence_class": "PRETARGET_SHADOW_FORECAST_NO_REALIZED_TARGET",
+  "forecast_gbp_mwh": {
+    "consensus": 203.13833333333332,
+    "direction_veto": 208.69,
+    "previous_day": 208.69
+  },
+  "freeze_completed_utc": "2026-11-08T11:44:35.270624+00:00",
+  "github_run_id": "42477029288",
+  "minimum_lead_minutes": 120,
+  "price_input_end_exclusive_utc": "2026-11-08T10:00:00+00:00",
+  "schema": "gb-power-v28-shadow-1",
+  "settlement_date": "2026-11-08",
+  "settlement_period": 29,
+  "source": {
+    "download_manifest_sha256": "60f339838a313469c45133ce1546a8fcde952bc7c383780d4931c2f9c215e9d8",
+    "price_input_end_exclusive_utc": "2026-11-08T10:00:00+00:00",
+    "reference_parquet_sha256": "9b38b29ae4671e8381d692360c322c87652a172feb6bc69f1b814ac6905efa2f",
+    "source_snapshot_observed_before_prediction": true,
+    "source_snapshot_reconstruction_not_used": true
+  },
+  "target_outcome_accessed": false,
+  "target_start_utc": "2026-11-08T14:00:00+00:00"
+}
